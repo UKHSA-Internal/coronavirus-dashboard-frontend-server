@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json.schemastore.org/proxies",
+  "proxies": {
+    "static": {
+      "matchCondition": {
+        "methods": ["GET", "HEAD"],
+        "route": "/static/{*all}"
+      },
+      "backendUri": "https://coronavirus.data.gov.uk/static/{all}"
+    },
+    "json": {
+      "matchCondition": {
+        "methods": ["GET", "HEAD"],
+        "route": "/{all}.json"
+      },
+      "backendUri": "https://coronavirus.data.gov.uk/{all}.json"
+    },
+    "icons": {
+      "matchCondition": {
+        "methods": ["GET", "HEAD"],
+        "route": "/{all}.ico"
+      },
+      "backendUri": "https://coronavirus.data.gov.uk/{all}.ico"
+    },
+    "png": {
+      "matchCondition": {
+        "methods": ["GET", "HEAD"],
+        "route": "/{all}.png"
+      },
+      "backendUri": "https://coronavirus.data.gov.uk/{all}.png"
+    },
+    "js": {
+      "matchCondition": {
+        "methods": ["GET", "HEAD"],
+        "route": "/{all}.js"
+      },
+      "backendUri": "https://coronavirus.data.gov.uk/{all}.js"
+    },
+    "txt": {
+      "matchCondition": {
+        "methods": ["GET", "HEAD"],
+        "route": "/{all}.txt"
+      },
+      "backendUri": "https://coronavirus.data.gov.uk/{all}.txt"
+    }
+  }
+}
