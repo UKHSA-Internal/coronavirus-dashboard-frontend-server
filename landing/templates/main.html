@@ -220,7 +220,7 @@
 											   onclick="showHelp()"><strong id="testschange" class="govuk-tag govuk-tag--grey"><img
 															id="testsarrowdir" src="/assets/public/images/arrow-{{ testsarrowdir }}.png"
 															width="12px" alt="down arrow"> {{ testschange | numberFormat }}</strong> <span
-															id="datetopriorweek" class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ testsdatefortnightprev }} - {{ testsdateweekprev }})</span></a>
+															id="datetopriorweek" class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ testsdatefortnightprev }} - {{ testsdateprevweekstart }})</span></a>
 										</h3></div>
 									</div>
 
@@ -308,7 +308,7 @@
 															id="casesarrowdir" src="/static/public/images/arrow-{{ casesarrowdir }}.png"
 															width="12px" alt="down arrow"> {{ caseschange | numberFormat }} <span
 															class="govuk-!-font-weight-regular">({{ casestrialchange }}%)</span> </strong> <span
-															class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ( {{ casesdatefortnightprev }} - {{ casesdateweekprev }})</span></a>
+															class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ( {{ casesdatefortnightprev }} - {{ casesdateprevweekstart }})</span></a>
 										</h3></div>
 									</div>
 
@@ -408,7 +408,7 @@
 															id="admissionsarrowdir"
 															src="/static/public/images/arrow-{{ admissionsarrowdir }}.png" width="12px"
 															alt="down arrow"> {{ admissionschange | numberFormat }}</strong> <span
-															id="fortnighttopriorweek" class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ admissionsdatefortnightprev }} - {{ admissionsdateweekprev }})</span></a>
+															id="fortnighttopriorweek" class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ admissionsdatefortnightprev }} - {{ admissionsdateprevweekstart }})</span></a>
 										</h3></div>
 									</div>
 
@@ -503,7 +503,7 @@
 											                                class="govuk-tag govuk-tag--{{ deathstagcol }}"><img
 															id="deathsarrowdir" src="/static/public/images/arrow-{{ deathsarrowdir }}.png"
 															width="12px" alt="down arrow"> {{ deathschange | numberFormat }}</strong> <span
-															id="datetopriorweek" class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ deathsdatefortnightprev }} - {{ deathsdateweekprev }})</span></a>
+															id="datetopriorweek" class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ deathsdatefortnightprev }} - {{ deathsdateprevweekstart }})</span></a>
 										</h3></div>
 									</div>
 
@@ -722,7 +722,7 @@
 																				class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 																	<a href="#" class="govuk-link--no-visited-state number-link"
 																	   onclick="showHelp()">{{ areaweekoftests | numberFormat }}<span
-																					class="tooltiptext govuk-!-font-size-16">Total number of tests processed in last 7 days ({{ areaweekprevdate }} - {{ areadate }})</span></a>
+																					class="tooltiptext govuk-!-font-size-16">Total number of tests processed in last 7 days ({{ areatestsdateprevweek }} - {{ areatestsdate }})</span></a>
 																</h3></div>
 															</div>
 
@@ -734,7 +734,7 @@
 																   onclick="showHelp()"><strong class="govuk-tag govuk-tag--grey"><img
 																				src="/static/public/images/arrow-{{ areatestsarrowdir }}.png" width="12px"
 																				alt="down arrow"> {{ areatestschange | numberFormat }}</strong> <span
-																				class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ areafortnightprevdate }} - {{ areaweekprevdate }})</span></a>
+																				class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ areatestsdatefortnightprev }} - {{ areatestsdateprevweekstart }})</span></a>
 															</h3></div>
 														</div>
 
@@ -799,7 +799,7 @@
 																				class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 																	<a href="#" class="govuk-link--no-visited-state number-link"
 																	   onclick="showHelp()">{{ areaweekofcases | numberFormat }}<span
-																					class="tooltiptext govuk-!-font-size-16">Total number of new people with a lab-confirmed positive test result in last 7 days ({{ areaweekprevdate }} - {{ areadate }})</span></a>
+																					class="tooltiptext govuk-!-font-size-16">Total number of new people with a lab-confirmed positive test result in last 7 days ({{ areacasesdateprevweek }} - {{ areacasesdate }})</span></a>
 																</h3></div>
 															</div>
 
@@ -812,7 +812,7 @@
 																				class="govuk-tag govuk-tag--{{ areacasestagcol }}"><img
 																				src="/static/public/images/arrow-{{ areacasesarrowdir }}.png" width="12px"
 																				alt="up arrow"> {{ areacaseschange | numberFormat }}</strong> <span
-																				class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ areafortnightprevdate }} - {{ areaweekprevdate }})</span></a>
+																				class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ areacasesdatefortnightprev }} - {{ areacasesdateprevweekstart }})</span></a>
 															</h3></div>
 														</div>
 
@@ -890,7 +890,7 @@
 																				class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 																	<a href="#" class="govuk-link--no-visited-state number-link"
 																	   onclick="showHelp()">{{ areaweekofadmissions }}<span
-																					class="tooltiptext govuk-!-font-size-16">Total number of COVID-19 patients admitted to hospital in the last 7 days ({{ areaweekprevdate }} - {{ areadate }})</span></a>
+																					class="tooltiptext govuk-!-font-size-16">Total number of COVID-19 patients admitted to hospital in the last 7 days ({{ areaadmissionsdateprevweek }} - {{ areaadmissionsdate }})</span></a>
 																</h3></div>
 															</div>
 
@@ -903,7 +903,7 @@
 																				class="govuk-tag govuk-tag--{{ areaadmissionstagcol }}"><img
 																				src="/static/public/images/arrow-{{ areaadmissionsarrowdir }}.png"
 																				width="12px" alt="down arrow"> {{ areaadmissionschange | numberFormat }}
-																</strong> <span class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ areafortnightprevdate }} - {{ areaweekprevdate }})</span></a>
+																</strong> <span class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ areaadmissionsdatefortnightprev }} - {{ areaadmissionsdateprevweekstart }})</span></a>
 															</h3></div>
 														</div>
 
@@ -978,7 +978,7 @@
 																				class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 																	<a href="#" class="govuk-link--no-visited-state number-link"
 																	   onclick="showHelp()">{{ areaweekofdeaths }}<span
-																					class="tooltiptext govuk-!-font-size-16">Total number of deaths from people who have had a positive test result in the last 7 days ({{ areaweekprevdate }} - {{ areadate }})</span></a>
+																					class="tooltiptext govuk-!-font-size-16">Total number of deaths from people who have had a positive test result in the last 7 days ({{ areadeathsdateprevweek }} - {{ areadeathsdate }})</span></a>
 																</h3></div>
 															</div>
 
@@ -991,7 +991,7 @@
 																				class="govuk-tag govuk-tag--{{ areadeathstagcol }}"><img
 																				src="/static/public/images/arrow-{{ areadeathsarrowdir }}.png"
 																				width="12px" alt="down arrow"> {{ areadeathschange | numberFormat }}
-																</strong> <span class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ areafortnightprevdate }} - {{ areaweekprevdate }})</span></a>
+																</strong> <span class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ areadeathsdatefortnightprev }} - {{ areadeathsdateprevweekstart }})</span></a>
 															</h3></div>
 														</div>
 
