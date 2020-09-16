@@ -6,7 +6,7 @@
 import logging
 
 # 3rd party:
-from flask import Flask, Response, render_template, Flask, request
+from flask import Flask, Response, render_template, request
 from azure.functions import HttpRequest, HttpResponse, WsgiMiddleware, Context
 from uk_covid19 import Cov19API
 from datetime import datetime, timedelta
@@ -33,6 +33,7 @@ app.config["APPLICATION_ROOT"] = "/"
 #storage_client = StorageClient(container='$web', path='index.html')
 #template_pointer = storage_client.download()
 #template = template_pointer.readall().decode()
+
 
 # return JSON data for specified parameter from specified JSON data
 def get_data(request_json: dict, request_param: str) -> Union[str, None]:
@@ -232,7 +233,7 @@ def regional_data() -> render_template:
         area_deaths_arrow_colour = "red"
 
     return render_template(
-        'index.html',
+        'main.html',
         areadate=result_area_date,
         areaweekprevdate=string_area_week_prev,
         areafortnightprevdate=string_area_fortnight_prev,
@@ -299,53 +300,55 @@ def regional_data() -> render_template:
     )
 
 
-@app.route('/interactive-map')
-def statpage() -> render_template: 
-    return render_template(
-        "static.html",
-        data=data,
-        date=result_date,
-        newcases=new_cases,
-        casesdate=cases_date,
-        casesdateweekprev=cases_week_prev,
-        casesdatefortnightprev=cases_fortnight_prev,
-        newtests=new_tests,
-        testsdate=tests_date,
-        testsdateweekprev=tests_week_prev,
-        testsdatefortnightprev=tests_fortnight_prev,
-        newadmissions=new_admissions,
-        admissionsdate=admissions_date,
-        admissionsdateweekprev=admissions_week_prev,
-        admissionsdatefortnightprev=admissions_fortnight_prev,
-        newdeaths=new_deaths,
-        deathsdate=deaths_date,
-        deathsdateweekprev=deaths_week_prev,
-        deathsdatefortnightprev=deaths_fortnight_prev,
-        weekofcases=week_cases_total,
-        weekoftests=week_tests_total,
-        weekofadmissions=week_admissions_total,
-        weekofdeaths=week_deaths_total,
-        caseschange=fortnight_cases_change,
-        testschange=fortnight_tests_change,
-        admissionschange=fortnight_admissions_change,
-        deathschange=fortnight_deaths_change,
-        casestagcol=cases_arrow_colour,
-        admissionstagcol=admissions_arrow_colour,
-        deathstagcol=deaths_arrow_colour,
-        casesarrowdir=cases_arrow_direction,
-        testsarrowdir=tests_arrow_direction,
-        admissionsarrowdir=admissions_arrow_direction,
-        deathsarrowdir=deaths_arrow_direction,
-        casestrialchange=trial_cases_change
-
-    )
+# @app.route('/interactive-map')
+# def statpage() -> render_template:
+#     return render_template(
+#         "static.html",
+#         data=data,
+#         date=result_date,
+#         newcases=new_cases,
+#         casesdate=cases_date,
+#         casesdateweekprev=cases_week_prev,
+#         casesdatefortnightprev=cases_fortnight_prev,
+#         newtests=new_tests,
+#         testsdate=tests_date,
+#         testsdateweekprev=tests_week_prev,
+#         testsdatefortnightprev=tests_fortnight_prev,
+#         newadmissions=new_admissions,
+#         admissionsdate=admissions_date,
+#         admissionsdateweekprev=admissions_week_prev,
+#         admissionsdatefortnightprev=admissions_fortnight_prev,
+#         newdeaths=new_deaths,
+#         deathsdate=deaths_date,
+#         deathsdateweekprev=deaths_week_prev,
+#         deathsdatefortnightprev=deaths_fortnight_prev,
+#         weekofcases=week_cases_total,
+#         weekoftests=week_tests_total,
+#         weekofadmissions=week_admissions_total,
+#         weekofdeaths=week_deaths_total,
+#         caseschange=fortnight_cases_change,
+#         testschange=fortnight_tests_change,
+#         admissionschange=fortnight_admissions_change,
+#         deathschange=fortnight_deaths_change,
+#         casestagcol=cases_arrow_colour,
+#         admissionstagcol=admissions_arrow_colour,
+#         deathstagcol=deaths_arrow_colour,
+#         casesarrowdir=cases_arrow_direction,
+#         testsarrowdir=tests_arrow_direction,
+#         admissionsarrowdir=admissions_arrow_direction,
+#         deathsarrowdir=deaths_arrow_direction,
+#         casestrialchange=trial_cases_change
+#
+#     )
 
 
 @app.route('/', methods=['GET'])
+@app.route('/<path>', methods=['GET'])
 #@app.route('/index')
-def index() -> render_template:
+def index(path=None) -> render_template:
+
     return render_template(
-        "index.html",
+        "main.html",
         data=data,
         date=result_date,
         newcases=new_cases,
@@ -495,6 +498,7 @@ obj_deaths_week_prev = datetime.strptime(deaths_date, '%d %B %Y') - timedelta(da
 deaths_week_prev = obj_deaths_week_prev.strftime('%d %B %Y')
 obj_deaths_fortnight_prev = datetime.strptime(deaths_date, '%d %B %Y') - timedelta(days=14)
 deaths_fortnight_prev = obj_deaths_fortnight_prev.strftime('%d %B %Y')
+
 
 def main(req: HttpRequest, context: Context) -> HttpResponse:
     logging.info(req.url)
