@@ -163,188 +163,188 @@
 
 		<div class="govuk-grid-column-one-half">
 
-			<div class="govuk-grid-row govuk-!-margin-top-0">
-				<div class="half leftpanel">
-					<div class="dashboard-panel">
-
-						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">
-							<div class="govuk-grid-column-full">
-								<span class="govuk-caption-m govuk-!-font-weight-regular">Tests</span>
-								<h3 class="govuk-heading-m govuk-!-margin-bottom-2 title-mobile">Number of tests</h3>
-							</div>
-						</div>
-
-						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">
-							<div class="govuk-grid-column-full">
-
-								<div class="data-metric2">
-
-									<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">Daily</div>
-
-									<div class="number-group">
-										<div class="number-container govuk-!-padding-right-4">
-											<div class="float tooltip"><h3
-															class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-												<a href="#" class="govuk-link--no-visited-state number-link" id="newtests"
-												   onclick="showHelp()">{{ newtests | numberFormat }}<span id="testsdate"
-												                                                           class="tooltiptext govuk-!-font-size-16">Daily number of tests processed on {{ testsdate }}</span></a>
-											</h3></div>
-
-										</div>
-
-									</div>
-
-								</div>
-
-								<div class="data-metric2">
-
-									<div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0" style="width:80%;">
-										Last 7 days
-									</div>
-
-									<div class="number-group">
-										<div class="number-container govuk-!-padding-right-4">
-											<div class="float tooltip"><h3
-															class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-												<a href="#" class="govuk-link--no-visited-state number-link" id="weekoftests"
-												   onclick="showHelp()">{{ weekoftests | numberFormat }}<span id="fortnighttopriorweek"
-												                                                              class="tooltiptext govuk-!-font-size-16">Total number of tests processed in last 7 days {{ testsdateweekprev }} - {{ testsdate }}</span></a>
-											</h3></div>
-										</div>
-
-									</div>
-									<div class="number-container">
-										<div class="float tooltip"><h3
-														class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-											<a href="#" class="govuk-link--no-visited-state number-link-grey"
-											   onclick="showHelp()"><strong id="testschange" class="govuk-tag govuk-tag--grey"><img
-															id="testsarrowdir" src="/assets/public/images/arrow-{{ testsarrowdir }}.png"
-															width="12px" alt="down arrow"> {{ testschange | numberFormat }}</strong> <span
-															id="datetopriorweek" class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ testsdatefortnightprev }} - {{ testsdateprevweekstart }})</span></a>
-										</h3></div>
-									</div>
-
-								</div>
-								<div style="clear: both"></div>
-								<div class="govuk-grid-row govuk-!-margin-top-5 govuk-!-margin-bottom-0">
-									<div class="govuk-grid-column-full">
-										<img src="/assets/public/images/graph-tests-small.png" width="100%" alt="">
-
-									</div>
-								</div>
-							</div>
-
-
-						</div>
-
-
-						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">
-							<div class="govuk-grid-column-full">
-								<div class="govuk-!-margin-top-2 govuk-!-margin-bottom-7"><a
-												class="govuk-link more-detail govuk-!-font-weight-bold govuk-link--no-visited-state"
-												href="tests-menu">All tests data</a></div>
-							</div>
-						</div>
-
-					</div>
-				</div>
-
-
-				<div class="half rightpanel">
-					<div class="dashboard-panel">
-
-						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">
-							<div class="govuk-grid-column-full">
-								<span class="govuk-caption-m">Cases</span>
-								<h3 class="govuk-heading-m govuk-!-margin-bottom-2">People tested positive</h3>
-							</div>
-						</div>
-
-						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">
-							<div class="govuk-grid-column-full">
-
-								<div class="data-metric2">
-
-									<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">Daily</div>
-
-									<div class="number-group">
-										<div class="number-container govuk-!-padding-right-4">
-											<div class="float tooltip"><h3
-															class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-												<a href="#" class="govuk-link--no-visited-state number-link" id="newcases"
-												   onclick="showHelp()">{{ newcases | numberFormat }}<span id="casesdate"
-												                                                           class="tooltiptext govuk-!-font-size-16">Daily number of new people with a lab-confirmed positive test result on {{ casesdate }}</span></a>
-											</h3></div>
-
-										</div>
-
-									</div>
-
-								</div>
-
-								<div class="data-metric2">
-
-									<div class="govuk-body-s float govuk-!-margin-bottom-0 govuk-!-margin-top-2" style="width:80%;">
-										Last 7 days
-									</div>
-
-									<div class="number-group">
-										<div class="number-container govuk-!-padding-right-4">
-											<div class="float tooltip"><h3
-															class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-												<a href="#" class="govuk-link--no-visited-state number-link" id="weekofcases"
-												   onclick="showHelp()">{{ weekofcases | numberFormat }}<span id="fortnighttopriorweek"
-												                                                              class="tooltiptext govuk-!-font-size-16">Total number of new people with a lab-confirmed positive test result in last 7 days {{ casesdateweekprev }} - {{ casesdate }}</span></a>
-											</h3></div>
-										</div>
-
-									</div>
-									<div class="number-container">
-										<div class="float tooltip"><h3
-														class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-											<a href="#" class="govuk-link--no-visited-state number-link-red"
-											   onclick="showHelp()"><strong id="caseschange"
-											                                class="govuk-tag govuk-tag--{{ casestagcol }}"><img
-															id="casesarrowdir" src="/static/public/images/arrow-{{ casesarrowdir }}.png"
-															width="12px" alt="down arrow"> {{ caseschange | numberFormat }} <span
-															class="govuk-!-font-weight-regular">({{ casestrialchange }}%)</span> </strong> <span
-															class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ( {{ casesdatefortnightprev }} - {{ casesdateprevweekstart }})</span></a>
-										</h3></div>
-									</div>
-
-								</div>
-								<div style="clear: both"></div>
-								<div class="govuk-grid-row govuk-!-margin-top-5 govuk-!-margin-bottom-0">
-									<div class="govuk-grid-column-full">
-										<img src="/static/public/images/graph-cases-small.png" width="100%" alt="">
-
-									</div>
-								</div>
-							</div>
-
-
-						</div>
-
-						<!--
-            <div class="govuk-grid-row status-green govuk-!-margin-top-3 govuk-!-margin-bottom-0">
-            <div class="govuk-grid-column-full">
-            <p>The Uk has seen a reduction of cases in the past 7 days.</p>
-          </div>
-        </div>
-      -->
-
-						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">
-							<div class="govuk-grid-column-full">
-								<div class="govuk-!-margin-top-2 govuk-!-margin-bottom-7"><a
-												class="govuk-link more-detail govuk-!-font-weight-bold govuk-link--no-visited-state"
-												href="cases-menu">All cases data</a></div>
-							</div>
-						</div>
-
-
-					</div>
-				</div>
-			</div>
+{#			<div class="govuk-grid-row govuk-!-margin-top-0">#}
+{#				<div class="half leftpanel">#}
+{#					<div class="dashboard-panel">#}
+{##}
+{#						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">#}
+{#							<div class="govuk-grid-column-full">#}
+{#								<span class="govuk-caption-m govuk-!-font-weight-regular">Tests</span>#}
+{#								<h3 class="govuk-heading-m govuk-!-margin-bottom-2 title-mobile">Number of tests</h3>#}
+{#							</div>#}
+{#						</div>#}
+{##}
+{#						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">#}
+{#							<div class="govuk-grid-column-full">#}
+{##}
+{#								<div class="data-metric2">#}
+{##}
+{#									<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">Daily</div>#}
+{##}
+{#									<div class="number-group">#}
+{#										<div class="number-container govuk-!-padding-right-4">#}
+{#											<div class="float tooltip"><h3#}
+{#															class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">#}
+{#												<a href="#" class="govuk-link--no-visited-state number-link" id="newtests"#}
+{#												   onclick="showHelp()">{{ newtests | numberFormat }}<span id="testsdate"#}
+{#												                                                           class="tooltiptext govuk-!-font-size-16">Daily number of tests processed on {{ testsdate }}</span></a>#}
+{#											</h3></div>#}
+{##}
+{#										</div>#}
+{##}
+{#									</div>#}
+{##}
+{#								</div>#}
+{##}
+{#								<div class="data-metric2">#}
+{##}
+{#									<div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0" style="width:80%;">#}
+{#										Last 7 days#}
+{#									</div>#}
+{##}
+{#									<div class="number-group">#}
+{#										<div class="number-container govuk-!-padding-right-4">#}
+{#											<div class="float tooltip"><h3#}
+{#															class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">#}
+{#												<a href="#" class="govuk-link--no-visited-state number-link" id="weekoftests"#}
+{#												   onclick="showHelp()">{{ weekoftests | numberFormat }}<span id="fortnighttopriorweek"#}
+{#												                                                              class="tooltiptext govuk-!-font-size-16">Total number of tests processed in last 7 days {{ testsdateweekprev }} - {{ testsdate }}</span></a>#}
+{#											</h3></div>#}
+{#										</div>#}
+{##}
+{#									</div>#}
+{#									<div class="number-container">#}
+{#										<div class="float tooltip"><h3#}
+{#														class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">#}
+{#											<a href="#" class="govuk-link--no-visited-state number-link-grey"#}
+{#											   onclick="showHelp()"><strong id="testschange" class="govuk-tag govuk-tag--grey"><img#}
+{#															id="testsarrowdir" src="/assets/public/images/arrow-{{ testsarrowdir }}.png"#}
+{#															width="12px" alt="down arrow"> {{ testschange | numberFormat }}</strong> <span#}
+{#															id="datetopriorweek" class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ({{ testsdatefortnightprev }} - {{ testsdateprevweekstart }})</span></a>#}
+{#										</h3></div>#}
+{#									</div>#}
+{##}
+{#								</div>#}
+{#								<div style="clear: both"></div>#}
+{#								<div class="govuk-grid-row govuk-!-margin-top-5 govuk-!-margin-bottom-0">#}
+{#									<div class="govuk-grid-column-full">#}
+{#										<img src="/assets/public/images/graph-tests-small.png" width="100%" alt="">#}
+{##}
+{#									</div>#}
+{#								</div>#}
+{#							</div>#}
+{##}
+{##}
+{#						</div>#}
+{##}
+{##}
+{#						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">#}
+{#							<div class="govuk-grid-column-full">#}
+{#								<div class="govuk-!-margin-top-2 govuk-!-margin-bottom-7"><a#}
+{#												class="govuk-link more-detail govuk-!-font-weight-bold govuk-link--no-visited-state"#}
+{#												href="tests-menu">All tests data</a></div>#}
+{#							</div>#}
+{#						</div>#}
+{##}
+{#					</div>#}
+{#				</div>#}
+{##}
+{##}
+{#				<div class="half rightpanel">#}
+{#					<div class="dashboard-panel">#}
+{##}
+{#						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">#}
+{#							<div class="govuk-grid-column-full">#}
+{#								<span class="govuk-caption-m">Cases</span>#}
+{#								<h3 class="govuk-heading-m govuk-!-margin-bottom-2">People tested positive</h3>#}
+{#							</div>#}
+{#						</div>#}
+{##}
+{#						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">#}
+{#							<div class="govuk-grid-column-full">#}
+{##}
+{#								<div class="data-metric2">#}
+{##}
+{#									<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">Daily</div>#}
+{##}
+{#									<div class="number-group">#}
+{#										<div class="number-container govuk-!-padding-right-4">#}
+{#											<div class="float tooltip"><h3#}
+{#															class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">#}
+{#												<a href="#" class="govuk-link--no-visited-state number-link" id="newcases"#}
+{#												   onclick="showHelp()">{{ newcases | numberFormat }}<span id="casesdate"#}
+{#												                                                           class="tooltiptext govuk-!-font-size-16">Daily number of new people with a lab-confirmed positive test result on {{ casesdate }}</span></a>#}
+{#											</h3></div>#}
+{##}
+{#										</div>#}
+{##}
+{#									</div>#}
+{##}
+{#								</div>#}
+{##}
+{#								<div class="data-metric2">#}
+{##}
+{#									<div class="govuk-body-s float govuk-!-margin-bottom-0 govuk-!-margin-top-2" style="width:80%;">#}
+{#										Last 7 days#}
+{#									</div>#}
+{##}
+{#									<div class="number-group">#}
+{#										<div class="number-container govuk-!-padding-right-4">#}
+{#											<div class="float tooltip"><h3#}
+{#															class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">#}
+{#												<a href="#" class="govuk-link--no-visited-state number-link" id="weekofcases"#}
+{#												   onclick="showHelp()">{{ weekofcases | numberFormat }}<span id="fortnighttopriorweek"#}
+{#												                                                              class="tooltiptext govuk-!-font-size-16">Total number of new people with a lab-confirmed positive test result in last 7 days {{ casesdateweekprev }} - {{ casesdate }}</span></a>#}
+{#											</h3></div>#}
+{#										</div>#}
+{##}
+{#									</div>#}
+{#									<div class="number-container">#}
+{#										<div class="float tooltip"><h3#}
+{#														class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">#}
+{#											<a href="#" class="govuk-link--no-visited-state number-link-red"#}
+{#											   onclick="showHelp()"><strong id="caseschange"#}
+{#											                                class="govuk-tag govuk-tag--{{ casestagcol }}"><img#}
+{#															id="casesarrowdir" src="/static/public/images/arrow-{{ casesarrowdir }}.png"#}
+{#															width="12px" alt="down arrow"> {{ caseschange | numberFormat }} <span#}
+{#															class="govuk-!-font-weight-regular">({{ casestrialchange }}%)</span> </strong> <span#}
+{#															class="tooltiptext govuk-!-font-size-16">Percentage change from previous 7 days ( {{ casesdatefortnightprev }} - {{ casesdateprevweekstart }})</span></a>#}
+{#										</h3></div>#}
+{#									</div>#}
+{##}
+{#								</div>#}
+{#								<div style="clear: both"></div>#}
+{#								<div class="govuk-grid-row govuk-!-margin-top-5 govuk-!-margin-bottom-0">#}
+{#									<div class="govuk-grid-column-full">#}
+{#										<img src="/static/public/images/graph-cases-small.png" width="100%" alt="">#}
+{##}
+{#									</div>#}
+{#								</div>#}
+{#							</div>#}
+{##}
+{##}
+{#						</div>#}
+{##}
+{#						<!--#}
+{#            <div class="govuk-grid-row status-green govuk-!-margin-top-3 govuk-!-margin-bottom-0">#}
+{#            <div class="govuk-grid-column-full">#}
+{#            <p>The Uk has seen a reduction of cases in the past 7 days.</p>#}
+{#          </div>#}
+{#        </div>#}
+{#      -->#}
+{##}
+{#						<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">#}
+{#							<div class="govuk-grid-column-full">#}
+{#								<div class="govuk-!-margin-top-2 govuk-!-margin-bottom-7"><a#}
+{#												class="govuk-link more-detail govuk-!-font-weight-bold govuk-link--no-visited-state"#}
+{#												href="cases-menu">All cases data</a></div>#}
+{#							</div>#}
+{#						</div>#}
+{##}
+{##}
+{#					</div>#}
+{#				</div>#}
+{#			</div>#}
 		</div>
 
 		<div class="govuk-grid-column-one-half panel-right">
