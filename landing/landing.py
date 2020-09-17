@@ -178,11 +178,11 @@ def numberFormat(value: Any) -> Any:
 
 
 # Gets country from dropdown form and returns data for the specified country
-@app.route('/areasearch', methods=['POST'])
+@app.route('/areasearch', methods=['GET'])
 def regional_data() -> render_template:
 
-    postcode = request.form['postcode']
-    drop_down_code = request.form['dropdown']
+    postcode = request.args.get['postcode']
+    drop_down_code = request.args.get['dropdown']
     # if a postcode has been entered (currently using ONS area codes)
     # then filter by the code provided
     if postcode != '':
