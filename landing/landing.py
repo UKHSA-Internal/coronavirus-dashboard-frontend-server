@@ -4,6 +4,9 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
 import logging
+from statistics import mean
+from operator import itemgetter
+from json import dumps
 
 # 3rd party:
 from flask import Flask, Response, render_template, request
@@ -13,11 +16,14 @@ from datetime import datetime, timedelta
 from typing import Union, Tuple, Any
 
 # Internal:
+from .data.queries import get_last_fortnight
 
-#try:
-#    from __app__.storage import StorageClient
-#except ImportError():
-#    from storage import StorageClient
+try:
+   from __app__.database import CosmosDB
+   from __app__.storage import StorageClient
+except ImportError:
+   from database import CosmosDB
+   from storage import StorageClient
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -25,6 +31,7 @@ __all__ = [
     'main'
 ]
 
+timestamp = str()
 
 app = Flask(__name__)
 
@@ -399,9 +406,7 @@ def regional_data() -> render_template:
 
 @app.route('/', methods=['GET'])
 @app.route('/<path>', methods=['GET'])
-#@app.route('/index')
 def index(path=None) -> render_template:
-
     return render_template(
         "main.html",
         data=data,
@@ -467,8 +472,8 @@ structure = {
     "newCasesBySpecimenDate": "newCasesBySpecimenDate"
 
 }
-
-# get json data and seperate values into variables for parsing to template
+#
+# # get json data and seperate values into variables for parsing to template
 api = Cov19API(
     filters=filters_overview,
     structure=structure
@@ -477,6 +482,9 @@ api = Cov19API(
 
 data = api.get_json()
 
+# from .data.queries import get_last_fortnight
+# data = [value for value in structure.values()]
+
 obj_result_date = datetime.strptime(data["data"][0]["date"], '%Y-%m-%d')
 result_date = obj_result_date.strftime('%d %B %Y')
 obj_week_prev = datetime.strptime(data["data"][0]["date"], '%Y-%m-%d') - timedelta(days=6)
@@ -484,6 +492,45 @@ string_week_prev = obj_week_prev.strftime('%d %B %Y')
 obj_fortnight_prev = datetime.strptime(data["data"][0]["date"], '%Y-%m-%d') - timedelta(days=13)
 string_fortnight_prev = obj_fortnight_prev.strftime('%d %B %Y')
 
+
+get_value = itemgetter("value")
+
+
+def get_change(metric_data):
+    mean_this_week = mean(map(get_value, metric_data[:7]))
+    mean_one_week_ago = mean(map(get_value, metric_data[7:]))
+    delta_mean = mean_this_week - mean_one_week_ago
+    delta_percentage = delta_mean * 100 / mean_one_week_ago
+    try:
+        return {
+            "percentage": format(delta_percentage, ".4g"),
+            "value": "{:,}".format(float(format(delta_mean, ".4g")))
+        }
+    except ZeroDivisionError:
+        return 0
+
+
+def get_fortnight_data(area_name="United Kingdom"):
+    metric_names = [
+        "newCasesByPublishDate",
+        "newDeaths28DaysByPublishDate",
+        "newTestsByPublishDate",
+        "newAdmissions"
+    ]
+
+    global timestamp
+
+    result = dict()
+
+    for metric in metric_names:
+        metric_data = get_last_fortnight(timestamp, area_name, metric)
+
+        result[metric] = {
+            "data": metric_data,
+            "change": get_change(metric_data),
+        }
+
+    return result
 
 
 week_cases_total, fortnight_cases_change, trial_cases_change = get_week(data, "newCasesByPublishDate")
@@ -571,7 +618,15 @@ deaths_fortnight_prev = obj_deaths_fortnight_prev.strftime('%d %B %Y')
 obj_deaths_prev_week_begin = datetime.strptime(deaths_date, '%d %B %Y') - timedelta(days=7)
 prev_deaths_week_begin = obj_deaths_prev_week_begin.strftime('%d %B %Y')
 
-def main(req: HttpRequest, context: Context) -> HttpResponse:
+
+def main(req: HttpRequest, context: Context, latestPublished: str) -> HttpResponse:
     logging.info(req.url)
+
+    global timestamp
+    timestamp = latestPublished
+
+    logging.info(dumps(get_fortnight_data(), indent=4))
+
     application = WsgiMiddleware(app)
+    # context.timestamp =
     return application.main(req, context)

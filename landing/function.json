@@ -11,7 +11,14 @@
         "get",
         "post"
       ],
-      "route": "{*path}" 
+      "route": "{*path}"
+    },
+    {
+      "type": "blob",
+      "direction": "in",
+      "name": "latestPublished",
+      "path": "pipeline/info/latest_published",
+      "connection": "DeploymentBlobStorage"
     },
     {
       "type": "http",
