@@ -41,34 +41,63 @@ app.config["APPLICATION_ROOT"] = "/"
 #template_pointer = storage_client.download()
 #template = template_pointer.readall().decode()
 
-# return JSON data for specified parameter from specified JSON data
-def get_data(request_json: dict, request_param: str) -> Union[str, None]:
-   
-    index = 0
-    result = request_json["data"][0][request_param]
-    while result is None:
-        if index == len(request_json["data"]):
-            break
-        result = request_json["data"][index][request_param]
-        index += 1
-    return result
+# return data for specified parameter 
+def get_data(request_filters: dict, request_param: str) -> Union[str, None]:
+
+    data_api = Cov19API(
+        filters=request_filters,
+        structure={
+            "date": "date",
+            request_param: request_param
+        },
+        latest_by=request_param
+    )
+
+    data = data_api.get_json()
+
+    if data["data"] != []:
+        return data["data"][0][request_param]
+    else:
+        return "N/A"
 
 
-# return date for specified parameter from specified JSON data
-def get_date(request_json: dict, request_param: str) -> str:
+# return date for specified parameter 
+def get_date(request_filters: dict, request_param: str) -> str:
 
-    index = 0
-    result = request_json["data"][0][request_param]
-    obj_result_date = datetime.strptime(request_json["data"][index]["date"], '%Y-%m-%d')
-    result_date = obj_result_date.strftime('%d %B %Y')
-    while result is None:
-        if index == len(request_json["data"]):
-            break
-        obj_result_date = datetime.strptime(request_json["data"][index]["date"], '%Y-%m-%d')
-        result_date = obj_result_date.strftime('%d %B %Y')
-        result = request_json["data"][index][request_param]
-        index += 1
-    return result_date
+    date_api = Cov19API(
+        filters=request_filters,
+        structure={
+            "date": "date",
+            request_param: request_param
+        },
+        latest_by=request_param
+    )
+
+    data = date_api.get_json()
+    
+    if data["data"] != []:
+        obj_result_date = datetime.strptime(data["data"][0]["date"], '%Y-%m-%d')
+    
+        return obj_result_date.strftime('%d %B %Y')
+    else:
+        return None
+
+
+def format_dates(date: str) -> Tuple[str, str, str]:
+
+    if date is not None:
+        obj_week_prev = datetime.strptime(date, '%d %B %Y') - timedelta(days=6)
+        week_prev = obj_week_prev.strftime('%d %B %Y')
+        
+        obj_fortnight_prev = datetime.strptime(date, '%d %B %Y') - timedelta(days=13)
+        fortnight_prev = obj_fortnight_prev.strftime('%d %B %Y')
+
+        obj_prev_week_begin = datetime.strptime(date, '%d %B %Y') - timedelta(days=7)
+        prev_week_begin = obj_week_prev.strftime('%d %B %Y')
+    else:
+        week_prev = fortnight_prev = prev_week_begin = "No data available"
+
+    return week_prev, fortnight_prev, prev_week_begin
 
 
 # return the prev 7 days of results and the change between the last week and 2 weeks ago as a percentage  of the specified request param
@@ -157,70 +186,51 @@ def regional_data() -> render_template:
     # if a postcode has been entered (currently using ONS area codes)
     # then filter by the code provided
     if postcode != '':
-        filters_areaCode = [
+        filters_area_code = [
             f'areaCode={postcode}'
         ]
     # use dropdown item if no postcode provided
     else:
-        filters_areaCode = [
+        filters_area_code = [
             f'areaCode={drop_down_code}'
         ]
 
     # set API params
     area_api = Cov19API(
-        filters=filters_areaCode,
+        filters=filters_area_code,
         structure=structure
     )
     # return JSON
     area_data = area_api.get_json()
     # seperate fields into variables for parsing to template
 
-    area_name = get_data(area_data, "areaName")
+    area_name = get_data(filters_area_code, "areaName")
 
-    area_new_tests = get_data(area_data, "newTestsByPublishDate")
+    area_new_tests = get_data(filters_area_code, "newTestsByPublishDate")
 
-    area_tests_date = get_date(area_data, "newTestsByPublishDate")
+    area_tests_date = get_date(filters_area_code, "newTestsByPublishDate")
 
-    area_new_cases = get_data(area_data, "newCasesByPublishDate")
-    area_cases_date = get_date(area_data, "newCasesByPublishDate")
+    area_new_cases = get_data(filters_area_code, "newCasesByPublishDate")
+    area_cases_date = get_date(filters_area_code, "newCasesByPublishDate")
 
-    area_new_admissions = get_data(area_data, "newAdmissions")
-    area_admissions_date = get_date(area_data, "newAdmissions")
+    area_new_admissions = get_data(filters_area_code, "newAdmissions")
+    area_admissions_date = get_date(filters_area_code, "newAdmissions")
     
-    area_new_deaths = get_data(area_data, "newDeaths28DaysByPublishDate")
-    area_deaths_date = get_date(area_data, "newDeaths28DaysByPublishDate")
+    area_new_deaths = get_data(filters_area_code, "newDeaths28DaysByPublishDate")
+    area_deaths_date = get_date(filters_area_code, "newDeaths28DaysByPublishDate")
 
    
-    obj_area_cases_week_prev = datetime.strptime(area_cases_date, '%d %B %Y') - timedelta(days=6)
-    area_cases_week_prev = obj_area_cases_week_prev.strftime('%d %B %Y')
-    obj_area_cases_fortnight_prev = datetime.strptime(area_cases_date, '%d %B %Y') - timedelta(days=13)
-    area_cases_fortnight_prev = obj_area_cases_fortnight_prev.strftime('%d %B %Y')
-    obj_area_cases_prev_week_begin = datetime.strptime(area_cases_date, '%d %B %Y') - timedelta(days=7)
-    area_prev_cases_week_begin = obj_area_cases_prev_week_begin.strftime('%d %B %Y')
-
-    obj_area_tests_week_prev = datetime.strptime(area_tests_date, '%d %B %Y') - timedelta(days=6)
-    area_tests_week_prev = obj_area_tests_week_prev.strftime('%d %B %Y')
-    obj_area_tests_fortnight_prev = datetime.strptime(area_tests_date, '%d %B %Y') - timedelta(days=13)
-    area_tests_fortnight_prev = obj_area_tests_fortnight_prev.strftime('%d %B %Y')
-    obj_area_tests_prev_week_begin = datetime.strptime(area_tests_date, '%d %B %Y') - timedelta(days=7)
-    area_prev_tests_week_begin = obj_area_tests_prev_week_begin.strftime('%d %B %Y')
-
-    obj_area_admissions_week_prev = datetime.strptime(area_admissions_date, '%d %B %Y') - timedelta(days=6)
-    area_admissions_week_prev = obj_area_admissions_week_prev.strftime('%d %B %Y')
-    obj_area_admissions_fortnight_prev = datetime.strptime(area_admissions_date, '%d %B %Y') - timedelta(days=13)
-    area_admissions_fortnight_prev = obj_area_admissions_fortnight_prev.strftime('%d %B %Y')
-    obj_area_admissions_prev_week_begin = datetime.strptime(area_admissions_date, '%d %B %Y') - timedelta(days=7)
-    area_prev_admissions_week_begin = obj_area_admissions_prev_week_begin.strftime('%d %B %Y')
+    area_cases_week_prev, area_cases_fortnight_prev, area_prev_cases_week_begin = format_dates(area_cases_date)
     
-    obj_area_deaths_week_prev = datetime.strptime(area_deaths_date, '%d %B %Y') - timedelta(days=6)
-    area_deaths_week_prev = obj_area_deaths_week_prev.strftime('%d %B %Y')
-    obj_area_deaths_fortnight_prev = datetime.strptime(area_deaths_date, '%d %B %Y') - timedelta(days=13)
-    area_deaths_fortnight_prev = obj_area_deaths_fortnight_prev.strftime('%d %B %Y')
-    obj_area_deaths_prev_week_begin = datetime.strptime(area_deaths_date, '%d %B %Y') - timedelta(days=7)
-    area_prev_deaths_week_begin = obj_area_deaths_prev_week_begin.strftime('%d %B %Y')
+    area_tests_week_prev, area_tests_fortnight_prev, area_prev_tests_week_begin = format_dates(area_tests_date)
+    
+    area_admissions_week_prev, area_admissions_fortnight_prev, area_prev_admissions_week_begin = format_dates(area_admissions_date)
+    
+    area_deaths_week_prev, area_deaths_fortnight_prev, area_prev_deaths_week_begin = format_dates(area_deaths_date)
 
 
     area_week_cases_total, area_fortnight_cases_change, area_trial_cases_change = get_week(area_data, "newCasesByPublishDate")
+
     if isinstance(area_fortnight_cases_change, str):
         area_cases_arrow_colour = "red"
         area_cases_arrow_direction = ""
@@ -582,41 +592,21 @@ else:
 
 # get latest date for data point, beginning of week prior, a week prior, and 2 weeks prior
 
-new_cases = get_data(data, "newCasesByPublishDate")
-cases_date = get_date(data, "newCasesByPublishDate")
-obj_cases_week_prev = datetime.strptime(cases_date, '%d %B %Y') - timedelta(days=6)
-cases_week_prev = obj_cases_week_prev.strftime('%d %B %Y')
-obj_cases_fortnight_prev = datetime.strptime(cases_date, '%d %B %Y') - timedelta(days=13)
-cases_fortnight_prev = obj_cases_fortnight_prev.strftime('%d %B %Y')
-obj_cases_prev_week_begin = datetime.strptime(cases_date, '%d %B %Y') - timedelta(days=7)
-prev_cases_week_begin = obj_cases_prev_week_begin.strftime('%d %B %Y')
+new_cases = get_data(filters_overview, "newCasesByPublishDate")
+cases_date = get_date(filters_overview, "newCasesByPublishDate")
+cases_week_prev, cases_fortnight_prev, prev_cases_week_begin = format_dates(cases_date)
 
-new_tests = get_data(data, "newTestsByPublishDate")
-tests_date = get_date(data, "newTestsByPublishDate")
-obj_tests_week_prev = datetime.strptime(tests_date, '%d %B %Y') - timedelta(days=6)
-tests_week_prev = obj_tests_week_prev.strftime('%d %B %Y')
-obj_tests_fortnight_prev = datetime.strptime(tests_date, '%d %B %Y') - timedelta(days=13)
-tests_fortnight_prev = obj_tests_fortnight_prev.strftime('%d %B %Y')
-obj_tests_prev_week_begin = datetime.strptime(tests_date, '%d %B %Y') - timedelta(days=7)
-prev_tests_week_begin = obj_tests_prev_week_begin.strftime('%d %B %Y')
+new_tests = get_data(filters_overview, "newTestsByPublishDate")
+tests_date = get_date(filters_overview, "newTestsByPublishDate")
+tests_week_prev, tests_fortnight_prev, prev_tests_week_begin = format_dates(tests_date)
 
-new_admissions = get_data(data, "newAdmissions")
-admissions_date = get_date(data, "newAdmissions")
-obj_admissions_week_prev = datetime.strptime(admissions_date, '%d %B %Y') - timedelta(days=6)
-admissions_week_prev = obj_admissions_week_prev.strftime('%d %B %Y')
-obj_admissions_fortnight_prev = datetime.strptime(admissions_date, '%d %B %Y') - timedelta(days=13)
-admissions_fortnight_prev = obj_admissions_fortnight_prev.strftime('%d %B %Y')
-obj_admissions_prev_week_begin = datetime.strptime(admissions_date, '%d %B %Y') - timedelta(days=7)
-prev_admissions_week_begin = obj_admissions_prev_week_begin.strftime('%d %B %Y')
+new_admissions = get_data(filters_overview, "newAdmissions")
+admissions_date = get_date(filters_overview, "newAdmissions")
+admissions_week_prev, admissions_fortnight_prev, prev_admissions_week_begin = format_dates(admissions_date)
 
-new_deaths = get_data(data, "newDeaths28DaysByPublishDate")
-deaths_date = get_date(data, "newDeaths28DaysByPublishDate")
-obj_deaths_week_prev = datetime.strptime(deaths_date, '%d %B %Y') - timedelta(days=6)
-deaths_week_prev = obj_deaths_week_prev.strftime('%d %B %Y')
-obj_deaths_fortnight_prev = datetime.strptime(deaths_date, '%d %B %Y') - timedelta(days=13)
-deaths_fortnight_prev = obj_deaths_fortnight_prev.strftime('%d %B %Y')
-obj_deaths_prev_week_begin = datetime.strptime(deaths_date, '%d %B %Y') - timedelta(days=7)
-prev_deaths_week_begin = obj_deaths_prev_week_begin.strftime('%d %B %Y')
+new_deaths = get_data(filters_overview, "newDeaths28DaysByPublishDate")
+deaths_date = get_date(filters_overview, "newDeaths28DaysByPublishDate")
+deaths_week_prev, deaths_fortnight_prev, prev_deaths_week_begin = format_dates(deaths_date)
 
 
 def main(req: HttpRequest, context: Context, latestPublished: str) -> HttpResponse:
