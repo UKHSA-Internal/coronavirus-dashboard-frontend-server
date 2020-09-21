@@ -4,26 +4,25 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
 import logging
-from statistics import mean
 from operator import itemgetter
-from json import dumps
+from datetime import datetime
 
 # 3rd party:
-from flask import Flask, Response, render_template, request
+from flask import Flask, render_template, request, Response
 from azure.functions import HttpRequest, HttpResponse, WsgiMiddleware, Context
-from uk_covid19 import Cov19API
-from datetime import datetime, timedelta
-from typing import Union, Tuple, Any
+from typing import Any
+from flask_minify import minify
 
 # Internal:
-from .data.queries import get_last_fortnight
+from .visualisation import plot_thumbnail, get_colour
+from .data.queries import get_last_fortnight, get_data_by_postcode
 
 try:
-   from __app__.database import CosmosDB
-   from __app__.storage import StorageClient
+    from __app__.database import CosmosDB
+    from __app__.storage import StorageClient
 except ImportError:
-   from database import CosmosDB
-   from storage import StorageClient
+    from database import CosmosDB
+    from storage import StorageClient
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -34,579 +33,216 @@ __all__ = [
 timestamp = str()
 
 app = Flask(__name__)
+minifier = minify(
+    app=app,
+    html=True,
+    js=True,
+    cssless=True,
+    caching_limit=0,
+    fail_safe=True
+)
 
 app.config["APPLICATION_ROOT"] = "/"
 
-#storage_client = StorageClient(container='$web', path='index.html')
-#template_pointer = storage_client.download()
-#template = template_pointer.readall().decode()
+get_value = itemgetter("value")
+get_area_type = itemgetter("areaType")
 
-# return data for specified parameter 
-def get_data(request_filters: dict, request_param: str) -> Union[str, None]:
-
-    data_api = Cov19API(
-        filters=request_filters,
-        structure={
-            "date": "date",
-            request_param: request_param
-        },
-        latest_by=request_param
-    )
-
-    data = data_api.get_json()
-
-    if data["data"] != []:
-        return data["data"][0][request_param]
-    else:
-        return "N/A"
-
-
-# return date for specified parameter 
-def get_date(request_filters: dict, request_param: str) -> str:
-
-    date_api = Cov19API(
-        filters=request_filters,
-        structure={
-            "date": "date",
-            request_param: request_param
-        },
-        latest_by=request_param
-    )
-
-    data = date_api.get_json()
-    
-    if data["data"] != []:
-        obj_result_date = datetime.strptime(data["data"][0]["date"], '%Y-%m-%d')
-    
-        return obj_result_date.strftime('%d %B %Y')
-    else:
-        return None
-
-
-def format_dates(date: str) -> Tuple[str, str, str]:
-
-    if date is not None:
-        obj_week_prev = datetime.strptime(date, '%d %B %Y') - timedelta(days=6)
-        week_prev = obj_week_prev.strftime('%d %B %Y')
-        
-        obj_fortnight_prev = datetime.strptime(date, '%d %B %Y') - timedelta(days=13)
-        fortnight_prev = obj_fortnight_prev.strftime('%d %B %Y')
-
-        obj_prev_week_begin = datetime.strptime(date, '%d %B %Y') - timedelta(days=7)
-        prev_week_begin = obj_week_prev.strftime('%d %B %Y')
-    else:
-        week_prev = fortnight_prev = prev_week_begin = "No data available"
-
-    return week_prev, fortnight_prev, prev_week_begin
-
-
-# return the prev 7 days of results and the change between the last week and 2 weeks ago as a percentage  of the specified request param
-# (trial_change returns the difference as whole number)
-def get_week(request_json: dict, request_param: str) -> Tuple[int, Union[int, str], Union[float, str]]:
-    # get the dates for a week ago and 2 weeks ago ---- uses 2 weeks data from date of latest entry ----
-    week_prev = datetime.strptime(request_json["data"][0]["date"], '%Y-%m-%d') - timedelta(days=6)
-    string_week_prev = week_prev.strftime('%Y-%m-%d')
-    fortnight_prev = datetime.strptime(request_json["data"][0]["date"], '%Y-%m-%d') - timedelta(days=13)
-    string_fortnight_prev = fortnight_prev.strftime('%Y-%m-%d')
-    
-    week_result_total = 0
-    week_complete = False
-    fortnight_complete = False
-    week_data_present = False
-    fortnight_data_present = False
-    index = 0
-    while not week_complete:
-        if request_json["data"][index]["date"] == string_week_prev:
-            week_complete = True
-            
-
-        if request_json["data"][index][request_param] is None:
-            week_result_total += 0
-        
-        else:
-            week_result_total += request_json["data"][index][request_param]
-            week_data_present = True
-
-        
-        index += 1
-
-    
-    fortnight_result_total = 0
-
-    while not fortnight_complete:
-        if request_json["data"][index]["date"] == string_fortnight_prev:
-            fortnight_complete = True
-            
-
-        if request_json["data"][index][request_param] is None:
-            fortnight_result_total += 0
-        
-        else:
-            fortnight_result_total += request_json["data"][index][request_param]
-            fortnight_data_present = True
-
-        
-        index += 1
-
-    if week_data_present and fortnight_data_present:
-        
-        try:
-            division = week_result_total / fortnight_result_total
-        except ZeroDivisionError:
-            division = 0
-
-        two_week_result_change = round((division) * 100 - 100, 2)
-        trial_change = week_result_total - fortnight_result_total
-        
-
-    else:
-        two_week_result_change = "insuficcent data"
-        trial_change = "insufficient data"
-
-    
-    return week_result_total, trial_change, two_week_result_change
-
-# Filter for use in templates, adds commas to data e.g. 123456 becomes 123,456
+IsImproving = {
+    "newCasesByPublishDate": lambda x: x < 0,
+    "newDeaths28DaysByPublishDate": lambda x: x < 0,
+    "newPillarOneTwoTestsByPublishDate": lambda x: x > 0,
+    "hospitalCases": lambda x: x < 0,
+}
 
 
 @app.template_filter()
-def numberFormat(value: Any) -> Any:
-    if value is not None and isinstance(value, int):
-        return format(int(value), ',d')
-    else:
+def format_number(value: Any) -> Any:
+    try:
+        value_int = int(value)
+    except TypeError:
         return value
 
+    if value == value_int:
+        return format(value_int, ',d')
 
-# Gets country from dropdown form and returns data for the specified country
-@app.route('/areasearch', methods=['GET'])
-def regional_data() -> render_template:
-
-    postcode = request.args.get['postcode']
-    drop_down_code = request.args.get['dropdown']
-    # if a postcode has been entered (currently using ONS area codes)
-    # then filter by the code provided
-    if postcode != '':
-        filters_area_code = [
-            f'areaCode={postcode}'
-        ]
-    # use dropdown item if no postcode provided
-    else:
-        filters_area_code = [
-            f'areaCode={drop_down_code}'
-        ]
-
-    # set API params
-    area_api = Cov19API(
-        filters=filters_area_code,
-        structure=structure
-    )
-    # return JSON
-    area_data = area_api.get_json()
-    # seperate fields into variables for parsing to template
-
-    area_name = get_data(filters_area_code, "areaName")
-
-    area_new_tests = get_data(filters_area_code, "newTestsByPublishDate")
-
-    area_tests_date = get_date(filters_area_code, "newTestsByPublishDate")
-
-    area_new_cases = get_data(filters_area_code, "newCasesByPublishDate")
-    area_cases_date = get_date(filters_area_code, "newCasesByPublishDate")
-
-    area_new_admissions = get_data(filters_area_code, "newAdmissions")
-    area_admissions_date = get_date(filters_area_code, "newAdmissions")
-    
-    area_new_deaths = get_data(filters_area_code, "newDeaths28DaysByPublishDate")
-    area_deaths_date = get_date(filters_area_code, "newDeaths28DaysByPublishDate")
-
-   
-    area_cases_week_prev, area_cases_fortnight_prev, area_prev_cases_week_begin = format_dates(area_cases_date)
-    
-    area_tests_week_prev, area_tests_fortnight_prev, area_prev_tests_week_begin = format_dates(area_tests_date)
-    
-    area_admissions_week_prev, area_admissions_fortnight_prev, area_prev_admissions_week_begin = format_dates(area_admissions_date)
-    
-    area_deaths_week_prev, area_deaths_fortnight_prev, area_prev_deaths_week_begin = format_dates(area_deaths_date)
-
-
-    area_week_cases_total, area_fortnight_cases_change, area_trial_cases_change = get_week(area_data, "newCasesByPublishDate")
-
-    if isinstance(area_fortnight_cases_change, str):
-        area_cases_arrow_colour = "red"
-        area_cases_arrow_direction = ""
-    elif area_fortnight_cases_change < 0:
-        area_cases_arrow_colour = "green"
-        area_cases_arrow_direction = "down"
-    else:
-        area_cases_arrow_colour = "red"
-        area_cases_arrow_direction = "up"
-
-    area_week_tests_total, area_fortnight_tests_change, area_trial_tests_change = get_week(area_data, "newTestsByPublishDate")
-
-    if isinstance(area_fortnight_tests_change, str):
-        area_tests_arrow_direction = ""
-    elif area_fortnight_tests_change < 0:
-        area_tests_arrow_direction = "down"
-    else:
-        area_tests_arrow_direction = "up"
-
-    area_week_admissions_total, area_fortnight_admissions_change, area_trial_admissions_change = get_week(area_data, "newAdmissions")
-
-    if isinstance(area_fortnight_admissions_change, str):
-        area_admissions_arrow_colour = "red"
-        area_admissions_arrow_direction = ""
-    elif area_fortnight_admissions_change < 0:
-        area_admissions_arrow_direction = "down"
-        area_admissions_arrow_colour = "green"
-    else:
-        area_admissions_arrow_direction = "up"
-        area_admissions_arrow_colour = "red"
-
-    area_week_deaths_total, area_fortnight_deaths_change, area_trial_deaths_change = get_week(area_data, "newDeaths28DaysByPublishDate")
-
-    if isinstance(area_fortnight_deaths_change, str):
-        area_deaths_arrow_colour = "red"
-        area_deaths_arrow_direction = ""
-    elif fortnight_deaths_change < 0:
-        area_deaths_arrow_direction = "down"
-        area_deaths_arrow_colour = "green"
-    else:
-        area_deaths_arrow_direction = "up"
-        area_deaths_arrow_colour = "red"
-
-
-    
-
-
-    return render_template(
-        'main.html',
-        areaname=area_name,
-        areanewcases=area_new_cases,
-        areanewtests=area_new_tests,
-        areanewadmissions=area_new_admissions,
-        areanewdeaths=area_new_deaths,
-        areacasesdate=area_cases_date,
-        areatestsdate=area_tests_date,
-        areaadmissionsdate=area_admissions_date,
-        areadeathsdate=area_deaths_date,
-        areaweekofcases=area_week_cases_total,
-        areaweekoftests=area_week_tests_total,
-        areaweekofadmissions=area_week_admissions_total,
-        areaweekofdeaths=area_week_deaths_total,
-        areacaseschange=area_fortnight_cases_change,
-        areatestschange=area_fortnight_tests_change,
-        areaadmissionschange=area_fortnight_admissions_change,
-        areadeathschange=area_fortnight_deaths_change,
-        areacasestagcol=area_cases_arrow_colour,
-        areaadmissionstagcol=area_admissions_arrow_colour,
-        areadeathstagcol=area_deaths_arrow_colour,
-        areacasesarrowdir=area_cases_arrow_direction,
-        areatestsarrowdir=area_tests_arrow_direction,
-        areaadmissionsarrowdir=area_admissions_arrow_direction,
-        areadeathsarrowdir=area_deaths_arrow_direction,
-        areacasestrialchange=area_trial_cases_change,
-        
-        areacasesdateprevweek=area_cases_week_prev,
-        areacasesdateprevweekstart=area_prev_cases_week_begin,
-        areacasesdatefortnightprev=area_cases_fortnight_prev,
-
-        areatestsdateprevweek=area_tests_week_prev,
-        areatestsdateprevweekstart=area_prev_tests_week_begin,
-        areatestsdatefortnightprev=area_tests_fortnight_prev,
-
-        areaadmissionsdateprevweek=area_admissions_week_prev,
-        areaadmissionsdateprevweekstart=area_prev_admissions_week_begin,
-        areaadmissionsdatefortnightprev=area_admissions_fortnight_prev,
-
-        areadeathsdateprevweek=area_deaths_week_prev,
-        areadeathsdateprevweekstart=area_prev_deaths_week_begin,
-        areadeathsdatefortnightprev=area_deaths_fortnight_prev,
-
-        newcases=new_cases,
-        casesdate=cases_date,
-        casesdateweekprev=cases_week_prev,
-        casesdateprevweekstart=prev_cases_week_begin,
-        casesdatefortnightprev=cases_fortnight_prev,
-
-        newtests=new_tests,
-        testsdate=tests_date,
-        testsdateweekprev=tests_week_prev,
-        testsdateprevweekstart=prev_tests_week_begin,
-        testsdatefortnightprev=tests_fortnight_prev,
-
-        newadmissions=new_admissions,
-        admissionsdate=admissions_date,
-        admissionsdateweekprev=admissions_week_prev,
-        admissionsdateprevweekstart=prev_admissions_week_begin,
-        admissionsdatefortnightprev=admissions_fortnight_prev,
-
-        newdeaths=new_deaths,
-        deathsdate=deaths_date,
-        deathsdateweekprev=deaths_week_prev,
-        deathsdateprevweekstart=prev_deaths_week_begin,
-        deathsdatefortnightprev=deaths_fortnight_prev,
-        
-        weekofcases=week_cases_total,
-        weekoftests=week_tests_total,
-        weekofadmissions=week_admissions_total,
-        weekofdeaths=week_deaths_total,
-        caseschange=fortnight_cases_change,
-        testschange=fortnight_tests_change,
-        admissionschange=fortnight_admissions_change,
-        deathschange=fortnight_deaths_change,
-        casestagcol=cases_arrow_colour,
-        admissionstagcol=admissions_arrow_colour,
-        deathstagcol=deaths_arrow_colour,
-        casesarrowdir=cases_arrow_direction,
-        testsarrowdir=tests_arrow_direction,
-        admissionsarrowdir=admissions_arrow_direction,
-        deathsarrowdir=deaths_arrow_direction,
-        casestrialchange=trial_cases_change,
-        date=result_date,
-        datefortnightprev=string_fortnight_prev,
-        dateweekprev=string_week_prev
-    )
-
-
-# @app.route('/interactive-map')
-# def statpage() -> render_template: 
-#     return render_template(
-#         "static.html",
-#         data=data,
-#         date=result_date,
-#         newcases=new_cases,
-#         casesdate=cases_date,
-#         casesdateweekprev=cases_week_prev,
-#         casesdateprevweekstart=prev_cases_week_begin,
-#         casesdatefortnightprev=cases_fortnight_prev,
-#         newtests=new_tests,
-#         testsdate=tests_date,
-#         testsdateweekprev=tests_week_prev,
-#         testsdateprevweekstart=prev_tests_week_begin,
-#         testsdatefortnightprev=tests_fortnight_prev,
-#         newadmissions=new_admissions,
-#         admissionsdate=admissions_date,
-#         admissionsdateweekprev=admissions_week_prev,
-#         admissionsdateprevweekstart=prev_admissions_week_begin,
-#         admissionsdatefortnightprev=admissions_fortnight_prev,
-#         newdeaths=new_deaths,
-#         deathsdate=deaths_date,
-#         deathsdateweekprev=deaths_week_prev,
-#         deathsdateprevweekstart=prev_deaths_week_begin,
-#         deathsdatefortnightprev=deaths_fortnight_prev,
-#         weekofcases=week_cases_total,
-#         weekoftests=week_tests_total,
-#         weekofadmissions=week_admissions_total,
-#         weekofdeaths=week_deaths_total,
-#         caseschange=fortnight_cases_change,
-#         testschange=fortnight_tests_change,
-#         admissionschange=fortnight_admissions_change,
-#         deathschange=fortnight_deaths_change,
-#         casestagcol=cases_arrow_colour,
-#         admissionstagcol=admissions_arrow_colour,
-#         deathstagcol=deaths_arrow_colour,
-#         casesarrowdir=cases_arrow_direction,
-#         testsarrowdir=tests_arrow_direction,
-#         admissionsarrowdir=admissions_arrow_direction,
-#         deathsarrowdir=deaths_arrow_direction,
-#         casestrialchange=trial_cases_change
-
-#     )
-
-
-@app.route('/', methods=['GET'])
-@app.route('/<path>', methods=['GET'])
-def index(path=None) -> render_template:
-    return render_template(
-        "main.html",
-        data=data,
-        date=result_date,
-        newcases=new_cases,
-        casesdate=cases_date,
-        casesdateweekprev=cases_week_prev,
-        casesdateprevweekstart=prev_cases_week_begin,
-        casesdatefortnightprev=cases_fortnight_prev,
-
-        newtests=new_tests,
-        testsdate=tests_date,
-        testsdateweekprev=tests_week_prev,
-        testsdateprevweekstart=prev_tests_week_begin,
-        testsdatefortnightprev=tests_fortnight_prev,
-
-        newadmissions=new_admissions,
-        admissionsdate=admissions_date,
-        admissionsdateweekprev=admissions_week_prev,
-        admissionsdateprevweekstart=prev_admissions_week_begin,
-        admissionsdatefortnightprev=admissions_fortnight_prev,
-
-        newdeaths=new_deaths,
-        deathsdate=deaths_date,
-        deathsdateweekprev=deaths_week_prev,
-        deathsdateprevweekstart=prev_deaths_week_begin,
-        deathsdatefortnightprev=deaths_fortnight_prev,
-
-        weekofcases=week_cases_total,
-        weekoftests=week_tests_total,
-        weekofadmissions=week_admissions_total,
-        weekofdeaths=week_deaths_total,
-        caseschange=fortnight_cases_change,
-        testschange=fortnight_tests_change,
-        admissionschange=fortnight_admissions_change,
-        deathschange=fortnight_deaths_change,
-        casestagcol=cases_arrow_colour,
-        admissionstagcol=admissions_arrow_colour,
-        deathstagcol=deaths_arrow_colour,
-        casesarrowdir=cases_arrow_direction,
-        testsarrowdir=tests_arrow_direction,
-        admissionsarrowdir=admissions_arrow_direction,
-        deathsarrowdir=deaths_arrow_direction,
-        casestrialchange=trial_cases_change,
-        datefortnightprev=string_fortnight_prev,
-        dateweekprev=string_week_prev
-        # teststrialchange=trial_tests_change
-    )
-
-
-filters_overview = [
-    'areaType=overview'
-]
-
-structure = {
-    "date": "date",
-    "areaName": "areaName",
-    "newCasesByPublishDate": "newCasesByPublishDate",
-    "newDeaths28DaysByPublishDate": "newDeaths28DaysByPublishDate",
-    "cumTestsByPublishDate": "cumTestsByPublishDate",
-    "newTestsByPublishDate": "newTestsByPublishDate",
-    "newAdmissions": "newAdmissions",
-    "newCasesBySpecimenDate": "newCasesBySpecimenDate"
-
-}
-#
-# # get json data and seperate values into variables for parsing to template
-api = Cov19API(
-    filters=filters_overview,
-    structure=structure
-)
-
-
-data = api.get_json()
-
-# from .data.queries import get_last_fortnight
-# data = [value for value in structure.values()]
-
-obj_result_date = datetime.strptime(data["data"][0]["date"], '%Y-%m-%d')
-result_date = obj_result_date.strftime('%d %B %Y')
-obj_week_prev = datetime.strptime(data["data"][0]["date"], '%Y-%m-%d') - timedelta(days=6)
-string_week_prev = obj_week_prev.strftime('%d %B %Y')
-obj_fortnight_prev = datetime.strptime(data["data"][0]["date"], '%Y-%m-%d') - timedelta(days=13)
-string_fortnight_prev = obj_fortnight_prev.strftime('%d %B %Y')
-
-
-get_value = itemgetter("value")
+    return value
 
 
 def get_change(metric_data):
-    mean_this_week = mean(map(get_value, metric_data[:7]))
-    mean_one_week_ago = mean(map(get_value, metric_data[7:]))
-    delta_mean = mean_this_week - mean_one_week_ago
-    delta_percentage = delta_mean * 100 / mean_one_week_ago
-    try:
-        return {
-            "percentage": format(delta_percentage, ".4g"),
-            "value": "{:,}".format(float(format(delta_mean, ".4g")))
-        }
-    except ZeroDivisionError:
-        return 0
+    sigma_this_week = sum(map(get_value, metric_data[:7]))
+    sigma_last_week = sum(map(get_value, metric_data[7:14]))
+    delta = sigma_this_week - sigma_last_week
+
+    delta_percentage = (sigma_this_week / max(sigma_last_week, 0.5) - 1) * 100
+
+    logging.info(delta_percentage)
+
+    if delta_percentage > 0:
+        trend = 0
+    elif delta_percentage < 0:
+        trend = 180
+    else:
+        trend = 90
+
+    return {
+        "percentage": format(delta_percentage, ".1f"),
+        "value": int(round(delta)),
+        "total": sigma_this_week,
+        "trend": trend
+    }
 
 
-def get_fortnight_data(area_name="United Kingdom"):
+def get_card_data(metric_name: str, metric_data, graph=True):
+    change = get_change(metric_data)
+    colour = get_colour(change, IsImproving[metric_name])
+
+    response = {
+        "data": metric_data,
+        "change": change,
+        "is_improving": IsImproving[metric_name],
+        "colour": colour,
+        "latest_date": metric_data[0]["date"].strftime('%-d %B')
+    }
+
+    if graph:
+        response["graph"] = plot_thumbnail(metric_data, change, IsImproving[metric_name])
+
+    return response
+
+
+def get_fortnight_data(area_name: str = "United Kingdom"):
     metric_names = [
         "newCasesByPublishDate",
         "newDeaths28DaysByPublishDate",
-        "newTestsByPublishDate",
-        "newAdmissions"
+        "newPillarOneTwoTestsByPublishDate",
+        "hospitalCases",
     ]
 
     global timestamp
 
     result = dict()
 
-    for metric in metric_names:
-        metric_data = get_last_fortnight(timestamp, area_name, metric)
-
-        result[metric] = {
-            "data": metric_data,
-            "change": get_change(metric_data),
-        }
+    for name in metric_names:
+        metric_data = get_last_fortnight(timestamp, area_name, name)
+        result[name] = get_card_data(name, metric_data)
 
     return result
 
 
-week_cases_total, fortnight_cases_change, trial_cases_change = get_week(data, "newCasesByPublishDate")
-if isinstance(fortnight_cases_change, str):
-    cases_arrow_colour = "red"
-    cases_arrow_direction = ""
-elif fortnight_cases_change < 0:
-    cases_arrow_colour = "green"
-    cases_arrow_direction = "down"
-else:
-    cases_arrow_colour = "red"
-    cases_arrow_direction = "up"
+def get_main_data():
+    # ToDo: Integrate this with postcode data.
+    data = get_fortnight_data()
 
-week_tests_total, fortnight_tests_change, trial_tests_change = get_week(data, "newTestsByPublishDate")
+    result = dict(
+        cards=[
+            {
+                "caption": "Testing",
+                "heading": "Tests in pillars 1 & 2",
+                **data['newPillarOneTwoTestsByPublishDate'],
+                "data": data['newPillarOneTwoTestsByPublishDate']['data'],
+            },
+            {
+                "caption": "Healthcare",
+                "heading": "Patients in hospital",
+                **data['hospitalCases'],
+                "data": data['hospitalCases']['data'],
+            },
+            {
+                "caption": "Cases",
+                "heading": "People tested positive",
+                **data['newCasesByPublishDate'],
+                "data": data['newCasesByPublishDate']['data'],
+            },
+            {
+                "caption": "Deaths",
+                "heading": "Deaths within 28 days of positive test",
+                **data['newDeaths28DaysByPublishDate'],
+                "data": data['newDeaths28DaysByPublishDate']['data'],
 
-if isinstance(fortnight_tests_change, str):
-    tests_arrow_direction = ""
-elif fortnight_tests_change < 0:
-    tests_arrow_direction = "down"
-else:
-    tests_arrow_direction = "up"
+            }
+        ]
+    )
 
-week_admissions_total, fortnight_admissions_change, trial_admissions_change = get_week(data, "newAdmissions")
-
-if isinstance(fortnight_admissions_change, str):
-    admissions_arrow_colour = "red"
-    admissions_arrow_direction = ""
-elif fortnight_admissions_change < 0:
-    admissions_arrow_direction = "down"
-    admissions_arrow_colour = "green"
-else:
-    admissions_arrow_direction = "up"
-    admissions_arrow_colour = "red"
-
-week_deaths_total, fortnight_deaths_change, trial_deaths_change = get_week(data, "newDeaths28DaysByPublishDate")
-
-if isinstance(fortnight_deaths_change, str):
-    deaths_arrow_colour = "red"
-    deaths_arrow_direction = ""
-elif fortnight_deaths_change < 0:
-    deaths_arrow_direction = "down"
-    deaths_arrow_colour = "green"
-else:
-    deaths_arrow_direction = "up"
-    deaths_arrow_colour = "red"
-
-# sets variable to latest date, if no data is found, loop to latest available
+    return result
 
 
-# get latest date for data point, beginning of week prior, a week prior, and 2 weeks prior
+def get_by_smallest_areatype(items, areatype_getter):
+    order = [
+        "lsoa",
+        "msoa",
+        "ltla",
+        "utla",
+        "region",
+        "nhsRegion",
+        "nation",
+        "overview"
+    ]
+    area_types = map(areatype_getter, items)
 
-new_cases = get_data(filters_overview, "newCasesByPublishDate")
-cases_date = get_date(filters_overview, "newCasesByPublishDate")
-cases_week_prev, cases_fortnight_prev, prev_cases_week_begin = format_dates(cases_date)
+    min_index = len(order) - 1
+    result = None
 
-new_tests = get_data(filters_overview, "newTestsByPublishDate")
-tests_date = get_date(filters_overview, "newTestsByPublishDate")
-tests_week_prev, tests_fortnight_prev, prev_tests_week_begin = format_dates(tests_date)
+    for item_ind, area_type in enumerate(area_types):
+        order_index = order.index(area_type)
+        if area_type in order and order_index < min_index:
+            result = items[item_ind]
+            min_index = order_index
 
-new_admissions = get_data(filters_overview, "newAdmissions")
-admissions_date = get_date(filters_overview, "newAdmissions")
-admissions_week_prev, admissions_fortnight_prev, prev_admissions_week_begin = format_dates(admissions_date)
+    return result
 
-new_deaths = get_data(filters_overview, "newDeaths28DaysByPublishDate")
-deaths_date = get_date(filters_overview, "newDeaths28DaysByPublishDate")
-deaths_week_prev, deaths_fortnight_prev, prev_deaths_week_begin = format_dates(deaths_date)
+
+@app.after_request
+def prepare_response(resp: Response):
+    global timestamp
+
+    last_modified = datetime.strptime(
+        timestamp[:24] + "Z",
+        "%Y-%m-%dT%H:%M:%S.%fZ"
+    )
+
+    resp.headers['Last-Modified'] = last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    # ToDo: Confirm that this part is now done by the CDN.
+    # resp.headers['Content-Encoding'] = "gzip"
+    # resp = minifier.main(resp.response)
+    # logging.info(resp.get_data())
+    # minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
+    # encoded = str.join("", minified).encode()
+    # # resp.response =
+    # # logging.info(resp.response)
+    # resp.set_data(compress(encoded))
+    return resp
+
+
+@app.route('/search', methods=['GET'])
+def postcode_search() -> render_template:
+    postcode = request.args.get("postcode", None)
+    if postcode is None:
+        return
+
+    global timestamp
+
+    response = {
+        category: {
+            **values,
+            **get_card_data(values["metric"], values['data'], False)
+        }
+        for category, values in get_data_by_postcode(postcode, timestamp).items()
+    }
+
+    data = get_main_data()
+    return render_template(
+        "main.html",
+        postcode_data=response,
+        postcode=postcode.upper(),
+        smallest_area=get_by_smallest_areatype(list(response.values()), get_area_type),
+        **data
+    )
+
+
+@app.route('/', methods=['GET'])
+def index() -> render_template:
+    data = get_main_data()
+    return render_template("main.html", **data)
 
 
 def main(req: HttpRequest, context: Context, latestPublished: str) -> HttpResponse:
@@ -615,8 +251,5 @@ def main(req: HttpRequest, context: Context, latestPublished: str) -> HttpRespon
     global timestamp
     timestamp = latestPublished
 
-    logging.info(dumps(get_fortnight_data(), indent=4))
-
     application = WsgiMiddleware(app)
-    # context.timestamp =
     return application.main(req, context)

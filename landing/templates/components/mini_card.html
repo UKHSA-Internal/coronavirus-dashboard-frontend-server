@@ -1,0 +1,123 @@
+{% macro create_card(card, is_postcode=False) %}
+
+	<div class="{% if not is_postcode %}dashboard-panel card{% else %}card-local{% endif %}">
+
+		<div>
+			<span class="govuk-caption-m govuk-!-font-weight-regular">{{ card.caption }}</span>
+			<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">{{ card.heading }}</h3>
+		</div>
+
+		<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-2">
+			Latest data
+			{% if is_postcode %}
+				at <strong>{{ card.areaType_formatted | lower }}</strong> level
+			{% endif %}
+			provided on&nbsp;<span style="white-space: nowrap">{{ card.latest_date }}</span>
+		</p>
+
+		<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">
+			<div class="govuk-grid-column-full">
+				<div class="data-metric2">
+					<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">Daily</div>
+					<div class="number-group">
+						<div class="number-container">
+							<div class="float tooltip">
+								<h3 class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+									<a href="#" class="govuk-link--no-visited-state number-link number"
+									   id="newtests" onclick="showHelp()">
+										{{ card.data[0].value | format_number }}&nbsp;
+										<span id="testsdate"
+										      class="tooltiptext govuk-!-font-size-16">
+											Daily number of {{ card.heading | lower }} on {{ card.data[0].formatted }}
+									</span>
+									</a>
+								</h3>
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="data-metric2">
+
+					<div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0" style="width:80%;">
+						Last 7 days
+					</div>
+
+					<div class="number-group">
+						<div class="number-container govuk-!-padding-right-4">
+							<div class="float tooltip">
+								<h3 class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+									<a href="#" class="govuk-link--no-visited-state number-link" id="weekoftests"
+									   onclick="showHelp()">{{ card.change.total | format_number }}
+										<span id="fortnighttopriorweek"
+										      class="tooltiptext govuk-!-font-size-16">
+										Total number of {{ card.heading | lower }} in the
+										last 7 days ({{ card.data[6].formatted }} &ndash; {{ card.data[0].formatted }})</span></a>
+								</h3></div>
+						</div>
+
+					</div>
+					<div class="number-container">
+						<div class="float tooltip">
+							<h3 class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+								<a href="#"
+								   class="govuk-link--no-visited-state number-link-red"
+								   style="border: none"
+								   onclick="showHelp()">
+									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1"
+									        style="background-color: {{ card.colour.fill }}; color: {{ card.colour.line }}">
+										{% if card.change.value != 0 %}
+											<img src="/assets/public/images/arrow.svg"
+											     width="12px"
+											     alt="down arrow"
+											     style="transform: rotate({{ card.change.trend }}deg)">
+											{{ card.change.value | format_number }}
+											<span class="govuk-!-font-weight-regular">({{ card.change.percentage }}%)</span>
+										{% else %}
+											<span>No change</span>
+										{% endif %}
+									</strong>&nbsp;
+									<span class="tooltiptext govuk-!-font-size-16">
+											Change from previous 7 days ({{ card.data[13].formatted }} &ndash; {{ card.data[7].formatted }})
+									</span>
+								</a>
+							</h3>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+
+		{% if not is_postcode %}
+			<figure class="graph"
+			        style="display: flex; width: 100%; height: 100%; justify-content: center; align-items: flex-end">
+				<img src="{{ card.graph }}" alt="Graph" style="">
+			</figure>
+			<div class="govuk-!-margin-top-4" style="display: flex; width: 100%; justify-content: flex-end;">
+				<a class="govuk-link more-detail govuk-link--no-visited-state" rel="next"
+				   href="/details/{{ card.caption | lower }}" style="margin-top: 1rem;">All {{ card.caption | lower }} data</a>
+			</div>
+		{% else %}
+				<div class="govuk-!-margin-top-7"
+				     style="display: flex; height: 100%; justify-self: flex-end; justify-content: flex-end; flex-direction: column;">
+					<a href="/downloads/easy_read/{{ card.areaType }}/{{ card.areaName }}.docx"
+					   class="govuk-link govuk-link--no-visited-state grey govuk-!-font-size-14"
+					   lang="en-GB" style="text-decoration: none"
+					   type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+					   download>Easy-read report for {{ card.areaName }}</a>
+
+					<a href="/details/{{ card.caption | lower }}?areaType={{ card.areaType | lower }}&areaName={{ card.areaName }}"
+					   class="govuk-link govuk-link--no-visited-state govuk-!-margin-top-3 govuk-!-font-size-14"
+					   style="text-decoration: none"
+					   rel="next">More details on {{ card.caption | lower }} in {{ card.areaName }}</a>
+				</div>
+		{% endif %}
+
+	</div>
+{% endmacro %}
+

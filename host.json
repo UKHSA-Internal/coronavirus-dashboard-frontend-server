@@ -23,7 +23,7 @@
       "maxOutstandingRequests": 150,
       "maxConcurrentRequests": 150,
       "customHeaders": {
-        "Cache-Control": "public, max-age=90",
+        "Cache-Control": "public, must-revalidate, max-age=120",
         "x-phe-media-type": "PHE-COVID19.v1"
       }
     }
