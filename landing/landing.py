@@ -6,6 +6,7 @@
 import logging
 from operator import itemgetter
 from datetime import datetime
+from gzip import compress
 
 # 3rd party:
 from flask import Flask, render_template, request, Response
@@ -34,7 +35,7 @@ timestamp = str()
 
 app = Flask(__name__)
 minifier = minify(
-    app=app,
+    # app=app,
     html=True,
     js=True,
     cssless=True,
@@ -201,15 +202,17 @@ def prepare_response(resp: Response):
     )
 
     resp.headers['Last-Modified'] = last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT")
-    # ToDo: Confirm that this part is now done by the CDN.
-    # resp.headers['Content-Encoding'] = "gzip"
-    # resp = minifier.main(resp.response)
-    # logging.info(resp.get_data())
-    # minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
-    # encoded = str.join("", minified).encode()
-    # # resp.response =
-    # # logging.info(resp.response)
-    # resp.set_data(compress(encoded))
+
+    minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
+    data = str.join("", minified).encode()
+
+    accept_encoding = request.headers.get("Accept-Encoding", "")
+
+    if 'gzip' in accept_encoding:
+        data = compress(data)
+        resp.headers['Content-Encoding'] = "gzip"
+
+    resp.set_data(data)
     return resp
 
 
