@@ -1,17 +1,26 @@
 <div class="govuk-!-margin-top-2">
-	<form action="/search" method="GET" id="regionform"
-	      enctype="application/x-www-form-urlencoded">
-		<div class="govuk-form-group">
-			<label class="govuk-label govuk-!-font-weight-bold" for="postcode">
-				Enter a postcode
-			</label>
-			<p class="govuk-hint">
-				For example: AB12 3CD
-			</p>
-			<p>
-				<input form="regionform" class="govuk-input govuk-input--width-10" id="postcode"
-				       name="postcode" type="text" pattern="[A-Za-z0-9\s]{5,8}" maxlength="8">
-			</p>
+	<form action="/search" method="GET" id="regionform" rel="next" target="_self">
+		<div class="govuk-form-group {% if invalid_postcode %}govuk-form-group--error{% endif %}">
+		  <fieldset class="govuk-fieldset" role="group" aria-describedby="postcode-hint">
+				<label class="govuk-label govuk-!-font-weight-bold" for="postcode">
+					Enter a postcode
+				</label>
+				<p class="govuk-hint" id="postcode-hint">
+					For example: NW9 5EQ
+				</p>
+				{% if invalid_postcode %}
+					<span id="passport-issued-error" class="govuk-error-message">
+			      <span class="govuk-visually-hidden">Error:</span> Invalid postcode &ndash; please
+					enter a full and valid UK postcode.
+			    </span>
+				{% endif %}
+				<p>
+					<input form="regionform"
+					       class="govuk-input govuk-input--width-10 {% if invalid_postcode %}govuk-input--error{% endif %}"
+					       id="postcode" name="postcode" type="text"
+					       pattern="[A-Za-z0-9\s]{5,8}" maxlength="8">
+				</p>
+		  </fieldset>
 		</div>
 		<input class="govuk-button" data-module="govuk-button" value="Search" type="submit"/>
 	</form>

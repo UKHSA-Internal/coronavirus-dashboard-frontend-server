@@ -4,9 +4,11 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
 import logging
+import re
 from operator import itemgetter
 from datetime import datetime
 from gzip import compress
+from os.path import abspath, join as join_path, pardir
 
 # 3rd party:
 from flask import Flask, render_template, request, Response
@@ -33,9 +35,13 @@ __all__ = [
 
 timestamp = str()
 
-app = Flask(__name__)
+instance_path = abspath(join_path(abspath(__file__), pardir))
+
+app = Flask(__name__, instance_path=instance_path)
+
+app.config.from_object('__app__.landing.config.Config')
+
 minifier = minify(
-    # app=app,
     html=True,
     js=True,
     cssless=True,
@@ -43,7 +49,7 @@ minifier = minify(
     fail_safe=True
 )
 
-app.config["APPLICATION_ROOT"] = "/"
+postcode_pattern = re.compile(r'^[a-z]{1,2}\d{1,2}[a-z]?\s?\d{1,2}[a-z]{1,2}$', re.I)
 
 get_value = itemgetter("value")
 get_area_type = itemgetter("areaType")
@@ -216,23 +222,46 @@ def prepare_response(resp: Response):
     return resp
 
 
+def get_validated_postcode(params):
+    found = postcode_pattern.search(params.get("postcode", "").strip())
+
+    if found is not None:
+        extract = found.group(0)
+        return extract
+
+    return None
+
+
 @app.route('/search', methods=['GET'])
 def postcode_search() -> render_template:
-    postcode = request.args.get("postcode", None)
+    postcode = get_validated_postcode(request.args)
+
+    data = get_main_data()
+
     if postcode is None:
-        return
+        return render_template(
+            "main.html",
+            invalid_postcode=True,
+            **data
+        )
 
     global timestamp
 
-    response = {
-        category: {
-            **values,
-            **get_card_data(values["metric"], values['data'], False)
+    try:
+        response = {
+            category: {
+                **values,
+                **get_card_data(values["metric"], values['data'], False)
+            }
+            for category, values in get_data_by_postcode(postcode, timestamp).items()
         }
-        for category, values in get_data_by_postcode(postcode, timestamp).items()
-    }
+    except IndexError:
+        return render_template(
+            "main.html",
+            invalid_postcode=True,
+            **data
+        )
 
-    data = get_main_data()
     return render_template(
         "main.html",
         postcode_data=response,

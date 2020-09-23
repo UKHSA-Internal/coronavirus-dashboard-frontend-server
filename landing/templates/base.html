@@ -1,123 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8"/>
-	<link rel="icon" href="/favicon.ico"/>
-	<meta name="viewport" content="width=device-width,initial-scale=1"/>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="theme-color" content="#0b0c0c">
-	<meta name="description" content="GOV.UK Coronavirus (COVID-19) dashboard: Latest data and statics at national and local levels."/>
-	<meta name="keywords"
-	      content="COVID19, COVID-19, Coronavirus, Public Health England, United Kingdom, Data, Charts, Download"/>
-	<link rel="apple-touch-icon" href="/favicon.png"/>
-	<link rel="manifest" href="/manifest.json"/>
-	<link rel="stylesheet" type="text/css" href="assets/css/application.css">
+	<meta name="description" content="Official Coronavirus (COVID-19) disease situation dashboard presents latest counts of COVID-19 cases, deaths, testing, and healthcare in the UK. It provides interactive features including charts, tables, and downloadable data at UK, nation, local authority and local area (MSOA) levels">
+	<meta name="keywords" content="COVID19,COVID-19,Coronavirus,Public Health England,United Kingdom,Data,Charts,Download,Coronavirus tracker,PHE,UK,API">
+
+	<meta name="twitter:title" content="Official UK Coronavirus (COVID-19) Dashboard">
+	<meta name="twitter:description" content="Official Coronavirus (COVID-19) disease situation dashboard presents latest counts of COVID-19 cases, deaths, testing, and healthcare in the UK. It provides interactive features including charts, tables, and downloadable data at UK, nation, local authority and local area (MSOA) levels.">
+{#	<meta data-react-helmet="true" name="twitter:card" content="summary">#}
+{#	<meta data-react-helmet="true" property="og:image" content="https://covid19.who.int/who_share.jpg">#}
+	<meta property="og:url" content="https://coronavirus.data.gov.uk">
+	<meta property="og:site" content="@PHE_uk">
+	<meta property="og:type" content="website">
+	<meta property="og:locale" content="en_GB" />
+
 	<meta property="og:image" content="/assets/public/images/opengraph-image.png">
-	<title>Coronavirus (COVID-19) in the UK</title>
+	<meta property="og:description" content="Official Coronavirus (COVID-19) disease situation dashboard presents latest counts of COVID-19 cases, deaths, testing, and healthcare in the UK. It provides interactive features including charts, tables, and downloadable data at UK, nation, local authority and local area (MSOA) levels.">
+	<meta property="og:title" content="Official UK Coronavirus (COVID-19) Dashboard">
+
+	<link rel="apple-touch-icon" href="/favicon.png">
+	<link rel="icon" href="/favicon.ico">
+	<link rel="manifest" href="/manifest.json">
+	<link rel="stylesheet" type="text/css" href="assets/css/application.css">
+	<link rel="manifest" href="https://coronavirus.data.gov.uk/manifest.json">
+	<title>UK Summary | Coronavirus (COVID-19) in the UK</title>
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-161400643-2"></script>
 	<script>function gtag() {
       dataLayer.push(arguments)
   }
   window.dataLayer = window.dataLayer || [], gtag("js", new Date), gtag("config", "UA-161400643-2", { anonymize_ip: !0 })</script>
 </head>
-	<style>
-      /*
-      #jsrequired {
-          display: none;
-      }
-       */
-	.card,
-	.card-local {
-      flex: 1 1 150px;
-      padding: 20px;
-			margin: 10px;
-			background-color: #f8f8f8;
-			border: 1px #f3f2f1 solid;
-			display: flex;
-			flex-direction: column;
-			align-content: flex-end;
-	}
+<style>
+    /*
+    #jsrequired {
+        display: none;
+    }
+     */
+    .card,
+    .card-local {
+        flex: 1 1 150px;
+        padding: 20px;
+        margin: 10px;
+        background-color: #f8f8f8;
+        border: 1px #f3f2f1 solid;
+        display: flex;
+        flex-direction: column;
+        align-content: flex-end;
+    }
 
-  .card-local {
-		 border: none;
-	   background-color: unset;
-	   margin: 10px 0 !important;
-  }
+    .card-local {
+        border: none;
+        background-color: unset;
+        margin: 10px 0 !important;
+    }
 
-  .local-data {
-			background-color: #f8f8f8;
-			border: 1px #f3f2f1 solid;
-		  margin: 10px;
-  }
+    .local-data {
+        background-color: #f8f8f8;
+        border: 1px #f3f2f1 solid;
+        margin: 10px;
+    }
 
-  .local-intro {
-		  margin: 20px;
-  }
+    .local-intro {
+        margin: 20px;
+    }
 
-  .dashboard-panel {
-		  margin: 10px;
-  }
+    .dashboard-panel {
+        margin: 10px;
+    }
 
-  @media only print {
-		  .govuk-grid-column-menu {
-				  display: none;
-		  }
-  }
-  @media only screen and (max-width: 600px) {
-		  .card,
-		  .card-local,
-		  .local-data {
-				  padding: 10px;
-				  margin: 5px 0 !important;
-		  }
+    @media only print {
+        .govuk-grid-column-menu {
+            display: none;
+        }
+    }
 
-		  .local-intro {
-				  margin: 10px;
-		  }
-  }
+    @media only screen and (max-width: 600px) {
+        .card,
+        .card-local,
+        .local-data {
+            padding: 10px;
+            margin: 5px 0 !important;
+        }
 
-  .number, number-* {
-	  font-feature-settings: "tnum" !important;
-    font-variant-numeric: tabular-nums !important;
-  }
-  .card
-  .more-detail {
-		  justify-self: flex-end;
-		  align-self: flex-end;
-  }
-	.card-container,
-	.card-local-container {
-      display: flex;
-      flex-wrap: wrap;
-			align-items: stretch;
-  }
+        .local-intro {
+            margin: 10px;
+        }
+    }
 
-	.graph {
-			display: block;
-			margin: 1rem 0 0 0;
-	}
+    .number, number- * {
+        font-feature-settings: "tnum" !important;
+        font-variant-numeric: tabular-nums !important;
+    }
 
-	.graph>img {
-			max-width: 100%;
-	}
-	.main {
-			display: flex;
-			flex-direction: column;
-	}
+    .card,
+    .more-detail {
+        justify-self: flex-end;
+        align-self: flex-end;
+    }
+
+    .card-container,
+    .card-local-container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+    }
+
+    .graph {
+        display: block;
+        margin: 1rem 0 0 0;
+    }
+
+    .graph > img {
+        max-width: 100%;
+    }
+
+    .main {
+        display: flex;
+        flex-direction: column;
+    }
 </style>
 <body class="govuk-template__body">
-		{% include "components/header.html" %}
-		<div class="govuk-width-container slides-wrapper">
-			<main class="govuk-main-wrapper" id="main-content" role="main">
-				<div class="govuk-grid-row">
-					{% include "components/nav.html" %}
-					<div class="main">
-					{% block main %}{% endblock %}
-					</div>
-				</div>
-			</main>
+{% include "components/header.html" %}
+<div class="govuk-width-container slides-wrapper">
+	<main class="govuk-main-wrapper" id="main-content" role="main">
+		<div class="govuk-grid-row">
+			{% include "components/nav.html" %}
+			<div class="main">
+				{% block main %}{% endblock %}
+			</div>
 		</div>
-		{% include "components/footer.html" %}
-  <script src="http://www.atmrum.net/rum.js"></script>
-	<script>rum.start("129b370ce22e87d992b520e4006016d1");</script>
+	</main>
+</div>
+{% include "components/footer.html" %}
+<script src="http://www.atmrum.net/rum.js"></script>
+<script>rum.start("129b370ce22e87d992b520e4006016d1");</script>
 </body>
 </html>

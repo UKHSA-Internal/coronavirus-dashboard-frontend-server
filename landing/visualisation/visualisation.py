@@ -5,6 +5,7 @@
 # Python:
 from operator import itemgetter
 from urllib.parse import quote
+from datetime import timedelta
 
 # 3rd party:
 from plotly import graph_objects as go
@@ -39,6 +40,8 @@ TIMESERIES_LAYOUT = go.Layout(
         "tickson": "boundaries",
         "type": "date",
         "tickformat": '%b',
+        # "tickvals": x[::30],
+        # "tickmode": 'array',
         "tickfont": {
             "family": '"GDS Transport", Arial, sans-serif',
             "size": 20,
