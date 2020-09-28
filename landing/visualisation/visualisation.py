@@ -5,13 +5,14 @@
 # Python:
 from operator import itemgetter
 from urllib.parse import quote
-from datetime import timedelta
+from typing import Dict, Union, Callable
 
 # 3rd party:
 from plotly import graph_objects as go
 from pandas import Series
 
-# Internal: 
+# Internal:
+from ..caching import cache_client
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -32,6 +33,8 @@ TIMESERIES_LAYOUT = go.Layout(
         't': 0,
     },
     showlegend=False,
+    height=350,
+    autosize=False,
     xaxis={
         "showgrid": False,
         "zeroline": False,
@@ -66,32 +69,39 @@ COLOURS = {
 }
 
 
-# @lru_cache()
-def get_colour(change, is_improving):
+IsImproving: Dict[str, Callable[[Union[int, float]], bool]] = {
+    "newCasesByPublishDate": lambda x: x < 0,
+    "newDeaths28DaysByPublishDate": lambda x: x < 0,
+    "newPillarOneTwoTestsByPublishDate": lambda x: x > 0,
+    "hospitalCases": lambda x: x < 0,
+}
+
+
+def get_colour(change, metric_name):
     change_value = float(change["value"])
 
     trend_colour = str()
 
     if change_value == 0:
         trend_colour = COLOURS["neutral"]
-    elif is_improving(change_value):
+    elif IsImproving[metric_name](change_value):
         trend_colour = COLOURS["good"]
-    elif not is_improving(change_value):
+    elif not IsImproving[metric_name](change_value):
         trend_colour = COLOURS["bad"]
 
     return trend_colour
 
 
-# @lru_cache()
 def svg_to_url(svg):
     return "data:image/svg+xml;utf8," + quote(svg)
 
 
-def plot_thumbnail(timeseries, change, is_improving):
+@cache_client.memoize(60 * 10)
+def plot_thumbnail(timeseries, change, metric_name):
     get_date = itemgetter("date")
     get_value = itemgetter("value")
 
-    trend_colour = get_colour(change, is_improving)
+    trend_colour = get_colour(change, metric_name)
 
     x = list(map(get_date, timeseries))
     y = Series(list(map(get_value, timeseries))).rolling(7, center=True).mean()
@@ -120,12 +130,9 @@ def plot_thumbnail(timeseries, change, is_improving):
             opacity=.5,
             line_color=trend_colour['line'],
             fillcolor=trend_colour['fill'],
-            text="Points only",
-            hoverinfo='text+x+y'
         )
     )
 
-    # fig.update_xaxes(showticklabels=False)
     fig.update_yaxes(showticklabels=False)
     fig.update_xaxes(showgrid=False)
     fig.update_yaxes(showgrid=False)

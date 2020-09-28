@@ -22,21 +22,24 @@
 							<a class="govuk-link " href="/">UK summary</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/details/testing">Tests</a>
+							<a class="govuk-link " href="/testing">Tests</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/details/cases">Cases</a>
+							<a class="govuk-link " href="/cases">Cases</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/details/healthcare">Healthcare</a>
+							<a class="govuk-link " href="/healthcare">Healthcare</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/details/deaths">Deaths</a>
+							<a class="govuk-link " href="/deaths">Deaths</a>
 						</li>
 						<hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-section-break--visible">
 
 						<li>
-							<a class="govuk-link" href="/details/about-data">About the data</a>
+							<a class="govuk-link" href="/about-data">About the data</a>
+						</li>
+						<li>
+							<a class="govuk-link" href="/developers-guide">Developer's guide</a>
 						</li>
 					</ul>
 				</div>
@@ -88,7 +91,7 @@
 		</div>
 
 		{% if postcode_data is defined %}
-			<div class="govuk-grid-row local-data">
+			<div class="govuk-grid-row local-data" id="local">
 				<div class="local-intro">
 					<span class="govuk-caption-m">Local summary</span>
 					<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
@@ -101,7 +104,6 @@
 					</h2>
 				</div>
 				<div class="card-local-container">
-
 					{% for category, card in postcode_data.items() %}
 						{{ create_card(card, True) }}
 					{% endfor %}
@@ -118,46 +120,19 @@
 					</h3>
 				</div>
 			</div>
-
-
-			<div class="govuk-grid-row ">
-				<div class="govuk-grid-column-full cases">
-
-
-					<div class="govuk-grid-row govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-						<div class="govuk-grid-column-one-half">
-
-
-							<p>View data for a specific area within the UK.</p>
-							<p>Not all data is available for every area &ndash; we will show the most
-								local information in each category for your selected area.</p>
-
-							<div class="govuk-grid-row">
-								<div class="govuk-grid-column-full">
-									{#									<div class="float govuk-!-margin-left-8">#}
-									{#										<div class="govuk-form-group">#}
-									{#											<label class="govuk-label govuk-!-font-weight-bold" for="sort">#}
-									{#												or select an area#}
-									{#											</label>#}
-									{#											<div class="govuk-hint">#}
-									{#												Nation, region, county or local authority.#}
-									{#											</div>#}
-									{#											<select form="regionform" class="govuk-select" id="sort" name="dropdown">#}
-									{#												<option value="E07000032">Amber Valley</option>#}
-									{#												<option value="E08000025">Birmingham</option>#}
-									{#												<option value="E12000004">East Midlands</option>#}
-									{#												<option value="E92000001">England</option>#}
-									{#											</select>#}
-									{#										</div>#}
-									{#									</div>#}
-								</div>
+				<div class="govuk-grid-row ">
+					<div class="govuk-grid-column-full cases">
+						<div class="govuk-grid-row govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+							<div class="govuk-grid-column-one-half">
+								<p>View data for a specific area within the UK.</p>
+								<p>Not all data is available for every area &ndash; we will show the most
+									local information in each category for your selected area.</p>
+								{% include "components/postcode_search.html" %}
 							</div>
-							{% include "components/postcode_search.html" %}
+							{% include "components/msoa_slide.html" %}
 						</div>
-						{% include "components/msoa_slide.html" %}
 					</div>
 				</div>
-			</div>
 		</div>
 
 

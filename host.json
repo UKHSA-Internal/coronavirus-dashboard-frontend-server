@@ -16,7 +16,6 @@
     "counterThreshold": 0.70
   },
   "extensions": {
-    "cosmosDB": {},
     "http": {
       "routePrefix": "",
       "dynamicThrottlesEnabled": true,

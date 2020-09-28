@@ -11,6 +11,7 @@ from typing import Dict, Union, List
 
 # Internal:
 from . import query_templates as queries
+from ..caching import cache_client
 
 try:
     from __app__.database import CosmosDB, Collection
@@ -78,12 +79,13 @@ def process_dates(date: str) -> ProcessedDateType:
     return result
 
 
+@cache_client.memoize(60 * 5)
 def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> DatabaseOutputType:
     """
     Retrieves the last fortnight worth of ``metric`` values
     for ``areaName`` as released on ``timestamp``.
     """
-    query = queries.LastFortnight.substitute({
+    query = queries.DataSinceApril.substitute({
         "metric": metric,
         "areaName": area_name
     })
@@ -101,6 +103,7 @@ def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> DatabaseO
     return result
 
 
+@cache_client.memoize(60 * 60 * 12)
 def get_postcode_areas(postcode):
     query = queries.PostcodeLookup
 
@@ -111,6 +114,7 @@ def get_postcode_areas(postcode):
     return lookup_db.query(query, params=params)
 
 
+@cache_client.memoize(60 * 60 * 12)
 def get_data_by_code(area_code, timestamp):
     query = queries.LookupByAreaCode
 

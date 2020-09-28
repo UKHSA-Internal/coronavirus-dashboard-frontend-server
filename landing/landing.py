@@ -9,16 +9,22 @@ from operator import itemgetter
 from datetime import datetime
 from gzip import compress
 from os.path import abspath, join as join_path, pardir
+from os import getenv
+from typing import List, Dict, Union
 
 # 3rd party:
 from flask import Flask, render_template, request, Response
-from azure.functions import HttpRequest, HttpResponse, WsgiMiddleware, Context
-from typing import Any
+from azure.functions import (
+    HttpRequest, HttpResponse, WsgiMiddleware,
+    Context
+)
 from flask_minify import minify
+from pytz import timezone
 
 # Internal:
 from .visualisation import plot_thumbnail, get_colour
 from .data.queries import get_last_fortnight, get_data_by_postcode
+from .caching import cache_client
 
 try:
     from __app__.database import CosmosDB
@@ -33,13 +39,26 @@ __all__ = [
     'main'
 ]
 
-timestamp = str()
+
+STORAGE_CONN_STR = getenv("StaticFrontendStorage")
+
+with StorageClient("$web", f"static/css/", connection_string=STORAGE_CONN_STR) as client:
+    css_names = [item["name"] for item in client if item["name"].endswith(".css")]
+
+
+timestamp: str = str()
+website_timestamp: str = str()
+timestamp_pattern = "%A %d %B %Y at %I:%M %p"
+timezone_LN = timezone("Europe/London")
+
 
 instance_path = abspath(join_path(abspath(__file__), pardir))
 
 app = Flask(__name__, instance_path=instance_path)
 
 app.config.from_object('__app__.landing.config.Config')
+
+cache_client.init_app(app)
 
 minifier = minify(
     html=True,
@@ -49,30 +68,55 @@ minifier = minify(
     fail_safe=True
 )
 
-postcode_pattern = re.compile(r'^[a-z]{1,2}\d{1,2}[a-z]?\s?\d{1,2}[a-z]{1,2}$', re.I)
+postcode_pattern = re.compile(r'(^[a-z]{1,2}\d{1,2}[a-z]?\s?\d{1,2}[a-z]{1,2}$)', re.I)
 
 get_value = itemgetter("value")
 get_area_type = itemgetter("areaType")
 
-IsImproving = {
-    "newCasesByPublishDate": lambda x: x < 0,
-    "newDeaths28DaysByPublishDate": lambda x: x < 0,
-    "newPillarOneTwoTestsByPublishDate": lambda x: x > 0,
-    "hospitalCases": lambda x: x < 0,
-}
+main_metric_names: List[str] = [
+    "newCasesByPublishDate",
+    "newDeaths28DaysByPublishDate",
+    "newPillarOneTwoTestsByPublishDate",
+    "hospitalCases",
+]
 
 
 @app.template_filter()
-def format_number(value: Any) -> Any:
+def format_timestamp(latest_timestamp: str) -> str:
+    ts_python_iso = latest_timestamp[:-1] + "+00:00"
+    ts = datetime.fromisoformat(ts_python_iso)
+    ts_london = ts.astimezone(timezone_LN)
+    formatted = ts_london.strftime(timestamp_pattern)
+    result = re.sub(r'\s([AP]M)', lambda found: found.group(1).lower(), formatted)
+    return result
+
+
+@cache_client.memoize(60 * 60 * 6)
+def get_og_image_names(latest_timestamp: str) -> list:
+    ts_python_iso = latest_timestamp[:-2]
+    ts = datetime.fromisoformat(ts_python_iso)
+    date = ts.strftime("%Y%m%d")
+    og_names = [
+        f"/downloads/og-images/og-{metric}_{date}.png"
+        for metric in main_metric_names
+    ]
+
+    og_names.insert(0, f"/downloads/og-images/og-summary_{date}.png")
+
+    return og_names
+
+
+@app.template_filter()
+def format_number(value: Union[int, float]) -> str:
     try:
         value_int = int(value)
     except TypeError:
-        return value
+        return str(value)
 
     if value == value_int:
         return format(value_int, ',d')
 
-    return value
+    return str(value)
 
 
 def get_change(metric_data):
@@ -81,8 +125,6 @@ def get_change(metric_data):
     delta = sigma_this_week - sigma_last_week
 
     delta_percentage = (sigma_this_week / max(sigma_last_week, 0.5) - 1) * 100
-
-    logging.info(delta_percentage)
 
     if delta_percentage > 0:
         trend = 0
@@ -101,44 +143,36 @@ def get_change(metric_data):
 
 def get_card_data(metric_name: str, metric_data, graph=True):
     change = get_change(metric_data)
-    colour = get_colour(change, IsImproving[metric_name])
+    colour = get_colour(change, metric_name)
 
     response = {
         "data": metric_data,
         "change": change,
-        "is_improving": IsImproving[metric_name],
         "colour": colour,
         "latest_date": metric_data[0]["date"].strftime('%-d %B')
     }
 
     if graph:
-        response["graph"] = plot_thumbnail(metric_data, change, IsImproving[metric_name])
+        response["graph"] = plot_thumbnail(metric_data, change, metric_name)
 
     return response
 
 
-def get_fortnight_data(area_name: str = "United Kingdom"):
-    metric_names = [
-        "newCasesByPublishDate",
-        "newDeaths28DaysByPublishDate",
-        "newPillarOneTwoTestsByPublishDate",
-        "hospitalCases",
-    ]
-
-    global timestamp
-
+@cache_client.memoize(60 * 60 * 6)
+def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
     result = dict()
 
-    for name in metric_names:
-        metric_data = get_last_fortnight(timestamp, area_name, name)
+    for name in main_metric_names:
+        metric_data = get_last_fortnight(latest_timestamp, area_name, name)
         result[name] = get_card_data(name, metric_data)
 
     return result
 
 
-def get_main_data():
+@cache_client.memoize(60 * 60 * 6)
+def get_main_data(latest_timestamp: str):
     # ToDo: Integrate this with postcode data.
-    data = get_fortnight_data()
+    data = get_fortnight_data(latest_timestamp)
 
     result = dict(
         cards=[
@@ -222,6 +256,7 @@ def prepare_response(resp: Response):
     return resp
 
 
+@cache_client.memoize(60 * 60 * 6)
 def get_validated_postcode(params):
     found = postcode_pattern.search(params.get("postcode", "").strip())
 
@@ -234,18 +269,21 @@ def get_validated_postcode(params):
 
 @app.route('/search', methods=['GET'])
 def postcode_search() -> render_template:
+    global timestamp, website_timestamp
+
     postcode = get_validated_postcode(request.args)
 
-    data = get_main_data()
+    data = get_main_data(timestamp)
 
     if postcode is None:
         return render_template(
             "main.html",
+            og_images=get_og_image_names(timestamp),
             invalid_postcode=True,
+            styles=css_names,
+            timestamp=website_timestamp,
             **data
         )
-
-    global timestamp
 
     try:
         response = {
@@ -258,30 +296,45 @@ def postcode_search() -> render_template:
     except IndexError:
         return render_template(
             "main.html",
+            og_images=get_og_image_names(timestamp),
+            styles=css_names,
             invalid_postcode=True,
+            timestamp=website_timestamp,
             **data
         )
 
     return render_template(
         "main.html",
+        og_images=get_og_image_names(timestamp),
+        styles=css_names,
         postcode_data=response,
         postcode=postcode.upper(),
+        timestamp=website_timestamp,
         smallest_area=get_by_smallest_areatype(list(response.values()), get_area_type),
         **data
     )
 
 
 @app.route('/', methods=['GET'])
+@cache_client.cached(timeout=120)
 def index() -> render_template:
-    data = get_main_data()
-    return render_template("main.html", **data)
+    global timestamp, website_timestamp
+
+    data = get_main_data(timestamp)
+    return render_template(
+        "main.html",
+        og_images=get_og_image_names(timestamp),
+        styles=css_names,
+        timestamp=website_timestamp,
+        **data
+    )
 
 
-def main(req: HttpRequest, context: Context, latestPublished: str) -> HttpResponse:
-    logging.info(req.url)
-
-    global timestamp
+def main(req: HttpRequest, context: Context, latestPublished: str,
+         websiteTimestamp: str) -> HttpResponse:
+    global timestamp, website_timestamp
     timestamp = latestPublished
-
-    application = WsgiMiddleware(app)
+    website_timestamp = websiteTimestamp
+    # cache_client.clear()
+    application = WsgiMiddleware(app.wsgi_app)
     return application.main(req, context)

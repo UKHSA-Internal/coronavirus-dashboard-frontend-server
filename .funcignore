@@ -1,5 +1,10 @@
 .git*
 .vscode
 local.settings.json
-test
-.venv
+/test
+/.venv
+
+
+/landing/__pycache__
+/.idea
+/.github

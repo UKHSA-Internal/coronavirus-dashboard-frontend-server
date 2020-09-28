@@ -21,6 +21,13 @@
       "connection": "DeploymentBlobStorage"
     },
     {
+      "type": "blob",
+      "direction": "in",
+      "name": "websiteTimestamp",
+      "path": "publicdata/assets/dispatch/website_timestamp",
+      "connection": "DeploymentBlobStorage"
+    },
+    {
       "type": "http",
       "direction": "out",
       "name": "$return"

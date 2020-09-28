@@ -128,3 +128,5 @@ obj
 appsettings.json
 local.settings.json
 .python_packages
+
+proxies.json

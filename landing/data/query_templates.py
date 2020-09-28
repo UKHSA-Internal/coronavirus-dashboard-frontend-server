@@ -12,14 +12,14 @@ from string import Template
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'LastFortnight',
+    'DataSinceApril',
     'PostcodeLookup',
     'LookupByAreaCode',
     'DataByAreaCode'
 ]
 
 
-LastFortnight = Template("""\
+DataSinceApril = Template("""\
 SELECT
     VALUE {
         'date':  c.date, 
@@ -29,7 +29,7 @@ FROM     c
 WHERE    c.releaseTimestamp = @releaseTimestamp
      AND c.areaNameLower    = @areaName
      AND IS_DEFINED(c.$metric)
-     AND c.date > '2020-04-01'
+     AND c.date >= '2020-04-01'
 ORDER BY c.releaseTimestamp DESC,
          c.date             DESC,
          c.areaType         ASC,
@@ -38,9 +38,11 @@ ORDER BY c.releaseTimestamp DESC,
 
 
 PostcodeLookup = """\
-SELECT
-    c.msoa,
-    c.ltla
+SELECT TOP 1 
+    VALUE {
+        'msoa': c.msoa,
+        'ltla': c.ltla
+    }
 FROM     c
 WHERE    c.type            = 'postcode'
      AND c.trimmedPostcode = @postcode\
@@ -48,7 +50,7 @@ WHERE    c.type            = 'postcode'
 
 
 LookupByAreaCode = """\
-SELECT 
+SELECT TOP 1
     c.areaName,
     c.destinations
 FROM c
@@ -66,8 +68,8 @@ SELECT
     TOP 14 VALUE {
         'areaName': c.areaName,
         'areaType': c.areaType,
-        'date': c.date,
-        'value': c.$metric
+        'date':     c.date,
+        'value':    c.$metric
     }
 FROM    c 
 WHERE   
