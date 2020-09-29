@@ -1223,6 +1223,10 @@ margin-top:0px;
   border-bottom: 1px dashed #000000;
 }
 
+.no-underline {
+  text-decoration: none;
+}
+
 .hcia-location {
   display: inline-block;
   float: left;
@@ -1301,4 +1305,9 @@ margin-top:0px;
 
 .white {
   color:#ffffff !important;
+}
+
+.govuk-tag--yellow {
+  color: #206BC9;
+  background: #D7E9FF;
 }
