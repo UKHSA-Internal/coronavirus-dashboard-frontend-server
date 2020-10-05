@@ -69,14 +69,15 @@
 			<div class="govuk-grid-column-full">
 
 				<p class="govuk-!-margin-bottom-2">
-					The official UK Government website for data and insights on Coronavirus
-					(COVID-19). Data is collected and published daily at around 4pm.
+					The official UK Government website for data and insights on Coronavirus (COVID-19). Data is also available to download in an easy to read document <a href="/downloads/easy_read/overview/United Kingdom.docx">here</a>.
 				</p>
-				{#				<p>#}
-				{#					The latest R number is estimated at <span class="green"><b>0.7 to 0.9</b></span> with a daily growth rate#}
-				{#					range of <span class="green"><b>–5% to –1%</b></span>#}
-				{#					<a href="https://www.gov.uk/guidance/the-r-number-in-the-uk">More info</a>#}
-				{#				</p>#}
+				<p>
+					The latest R number is estimated at <span class="green"><b> {{r_values.transmissionRateMin}} to {{r_values.transmissionRateMax}}</b></span> with a daily growth rate
+					range of <span class="green"><b>{{r_values.transmissionRateGrowthRateMin}}% to {{r_values.transmissionRateGrowthRateMax}}%</b></span>
+					<a href="https://www.gov.uk/guidance/the-r-number-in-the-uk">More info</a>
+				</p>
+
+
 
 			</div>
 		</div>

@@ -167,6 +167,21 @@ def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom")
         result[name] = get_card_data(name, metric_data)
 
     return result
+@cache_client.memoize(60 * 60 * 6)
+def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
+    result = dict()
+
+    min_rate = get_last_fortnight(latest_timestamp, area_name, "transmissionRateMin")
+    result["transmissionRateMin"] = min_rate[0]["value"]
+    max_rate = get_last_fortnight(latest_timestamp, area_name, "transmissionRateMax")
+    result["transmissionRateMax"] = max_rate[0]["value"]
+
+    min_growth_rate = get_last_fortnight(latest_timestamp, area_name, "transmissionRateGrowthRateMin")
+    result["transmissionRateGrowthRateMin"] = min_growth_rate[0]["value"]
+    max_growth_rate = get_last_fortnight(latest_timestamp, area_name, "transmissionRateGrowthRateMax")
+    result["transmissionRateGrowthRateMax"] = max_growth_rate[0]["value"]
+
+    return result
 
 
 @cache_client.memoize(60 * 60 * 6)
@@ -200,8 +215,8 @@ def get_main_data(latest_timestamp: str):
                 **data['newDeaths28DaysByPublishDate'],
                 "data": data['newDeaths28DaysByPublishDate']['data'],
 
-            }
-        ]
+            }  
+        ] 
     )
 
     return result
@@ -281,6 +296,7 @@ def postcode_search() -> render_template:
             og_images=get_og_image_names(timestamp),
             invalid_postcode=True,
             styles=css_names,
+            r_values=get_r_values(timestamp),
             timestamp=website_timestamp,
             **data
         )
@@ -299,6 +315,7 @@ def postcode_search() -> render_template:
             og_images=get_og_image_names(timestamp),
             styles=css_names,
             invalid_postcode=True,
+            r_values=get_r_values(timestamp),
             timestamp=website_timestamp,
             **data
         )
@@ -310,6 +327,7 @@ def postcode_search() -> render_template:
         postcode_data=response,
         postcode=postcode.upper(),
         timestamp=website_timestamp,
+        r_values=get_r_values(timestamp),
         smallest_area=get_by_smallest_areatype(list(response.values()), get_area_type),
         **data
     )
@@ -325,6 +343,7 @@ def index() -> render_template:
         "main.html",
         og_images=get_og_image_names(timestamp),
         styles=css_names,
+        r_values=get_r_values(timestamp),
         timestamp=website_timestamp,
         **data
     )
@@ -335,6 +354,6 @@ def main(req: HttpRequest, context: Context, latestPublished: str,
     global timestamp, website_timestamp
     timestamp = latestPublished
     website_timestamp = websiteTimestamp
-    # cache_client.clear()
+    #cache_client.clear()
     application = WsgiMiddleware(app.wsgi_app)
     return application.main(req, context)
