@@ -45,7 +45,11 @@ SELECT TOP 1
 FROM     c
 WHERE    c.releaseTimestamp = @releaseTimestamp
      AND c.areaNameLower    = @areaName
-     AND IS_DEFINED(c.$metric)\
+     AND IS_DEFINED(c.$metric)
+ORDER BY c.releaseTimestamp DESC,
+    c.date             DESC,
+    c.areaType         ASC,
+    c.areaNameLower    ASC\
 """)
 
 

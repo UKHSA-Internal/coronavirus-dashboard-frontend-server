@@ -103,7 +103,7 @@ def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> DatabaseO
     return result
 
 
-@cache_client.memoize(60 * 5)
+@cache_client.memoize(60 * 60 * 12)
 def get_latest_value(timestamp: str, area_name: str, metric: str):
     """
     Retrieves the latest ``metric`` value
