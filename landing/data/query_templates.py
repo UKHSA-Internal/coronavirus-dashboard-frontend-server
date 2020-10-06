@@ -36,6 +36,18 @@ ORDER BY c.releaseTimestamp DESC,
          c.areaNameLower    ASC\
 """)
 
+LatestData = Template("""\
+SELECT TOP 1
+    VALUE {
+        'date':  c.date, 
+        'value': c.$metric
+    }
+FROM     c
+WHERE    c.releaseTimestamp = @releaseTimestamp
+     AND c.areaNameLower    = @areaName
+     AND IS_DEFINED(c.$metric)\
+""")
+
 
 PostcodeLookup = """\
 SELECT TOP 1 

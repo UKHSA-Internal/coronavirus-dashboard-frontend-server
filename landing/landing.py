@@ -23,7 +23,7 @@ from pytz import timezone
 
 # Internal:
 from .visualisation import plot_thumbnail, get_colour
-from .data.queries import get_last_fortnight, get_data_by_postcode
+from .data.queries import get_last_fortnight, get_data_by_postcode, get_latest_value
 from .caching import cache_client
 
 try:
@@ -167,19 +167,18 @@ def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom")
         result[name] = get_card_data(name, metric_data)
 
     return result
+
 @cache_client.memoize(60 * 60 * 6)
 def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
     result = dict()
 
-    min_rate = get_last_fortnight(latest_timestamp, area_name, "transmissionRateMin")
-    result["transmissionRateMin"] = min_rate[0]["value"]
-    max_rate = get_last_fortnight(latest_timestamp, area_name, "transmissionRateMax")
-    result["transmissionRateMax"] = max_rate[0]["value"]
+    result["transmissionRateMin"] = get_latest_value(latest_timestamp, area_name, "transmissionRateMin")
 
-    min_growth_rate = get_last_fortnight(latest_timestamp, area_name, "transmissionRateGrowthRateMin")
-    result["transmissionRateGrowthRateMin"] = min_growth_rate[0]["value"]
-    max_growth_rate = get_last_fortnight(latest_timestamp, area_name, "transmissionRateGrowthRateMax")
-    result["transmissionRateGrowthRateMax"] = max_growth_rate[0]["value"]
+    result["transmissionRateMax"] = get_latest_value(latest_timestamp, area_name, "transmissionRateMax")
+
+    result["transmissionRateGrowthRateMin"] = get_latest_value(latest_timestamp, area_name, "transmissionRateGrowthRateMin")
+
+    result["transmissionRateGrowthRateMax"] = get_latest_value(latest_timestamp, area_name, "transmissionRateGrowthRateMax")
 
     return result
 
@@ -354,6 +353,6 @@ def main(req: HttpRequest, context: Context, latestPublished: str,
     global timestamp, website_timestamp
     timestamp = latestPublished
     website_timestamp = websiteTimestamp
-    #cache_client.clear()
+    # cache_client.clear()
     application = WsgiMiddleware(app.wsgi_app)
     return application.main(req, context)

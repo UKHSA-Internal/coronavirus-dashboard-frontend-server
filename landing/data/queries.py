@@ -103,6 +103,26 @@ def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> DatabaseO
     return result
 
 
+@cache_client.memoize(60 * 5)
+def get_latest_value(timestamp: str, area_name: str, metric: str):
+    """
+    Retrieves the latest ``metric`` value
+    for ``areaName`` as released on ``timestamp``.
+    """
+    query = queries.LatestData.substitute({
+        "metric": metric,
+        "areaName": area_name
+    })
+
+    params = [
+        {"name": "@releaseTimestamp", "value": timestamp},
+        {"name": "@areaName", "value": area_name.lower()}
+    ]
+
+    result = data_db.query(query, params=params)
+    
+    return result[0]["value"]
+
 @cache_client.memoize(60 * 60 * 12)
 def get_postcode_areas(postcode):
     query = queries.PostcodeLookup
