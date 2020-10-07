@@ -1,0 +1,30 @@
+// Global settings
+$govuk-assets-path: "~govuk-frontend/govuk/assets/";
+$govuk-page-width: 1920px;
+$govuk-font-family: "GDS Transport", Arial, sans-serif;
+$govuk-breakpoints: (
+  mobile:  768px,
+  tablet:  768px,
+  desktop: 769px
+) !default;
+
+$primary-colour: #1d70b8;
+$govuk-secondary-text-colour: #6B7276;
+
+// GOVUK Frontend
+@import '../node_modules/govuk-frontend/govuk/all';
+
+@import 'sass/base-elements';
+@import 'sass/cookie-banner';
+@import 'sass/govuk-extensions';
+@import 'sass/markdown';
+@import 'sass/accessibility';
+@import 'sass/dashboard';
+@import 'sass/side-navigation';
+@import 'sass/sticky-header';
+@import 'sass/day-picker';
+@import 'sass/tooltip';
+@import 'sass/utility';
+@import 'sass/select';
+@import 'sass/header';
+@import 'sass/covid19-custom';

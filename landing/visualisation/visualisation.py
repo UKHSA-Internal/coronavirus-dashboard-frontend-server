@@ -55,16 +55,16 @@ TIMESERIES_LAYOUT = go.Layout(
 
 COLOURS = {
     "good": {
-        "line": "rgba(30,150,0,1)",
-        "fill": "rgba(100,200,0,0.1)"
+        "line": "rgba(0,90,48,1)",
+        "fill": "rgba(204,226,216,1)"
     },
     "bad": {
-        "line": "rgba(255,0,0,1)",
-        "fill": "rgba(255,0,0,0.1)"
+        "line": "rgba(148,37,20,1)",
+        "fill": "rgba(246,215,210,1)"
     },
     "neutral": {
-        "line": "rgba(107,114,118,1)",
-        "fill": "rgba(107,114,118,0.1)"
+        "line": "rgba(56,63,67,1)",
+        "fill": "rgba(235,233,231,0.1)"
     }
 }
 
