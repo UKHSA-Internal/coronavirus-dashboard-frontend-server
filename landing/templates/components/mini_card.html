@@ -1,6 +1,6 @@
 {% macro create_card(card, is_postcode=False) %}
 
-	<div class="{% if not is_postcode %}dashboard-panel card{% else %}card-local{% endif %}">
+	<div class="{% if not is_postcode %}dashboard-panel card{% else %}card{% endif %} govuk-!-margin-left-0">
 
 		<div>
 			<span class="govuk-caption-m govuk-!-font-weight-regular">{{ card.caption }}</span>

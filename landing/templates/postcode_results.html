@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% from "components/mini_card.html" import create_card %}
+
+{% block main %}
+
+<div id="top">
+    <div class="sticky-header govuk-!-padding-top-3">
+
+        <!-- The overlay -->
+        <div id="mobile-nav" class="overlay">
+
+            <!-- Button to close the overlay navigation -->
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+
+            <!-- Overlay content -->
+            <div class="overlay-content">
+
+
+                <ul class="govuk-list">
+                    <li>
+                        <a class="govuk-link " href="/">Daily update</a>
+                    </li>
+                    <li>
+                        <a class="govuk-link " href="/testing">Tests</a>
+                    </li>
+                    <li>
+                        <a class="govuk-link " href="/cases">Cases</a>
+                    </li>
+                    <li>
+                        <a class="govuk-link " href="/healthcare">Healthcare</a>
+                    </li>
+                    <li>
+                        <a class="govuk-link " href="/deaths">Deaths</a>
+                    </li>
+                    <hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-section-break--visible">
+
+                    <li>
+                        <a class="govuk-link" href="/about-data">About the data</a>
+                    </li>
+                    <li>
+                        <a class="govuk-link" href="/developers-guide">Developer's guide</a>
+                    </li>
+                </ul>
+            </div>
+
+
+        </div>
+
+
+        <div class="govuk-grid-row govuk-!-margin-top-0">
+            <div class="govuk-grid-column-one-half">
+                <span class="govuk-caption-l govuk-!-margin-bottom-0 panel-title-new">Daily update</span>
+            </div>
+            <div class="govuk-grid-column-one-half filters govuk-!-padding-top-1">
+            </div>
+        </div>
+
+        <div class="govuk-grid-row govuk-!-margin-top-0">
+            <div class="govuk-grid-column-full">
+                <hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-2 govuk-!-margin-bottom-2 govuk-section-break--visible">
+            </div>
+        </div>
+
+
+    </div>
+
+</div>
+
+<a href="/"> &lt; Back</a>
+
+<div class="local-intro govuk-!-margin-left-0">
+    <h2 class="govuk-heading-l govuk-!-margin-bottom-2 govuk-!-margin-top-0 govuk-!-margin-left-0 govuk-!-padding-top-0 govuk-!-padding-left-0">
+        {{ postcode }} &mdash; {{ smallest_area.areaName }}
+    </h2>
+</div>
+
+<span class="govuk-caption-m govuk-!-font-weight-regular"> Current risk level </span>
+<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0"> MEDIUM </h3> 
+<br>
+
+<span class="govuk-caption-m govuk-!-font-weight-regular"> Area subject to local restrictions?</span>
+<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0"> Yes </h3>
+<a href="#">View Details</a>
+<br>
+
+<span class="govuk-caption-m govuk-!-font-weight-regular"> Rate of cases compared to national average</span>
+
+
+
+<h3 class="govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-heading-m">Most relevant data available for {{ postcode }}: </h3>
+<p>Some data is available at a more local level than other. For example; healthcare data is only available by NHS region </p>
+
+<div class="govuk-grid-row  govuk-!-margin-left-0 govuk-!-margin-top-0" id="local">
+    
+    <div class="card-container">
+        {% for category, card in postcode_data.items() %}
+            {{ create_card(card, True) }}
+        {% endfor %}
+    </div>
+</div>
+
+
+<h2 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-!-padding-top-0 govuk-!-padding-left-0">Search another location</h2>
+
+		<div class="dashboard-panel govuk-!-margin-top-5 govuk-!-margin-left-0 govuk-!-padding-5">
+			<div class="govuk-grid-row ">
+				<div class="govuk-grid-column-full">
+					<span class="govuk-caption-m">Local data</span>
+					<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
+						Regional breakdown
+					</h3>
+				</div>
+			</div>
+				<div class="govuk-grid-row ">
+					<div class="govuk-grid-column-full cases">
+						<div class="govuk-grid-row govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+							<div class="govuk-grid-column-one-half">
+								<p>View data for a specific area within the UK.</p>
+								<p>Not all data is available for every area &ndash; we will show the most
+									local information in each category for your selected area.</p>
+								{% include "components/postcode_search.html" %}
+							</div>
+							{% include "components/msoa_slide.html" %}
+						</div>
+					</div>
+				</div>
+		</div>
+
+{% endblock %}

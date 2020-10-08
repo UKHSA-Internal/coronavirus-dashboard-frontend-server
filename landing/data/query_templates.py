@@ -89,8 +89,7 @@ SELECT
     }
 FROM    c 
 WHERE   
-        c.seriesDate       = @seriesDate
-    AND c.releaseTimestamp = @releaseTimestamp
+        c.releaseTimestamp = @releaseTimestamp
     AND c.areaType         = @areaType
     AND c.areaNameLower    = @areaName
     AND IS_DEFINED(c.$metric)

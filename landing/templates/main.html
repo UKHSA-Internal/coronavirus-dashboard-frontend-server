@@ -19,7 +19,7 @@
 
 					<ul class="govuk-list">
 						<li>
-							<a class="govuk-link " href="/">UK summary</a>
+							<a class="govuk-link " href="/">Daily update</a>
 						</li>
 						<li>
 							<a class="govuk-link " href="/testing">Tests</a>
@@ -50,7 +50,7 @@
 
 			<div class="govuk-grid-row govuk-!-margin-top-0">
 				<div class="govuk-grid-column-one-half">
-					<span class="govuk-caption-l govuk-!-margin-bottom-0 panel-title-new">UK summary</span>
+					<span class="govuk-caption-l govuk-!-margin-bottom-0 panel-title-new">Daily update</span>
 				</div>
 				<div class="govuk-grid-column-one-half filters govuk-!-padding-top-1">
 				</div>
@@ -65,9 +65,9 @@
 
 		</div>
 
-		<div class="govuk-grid-row govuk-!-margin-top-5">
-			<div class="govuk-grid-column-full">
-
+		<div class="govuk-grid-row govuk-!-margin-top-5 ">
+			<div class="govuk-grid-column-full ">
+				<h2 class="govuk-heading-l govuk-!-margin-bottom-4 govuk-!-margin-top-0  govuk-!-padding-top-0">UK Summary</h2>
 				<p class="govuk-!-margin-bottom-2">
 					The official UK Government website for data and insights on Coronavirus (COVID-19). Data is also available to download in an easy to read document <a href="/downloads/easy_read/overview/United Kingdom.docx">here</a>.
 				</p>
@@ -83,36 +83,19 @@
 		</div>
 	</div>
 
+	
+
 	<div>
 
-		<div class="card-container">
+		<div class="card-container govuk-!-margin-left-0">
 			{% for card in cards %}
 				{{ create_card(card, False) }}
 			{% endfor %}
 		</div>
+		
+		<h2 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-!-padding-top-0 govuk-!-padding-left-0">What's the situation in your local area?</h2>
 
-		{% if postcode_data is defined %}
-			<div class="govuk-grid-row local-data" id="local">
-				<div class="local-intro">
-					<span class="govuk-caption-m">Local summary</span>
-					<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
-						Coronavirus (COVID-19) in my local area
-					</h3>
-
-					<p class="govuk-!-margin-bottom-0">Most relevant data available for:</p>
-					<h2 class="govuk-heading-l govuk-!-margin-bottom-4 govuk-!-margin-top-0 govuk-!-padding-top-0">
-						{{ postcode }} &mdash; {{ smallest_area.areaName }}
-					</h2>
-				</div>
-				<div class="card-local-container">
-					{% for category, card in postcode_data.items() %}
-						{{ create_card(card, True) }}
-					{% endfor %}
-				</div>
-			</div>
-		{% endif %}
-
-		<div class="dashboard-panel govuk-!-margin-top-5 govuk-!-padding-5">
+		<div class="dashboard-panel govuk-!-margin-top-5 govuk-!-margin-left-0 govuk-!-padding-5">
 			<div class="govuk-grid-row ">
 				<div class="govuk-grid-column-full">
 					<span class="govuk-caption-m">Local data</span>

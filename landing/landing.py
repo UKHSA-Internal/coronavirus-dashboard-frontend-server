@@ -320,7 +320,7 @@ def postcode_search() -> render_template:
         )
 
     return render_template(
-        "main.html",
+        "postcode_results.html",
         og_images=get_og_image_names(timestamp),
         styles=css_names,
         postcode_data=response,
