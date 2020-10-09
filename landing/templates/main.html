@@ -65,17 +65,21 @@
 
 		</div>
 
-		<div class="govuk-grid-row govuk-!-margin-top-5 ">
+		<div class="govuk-grid-row govuk-!-margin-top-2 ">
 			<div class="govuk-grid-column-full ">
-				<h2 class="govuk-heading-l govuk-!-margin-bottom-4 govuk-!-margin-top-0  govuk-!-padding-top-0">UK Summary</h2>
-				<p class="govuk-!-margin-bottom-2">
-					The official UK Government website for data and insights on Coronavirus (COVID-19). Data is also available to download in an easy to read document <a href="/downloads/easy_read/overview/United Kingdom.docx">here</a>.
+				<p class="govuk-!-margin-bottom-1">
+					The official UK Government website for data and insights on Coronavirus (COVID-19).
 				</p>
-				<p>
-					The latest R number is estimated at <span class="green"><b> {{r_values.transmissionRateMin}} to {{r_values.transmissionRateMax}}</b></span> with a daily growth rate
+				<h2 class="govuk-heading-l govuk-!-margin-bottom-2 govuk-!-margin-top-0  govuk-!-padding-top-0">UK Summary</h2>
+				<p class="govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+					The latest <a href="https://www.gov.uk/guidance/the-r-number-in-the-uk"> R number </a> is estimated at <span class="green"><b> {{r_values.transmissionRateMin}} to {{r_values.transmissionRateMax}}</b></span> with a daily growth rate
 					range of <span class="green"><b>{{r_values.transmissionRateGrowthRateMin}}% to {{r_values.transmissionRateGrowthRateMax}}%</b></span>
-					<a href="https://www.gov.uk/guidance/the-r-number-in-the-uk">More info</a>
+					
 				</p>
+				<p class="govuk-!-margin-bottom-2">
+					Data is also available to download in an easy to read document <a href="/downloads/easy_read/overview/United Kingdom.docx">here</a>.
+				</p>
+				
 
 
 
@@ -93,9 +97,9 @@
 			{% endfor %}
 		</div>
 		
-		<h2 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-!-padding-top-0 govuk-!-padding-left-0">What's the situation in your local area?</h2>
+		<h2 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-2 govuk-!-padding-top-0 govuk-!-padding-left-0">What's the situation in your local area?</h2>
 
-		<div class="dashboard-panel govuk-!-margin-top-5 govuk-!-margin-left-0 govuk-!-padding-5">
+		<div class="dashboard-panel govuk-!-margin-top-2 govuk-!-margin-left-0 govuk-!-padding-5">
 			<div class="govuk-grid-row ">
 				<div class="govuk-grid-column-full">
 					<span class="govuk-caption-m">Local data</span>
