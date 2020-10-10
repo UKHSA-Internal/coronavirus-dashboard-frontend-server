@@ -354,6 +354,8 @@ def main(req: HttpRequest, context: Context, latestPublished: str,
     global timestamp, website_timestamp
     timestamp = latestPublished
     website_timestamp = websiteTimestamp
-    # cache_client.clear()
+    cache_client.clear()
+
+
     application = WsgiMiddleware(app.wsgi_app)
     return application.main(req, context)
