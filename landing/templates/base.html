@@ -32,9 +32,9 @@
 	<link rel="apple-touch-icon" href="/favicon.png">
 	<link rel="icon" href="/favicon.ico">
 	<link rel="manifest" href="/manifest.json">
-	<link rel="stylesheet" type="text/css" href="/static/css/application.css">
+	<link rel="stylesheet" type="text/css" href="/assets/css/application.css">
 	{% for css_path in styles -%}
-			<link rel="stylesheet" type="text/css" href="/assets/{{ css_path }}">
+			<link rel="stylesheet" type="text/css" href="{{ css_path }}">
 	{%- endfor %}
 	<link rel="manifest" href="https://coronavirus.data.gov.uk/manifest.json">
 	{% if smallest_area is defined -%}
