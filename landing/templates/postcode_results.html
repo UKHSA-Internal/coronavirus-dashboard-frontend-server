@@ -66,7 +66,7 @@
 
 </div>
 
-<a href="/"> &lt; Back</a>
+{#<a href="/"> &lt; Back</a>#}
 
 <div class="local-intro govuk-!-margin-left-0">
     <h2 class="govuk-heading-l govuk-!-margin-bottom-2 govuk-!-margin-top-0 govuk-!-margin-left-0 govuk-!-padding-top-0 govuk-!-padding-left-0">
@@ -88,7 +88,7 @@
 
 
 <h3 class="govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-heading-m">Most relevant data available for {{ postcode }}: </h3>
-<p>Some data is available at a more local level than other. For example; healthcare data is only available by NHS region </p>
+<p>Some data is not available at local levels &mdash; for example, healthcare data is only available by NHS region.</p>
 
 <div class="govuk-grid-row  govuk-!-margin-left-0 govuk-!-margin-top-0" id="local">
     
@@ -105,36 +105,6 @@
     <summary class="govuk-details__summary">
       <span class="govuk-details__summary-text">
         Middle Layer Super Output Areas (MSOA) - areas with an average population of 7200
-      </span>
-    </summary>
-    <div class="govuk-details__text">
-        <h3 class="govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-heading-m"> People tested positive in {{ smallest_area.areaName }} </h3>
-        <p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-2">Latest data provided on  </p>
-        
-        <div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0" style="width:80%;">
-            Last 7 days
-        </div>
-
-        <div class="number-group">
-            <div class="number-container govuk-!-padding-right-4">
-                <div class="float tooltip">
-                    <h3 class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-                        <a href="#" class="govuk-link--no-visited-state number-link"
-                           onclick="showHelp()">3,292
-                            <span class="tooltiptext govuk-!-font-size-16">
-                            Total number of cases in the
-                            last 7 days</span></a>
-                    </h3>
-                </div>
-            </div>
-        </div>
-    </div>
-  </details>
-
-  <details class="govuk-details" data-module="govuk-details">
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        Lower Layer Super Output Areas (MSOA) - areas with an average population of 1500
       </span>
     </summary>
     <div class="govuk-details__text">
