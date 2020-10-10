@@ -72,9 +72,9 @@
 				</p>
 				<h2 class="govuk-heading-m">UK Summary</h2>
 				<p class="govuk-body-m govuk-!-margin-top-0 govuk-!-margin-bottom-1">
-					The latest R number is estimated at <span class="green"><b> {{r_values.transmissionRateMin}} to {{r_values.transmissionRateMax}}</b></span> with
+					The latest R number is estimated at <span><b> {{r_values.transmissionRateMin}} to {{r_values.transmissionRateMax}}</b></span> with
 					a daily growth rate range
-					of <span class="green"><b>{{r_values.transmissionRateGrowthRateMin}}% to {{r_values.transmissionRateGrowthRateMax}}%</b></span>.
+					of <span><b>{{r_values.transmissionRateGrowthRateMin}}% to {{r_values.transmissionRateGrowthRateMax}}%</b></span>.
 					
 				</p>
 				<p class="govuk-body-m govuk-!-margin-bottom-2">
@@ -90,7 +90,7 @@
 
 	
 
-	<div>
+	
 
 		<div class="card-container govuk-!-margin-left-0">
 			{% for card in cards %}
@@ -100,32 +100,27 @@
 		
 		<h2 class="govuk-heading-m govuk-!-margin-top-3 govuk-!-margin-bottom-0">What's the situation in your local area?</h2>
 
-		<div class="dashboard-panel govuk-!-margin-top-2 govuk-!-margin-left-0 govuk-!-padding-5">
-			<div class="govuk-grid-row ">
-				<div class="govuk-grid-column-full">
-					<span class="govuk-caption-m">Local data</span>
+		<div class="govuk-grid-row govuk-!-margin-top-2 govuk-!-margin-left-0 govuk-!-padding-left-0">	
+			<div class="govuk-grid-column-one-half govuk-!-margin-left-0 govuk-!-padding-left-0 ">
+	
+					<div class="dashboard-panel govuk-!-margin-left-0">
 					<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
-						Regional breakdown
+						Search by postcode
 					</h3>
-				</div>
+					<p>View data for a specific area within the UK.</p>
+					<p>Not all data is available for every area &ndash; we will show the most
+						local information in each category for your selected area.
+					</p>
+					{% include "components/postcode_search.html" %}
+				
+				</div>		
 			</div>
-				<div class="govuk-grid-row ">
-					<div class="govuk-grid-column-full cases">
-						<div class="govuk-grid-row govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-							<div class="govuk-grid-column-one-half">
-								<p>View data for a specific area within the UK.</p>
-								<p>Not all data is available for every area &ndash; we will show the most
-									local information in each category for your selected area.</p>
-								{% include "components/postcode_search.html" %}
-							</div>
-							{% include "components/msoa_slide.html" %}
-						</div>
-					</div>
-				</div>
-		</div>
+			
+			{% include "components/msoa_slide.html" %}
+			</div>		
 
 
-	</div>
+	
 
 
 	{#	</div>#}
