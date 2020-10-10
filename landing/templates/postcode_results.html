@@ -133,29 +133,23 @@
 
 <h2 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-!-padding-top-0 govuk-!-padding-left-0">Search another location</h2>
 
-		<div class="dashboard-panel govuk-!-margin-top-5 govuk-!-margin-left-0 govuk-!-padding-5">
-			<div class="govuk-grid-row ">
-				<div class="govuk-grid-column-full">
-					<span class="govuk-caption-m">Local data</span>
-					<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
-						Regional breakdown
-					</h3>
-				</div>
-			</div>
-				<div class="govuk-grid-row ">
-					<div class="govuk-grid-column-full cases">
-						<div class="govuk-grid-row govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-							<div class="govuk-grid-column-one-half">
-								<p>View data for a specific area within the UK.</p>
-								<p>Not all data is available for every area &ndash; we will show the most
-									local information in each category for your selected area.</p>
-								{% include "components/postcode_search.html" %}
-							</div>
-							{% include "components/msoa_slide.html" %}
-						</div>
-					</div>
-				</div>
-        </div>
+<div class="govuk-grid-row govuk-!-margin-top-2 govuk-!-margin-left-0 govuk-!-padding-left-0">	
+    <div class="govuk-grid-column-one-half govuk-!-margin-left-0 govuk-!-padding-left-0 ">
+
+            <div class="dashboard-panel govuk-!-margin-left-0">
+            <h3 class="govuk-heading-m govuk-!-margin-bottom-2">
+                Search by postcode
+            </h3>
+            <p>View data for a specific area within the UK.</p>
+            <p>Not all data is available for every area &ndash; we will show the most
+                local information in each category for your selected area.
+            </p>
+            {% include "components/postcode_search.html" %}
         
+        </div>		
+    </div>
+    
+    {% include "components/msoa_slide.html" %}
+    </div>	
 
 {% endblock %}
