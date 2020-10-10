@@ -50,7 +50,7 @@
 
 			<div class="govuk-grid-row govuk-!-margin-top-0">
 				<div class="govuk-grid-column-one-half">
-					<span class="govuk-caption-l govuk-!-margin-bottom-0 panel-title-new">Daily update</span>
+					<h1 class="govuk-caption-l govuk-!-margin-top-0 govuk-!-margin-bottom-0 panel-title-new">Daily update</h1>
 				</div>
 				<div class="govuk-grid-column-one-half filters govuk-!-padding-top-1">
 				</div>
@@ -67,21 +67,22 @@
 
 		<div class="govuk-grid-row govuk-!-margin-top-2 ">
 			<div class="govuk-grid-column-full ">
-				<p class="govuk-!-margin-bottom-1">
+				<p class="govuk-body-m govuk-!-margin-bottom-1">
 					The official UK Government website for data and insights on Coronavirus (COVID-19).
 				</p>
-				<h2 class="govuk-heading-l govuk-!-margin-bottom-2 govuk-!-margin-top-0  govuk-!-padding-top-0">UK Summary</h2>
-				<p class="govuk-!-margin-bottom-0 govuk-!-margin-top-0">
-					The latest <a href="https://www.gov.uk/guidance/the-r-number-in-the-uk"> R number </a> is estimated at <span class="green"><b> {{r_values.transmissionRateMin}} to {{r_values.transmissionRateMax}}</b></span> with a daily growth rate
-					range of <span class="green"><b>{{r_values.transmissionRateGrowthRateMin}}% to {{r_values.transmissionRateGrowthRateMax}}%</b></span>
+				<h2 class="govuk-heading-m">UK Summary</h2>
+				<p class="govuk-body-m govuk-!-margin-top-0 govuk-!-margin-bottom-1">
+					The latest R number is estimated at <span class="green"><b> {{r_values.transmissionRateMin}} to {{r_values.transmissionRateMax}}</b></span> with
+					a daily growth rate range
+					of <span class="green"><b>{{r_values.transmissionRateGrowthRateMin}}% to {{r_values.transmissionRateGrowthRateMax}}%</b></span>.
 					
 				</p>
-				<p class="govuk-!-margin-bottom-2">
-					Data is also available to download in an easy to read document <a href="/downloads/easy_read/overview/United Kingdom.docx">here</a>.
+				<p class="govuk-body-m govuk-!-margin-bottom-2">
+					Data are also available
+					to <a class="govuk-link govuk-link--no-visited-state"
+					      href="/downloads/easy_read/overview/United Kingdom.docx">download</a> as
+					an easy to read document.
 				</p>
-				
-
-
 
 			</div>
 		</div>
@@ -97,7 +98,7 @@
 			{% endfor %}
 		</div>
 		
-		<h2 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-2 govuk-!-padding-top-0 govuk-!-padding-left-0">What's the situation in your local area?</h2>
+		<h2 class="govuk-heading-m govuk-!-margin-top-3 govuk-!-margin-bottom-0">What's the situation in your local area?</h2>
 
 		<div class="dashboard-panel govuk-!-margin-top-2 govuk-!-margin-left-0 govuk-!-padding-5">
 			<div class="govuk-grid-row ">
