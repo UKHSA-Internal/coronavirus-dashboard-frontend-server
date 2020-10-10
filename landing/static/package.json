@@ -1,0 +1,17 @@
+{
+  "name": "covid-styles",
+  "version": "3.0.0",
+  "private": true,
+  "homepage": "https://coronavirus.data.gov.uk/",
+  "rootDir": ".",
+  "dependencies": {},
+  "scripts": {
+    "watch": "sass --watch ./css/index.scss:./css/application.css --style compressed",
+    "build": "sass ./css/index.scss:./css/application.css --style compressed"
+  },
+  "eslintConfig": {},
+  "devDependencies": {
+    "govuk-frontend": "3.8.1",
+    "node-sass": "^4.13.1"
+  }
+}

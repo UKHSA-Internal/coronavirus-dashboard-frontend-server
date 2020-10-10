@@ -130,3 +130,5 @@ local.settings.json
 .python_packages
 
 proxies.json
+
+node_modules/

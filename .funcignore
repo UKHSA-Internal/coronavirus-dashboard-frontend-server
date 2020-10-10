@@ -8,3 +8,4 @@ local.settings.json
 /landing/__pycache__
 /.idea
 /.github
+/landing/static
