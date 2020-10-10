@@ -76,7 +76,7 @@ get_area_type = itemgetter("areaType")
 main_metric_names: List[str] = [
     "newCasesByPublishDate",
     "newDeaths28DaysByPublishDate",
-    "newPillarOneTwoTestsByPublishDate",
+    "newPCRTestsByPublishDate",
     "hospitalCases",
 ]
 
@@ -168,6 +168,7 @@ def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom")
 
     return result
 
+
 @cache_client.memoize(60 * 60 * 6)
 def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
     result = dict()
@@ -192,9 +193,9 @@ def get_main_data(latest_timestamp: str):
         cards=[
             {
                 "caption": "Testing",
-                "heading": "Tests in pillars 1 & 2",
-                **data['newPillarOneTwoTestsByPublishDate'],
-                "data": data['newPillarOneTwoTestsByPublishDate']['data'],
+                "heading": "PCR tests processed",
+                **data['newPCRTestsByPublishDate'],
+                "data": data['newPCRTestsByPublishDate']['data'],
             },
             {
                 "caption": "Healthcare",

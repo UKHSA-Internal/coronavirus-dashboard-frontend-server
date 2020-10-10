@@ -36,9 +36,9 @@ DatabaseOutputType = List[DatabaseRowType]
 
 destination_metrics = {
     'testing': {
-        "metric": 'newPillarOneTwoTestsByPublishDate',
+        "metric": 'newPCRTestsByPublishDate',
         "caption": "Testing",
-        "heading": "Tests in pillars 1 & 2",
+        "heading": "PCR tests processed",
     },
     'healthcare': {
         "metric": 'hospitalCases',
