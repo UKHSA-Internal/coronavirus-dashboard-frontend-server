@@ -199,7 +199,7 @@ def get_main_data(latest_timestamp: str):
             },
             {
                 "caption": "Healthcare",
-                "heading": "New admissions",
+                "heading": "Patients admitted",
                 **data['newAdmissions'],
                 "data": data['newAdmissions']['data'],
             },
