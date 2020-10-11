@@ -41,9 +41,9 @@ destination_metrics = {
         "heading": "PCR tests processed",
     },
     'healthcare': {
-        "metric": 'hospitalCases',
+        "metric": 'newAdmissions',
         "caption": "Healthcare",
-        "heading": "Patients in hospital",
+        "heading": "New admissions",
     },
     'cases': {
         "metric": 'newCasesByPublishDate',

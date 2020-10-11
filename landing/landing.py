@@ -77,7 +77,7 @@ main_metric_names: List[str] = [
     "newCasesByPublishDate",
     "newDeaths28DaysByPublishDate",
     "newPCRTestsByPublishDate",
-    "hospitalCases",
+    "newAdmissions",
 ]
 
 
@@ -199,9 +199,9 @@ def get_main_data(latest_timestamp: str):
             },
             {
                 "caption": "Healthcare",
-                "heading": "Patients in hospital",
-                **data['hospitalCases'],
-                "data": data['hospitalCases']['data'],
+                "heading": "New admissions",
+                **data['newAdmissions'],
+                "data": data['newAdmissions']['data'],
             },
             {
                 "caption": "Cases",
@@ -354,6 +354,7 @@ def main(req: HttpRequest, context: Context, latestPublished: str,
     global timestamp, website_timestamp
     timestamp = latestPublished
     website_timestamp = websiteTimestamp
-    # cache_client.clear()
+    cache_client.clear()
+
     application = WsgiMiddleware(app.wsgi_app)
     return application.main(req, context)
