@@ -104,7 +104,7 @@ def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> DatabaseO
 
 
 @cache_client.memoize(60 * 60 * 12)
-def get_latest_value(timestamp: str, area_name: str, metric: str):
+def get_latest_value(metric: str, timestamp: str, area_name: str):
     """
     Retrieves the latest ``metric`` value
     for ``areaName`` as released on ``timestamp``.

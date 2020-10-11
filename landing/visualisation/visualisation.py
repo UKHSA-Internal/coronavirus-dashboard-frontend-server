@@ -29,7 +29,7 @@ TIMESERIES_LAYOUT = go.Layout(
     margin={
         'l': 0,
         'r': 0,
-        'b': 0,
+        'b': 4,
         't': 0,
     },
     showlegend=False,
@@ -64,7 +64,7 @@ COLOURS = {
     },
     "neutral": {
         "line": "rgba(56,63,67,1)",
-        "fill": "rgba(235,233,231,0.1)"
+        "fill": "rgba(235,233,231,1)"
     }
 }
 
@@ -79,15 +79,15 @@ IsImproving: Dict[str, Callable[[Union[int, float]], bool]] = {
 
 def get_colour(change, metric_name):
     change_value = float(change["value"])
+    improving = IsImproving[metric_name](change_value)
 
-    trend_colour = str()
+    trend_colour = COLOURS["neutral"]
 
-    if change_value == 0:
-        trend_colour = COLOURS["neutral"]
-    elif IsImproving[metric_name](change_value):
-        trend_colour = COLOURS["good"]
-    elif not IsImproving[metric_name](change_value):
-        trend_colour = COLOURS["bad"]
+    if improving is not 0:
+        if improving:
+            trend_colour = COLOURS["good"]
+        else:
+            trend_colour = COLOURS["bad"]
 
     return trend_colour
 

@@ -11,6 +11,7 @@ from gzip import compress
 from os.path import abspath, join as join_path, pardir
 from os import getenv
 from typing import List, Dict, Union
+from functools import partial
 
 # 3rd party:
 from flask import Flask, render_template, request, Response
@@ -171,15 +172,14 @@ def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom")
 
 @cache_client.memoize(60 * 60 * 6)
 def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
-    result = dict()
+    get_latest = partial(get_latest_value, timestamp=latest_timestamp, area_name=area_name)
 
-    result["transmissionRateMin"] = get_latest_value(latest_timestamp, area_name, "transmissionRateMin")
-
-    result["transmissionRateMax"] = get_latest_value(latest_timestamp, area_name, "transmissionRateMax")
-
-    result["transmissionRateGrowthRateMin"] = get_latest_value(latest_timestamp, area_name, "transmissionRateGrowthRateMin")
-
-    result["transmissionRateGrowthRateMax"] = get_latest_value(latest_timestamp, area_name, "transmissionRateGrowthRateMax")
+    result = {
+        "transmissionRateMin": get_latest("transmissionRateMin"),
+        "transmissionRateMax": get_latest("transmissionRateMax"),
+        "transmissionRateGrowthRateMin": get_latest("transmissionRateGrowthRateMin"),
+        "transmissionRateGrowthRateMax": get_latest("transmissionRateGrowthRateMax")
+    }
 
     return result
 
