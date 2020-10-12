@@ -70,7 +70,7 @@
 				<p class="govuk-body-m govuk-!-margin-bottom-1">
 					The official UK Government website for data and insights on Coronavirus (COVID-19).
 				</p>
-				<h2 class="govuk-heading-m">UK Summary</h2>
+				<h2 class="govuk-heading-l">UK Summary</h2>
 				<p class="govuk-body-m govuk-!-margin-top-0 govuk-!-margin-bottom-1">
 					The latest R number is estimated at <span><b> {{r_values.transmissionRateMin}} to {{r_values.transmissionRateMax}}</b></span> with
 					a daily growth rate range
@@ -98,7 +98,7 @@
 			{% endfor %}
 		</div>
 		
-		<h2 class="govuk-heading-m govuk-!-margin-top-3 govuk-!-margin-bottom-0">What's the situation in your local area?</h2>
+		<h2 class="govuk-heading-l govuk-!-margin-top-3 govuk-!-margin-bottom-0">What's the situation in your local area?</h2>
 
 		<div class="govuk-grid-row govuk-!-margin-top-2 govuk-!-margin-left-0 govuk-!-padding-left-0">	
 			<div class="govuk-grid-column-one-half govuk-!-margin-left-0 govuk-!-padding-left-0 ">
@@ -107,8 +107,8 @@
 					<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
 						Search by postcode
 					</h3>
-					<p>View data for a specific area within the UK.</p>
-					<p>Not all data is available for every area &ndash; we will show the most
+					<p class="govuk-body-m">View data for a specific area within the UK.</p>
+					<p class="govuk-body-m">Not all data is available for every area &ndash; we will show the most
 						local information in each category for your selected area.
 					</p>
 					{% include "components/postcode_search.html" %}

@@ -7,7 +7,7 @@
 			<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">{{ card.heading }}</h3>
 		</div>
 
-		<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-2">
+		<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-2 govuk-!-margin-top-0">
 			Latest data
 			{% if is_postcode %}
 				at <strong>{{ card.areaType_formatted | lower }}</strong> level
@@ -104,16 +104,17 @@
 		{% else %}
 				<div class="govuk-!-margin-top-5"
 				     style="display: flex; height: 100%; justify-self: flex-end; justify-content: flex-end; flex-direction: column;">
-					<a href="/downloads/easy_read/{{ card.areaType }}/{{ card.areaName }}.docx"
+					 
+					 <a href="/details/{{ card.caption | lower }}?areaType={{ card.areaType | lower }}&areaName={{ card.areaName }}"
+					 class="govuk-link govuk-link--no-visited-state govuk-!-margin-top-3 govuk-!-font-size-14"
+					 style="text-decoration: none"
+					 rel="next"><b>More details on {{ card.caption | lower }} in {{ card.areaName }}</b></a>
+					
+					 <a href="/downloads/easy_read/{{ card.areaType }}/{{ card.areaName }}.docx"
 					   class="govuk-link govuk-link--no-visited-state grey govuk-!-font-size-14"
 					   lang="en-GB" style="text-decoration: none"
 					   type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 					   download>Easy-read report for {{ card.areaName }}</a>
-
-					<a href="/details/{{ card.caption | lower }}?areaType={{ card.areaType | lower }}&areaName={{ card.areaName }}"
-					   class="govuk-link govuk-link--no-visited-state govuk-!-margin-top-3 govuk-!-font-size-14"
-					   style="text-decoration: none"
-					   rel="next">More details on {{ card.caption | lower }} in {{ card.areaName }}</a>
 				</div>
 		{% endif %}
 
