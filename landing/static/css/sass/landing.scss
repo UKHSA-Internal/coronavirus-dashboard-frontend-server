@@ -20,8 +20,8 @@ main {
 }
 
 .tooltip {
-  padding: 0;
-  width: auto;
+  padding: 0 !important;
+  width: max-content !important;
   z-index: unset !important;
 }
 

@@ -1,10 +1,12 @@
 {% macro create_card(card, is_postcode=False) %}
 
-	<div class="{% if not is_postcode %}dashboard-panel card{% else %}card{% endif %} govuk-!-margin-left-0">
+	<div class="dashboard-panel card govuk-!-margin-left-0">
 
 		<div>
 			<span class="govuk-caption-m govuk-!-font-weight-regular">{{ card.caption }}</span>
-			<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">{{ card.heading }}</h3>
+			<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
+				{{ card.heading }}{% if is_postcode %} in {{ card.areaName }}{% endif %}
+			</h3>
 		</div>
 
 		<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-2 govuk-!-margin-top-0">
@@ -15,7 +17,7 @@
 			provided on&nbsp;<span style="white-space: nowrap">{{ card.latest_date }}</span>
 		</p>
 
-		<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0">
+		<div class="govuk-grid-row govuk-!-margin-top-0 govuk-!-margin-bottom-0 bottom-aligned">
 			<div class="govuk-grid-column-full">
 				<div class="data-metric2">
 					<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">Daily</div>
@@ -24,8 +26,7 @@
 							<div class="float tooltip">
 								<h3 class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 									<a href="#"
-									   class="govuk-link--no-visited-state number-link number"
-									   onclick="showHelp()">
+									   class="govuk-link--no-visited-state number-link number">
 										{{ card.data[0].value | format_number }}
 										<span class="tooltiptext govuk-!-font-size-16">
 											Daily number of {{ card.heading | lower }} on {{ card.data[0].formatted }}
@@ -64,8 +65,7 @@
 							<h3 class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 								<a href="#"
 								   class="govuk-link--no-visited-state number-link-red"
-								   style="border: none"
-								   onclick="showHelp()">
+								   style="border: none">
 									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1"
 									        style="background: {{ card.colour.fill }}; color: {{ card.colour.line }}">
 										{% if card.change.value != 0 %}

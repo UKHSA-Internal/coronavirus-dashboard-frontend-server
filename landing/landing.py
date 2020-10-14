@@ -11,7 +11,6 @@ from gzip import compress
 from os.path import abspath, join as join_path, pardir
 from os import getenv
 from typing import List, Dict, Union
-from functools import partial
 
 # 3rd party:
 from flask import Flask, render_template, request, Response
@@ -24,7 +23,10 @@ from pytz import timezone
 
 # Internal:
 from .visualisation import plot_thumbnail, get_colour
-from .data.queries import get_last_fortnight, get_data_by_postcode, get_latest_value
+from .data.queries import (
+    get_last_fortnight, get_data_by_postcode,
+    get_msoa_data, get_r_values
+)
 from .caching import cache_client
 
 try:
@@ -111,7 +113,9 @@ def get_og_image_names(latest_timestamp: str) -> list:
 def format_number(value: Union[int, float]) -> str:
     try:
         value_int = int(value)
-    except TypeError:
+    except ValueError:
+        if value == "0-2":
+            value = "0 &ndash; 2"
         return str(value)
 
     if value == value_int:
@@ -166,20 +170,6 @@ def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom")
     for name in main_metric_names:
         metric_data = get_last_fortnight(latest_timestamp, area_name, name)
         result[name] = get_card_data(name, metric_data)
-
-    return result
-
-
-@cache_client.memoize(60 * 60 * 6)
-def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
-    get_latest = partial(get_latest_value, timestamp=latest_timestamp, area_name=area_name)
-
-    result = {
-        "transmissionRateMin": get_latest("transmissionRateMin"),
-        "transmissionRateMax": get_latest("transmissionRateMax"),
-        "transmissionRateGrowthRateMin": get_latest("transmissionRateGrowthRateMin"),
-        "transmissionRateGrowthRateMax": get_latest("transmissionRateGrowthRateMax")
-    }
 
     return result
 
@@ -309,7 +299,8 @@ def postcode_search() -> render_template:
             }
             for category, values in get_data_by_postcode(postcode, timestamp).items()
         }
-    except IndexError:
+    except IndexError as err:
+        logging.exception(err)
         return render_template(
             "main.html",
             og_images=get_og_image_names(timestamp),
@@ -329,6 +320,7 @@ def postcode_search() -> render_template:
         timestamp=website_timestamp,
         r_values=get_r_values(timestamp),
         smallest_area=get_by_smallest_areatype(list(response.values()), get_area_type),
+        msoa=get_msoa_data(postcode, timestamp),
         **data
     )
 
@@ -356,5 +348,8 @@ def main(req: HttpRequest, context: Context, latestPublished: str,
     website_timestamp = websiteTimestamp
     # cache_client.clear()
 
-    application = WsgiMiddleware(app.wsgi_app)
-    return application.main(req, context)
+    try:
+        application = WsgiMiddleware(app.wsgi_app)
+        return application.main(req, context)
+    except Exception as err:
+        logging.exception(err)

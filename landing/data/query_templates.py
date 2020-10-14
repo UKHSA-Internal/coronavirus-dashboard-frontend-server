@@ -15,7 +15,8 @@ __all__ = [
     'DataSinceApril',
     'PostcodeLookup',
     'LookupByAreaCode',
-    'DataByAreaCode'
+    'DataByAreaCode',
+    'MsoaData'
 ]
 
 
@@ -54,11 +55,8 @@ ORDER BY c.releaseTimestamp DESC,
 
 
 PostcodeLookup = """\
-SELECT TOP 1 
-    VALUE {
-        'msoa': c.msoa,
-        'ltla': c.ltla
-    }
+SELECT
+    TOP 1 VALUE udf.postcodeData(c)
 FROM     c
 WHERE    c.type            = 'postcode'
      AND c.trimmedPostcode = @postcode\
@@ -96,3 +94,11 @@ WHERE
 ORDER BY 
     c.date DESC\
 """)
+
+
+MsoaData = """\
+SELECT 
+    VALUE udf.cleanData(c) 
+FROM c 
+WHERE c.id = @id\
+"""

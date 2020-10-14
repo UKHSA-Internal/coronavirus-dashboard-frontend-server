@@ -6,6 +6,7 @@
 import logging
 from datetime import datetime
 from typing import Dict, Union, List
+from functools import partial
 
 # 3rd party:
 
@@ -22,7 +23,10 @@ except ImportError:
 
 __all__ = [
     'get_last_fortnight',
-    'get_data_by_postcode'
+    'get_data_by_postcode',
+    'get_msoa_data',
+    'get_latest_value',
+    'get_r_values'
 ]
 
 ProcessedDateType = Dict[str, Union[str, datetime]]
@@ -43,7 +47,7 @@ destination_metrics = {
     'healthcare': {
         "metric": 'newAdmissions',
         "caption": "Healthcare",
-        "heading": "New admissions",
+        "heading": "Patients admitted",
     },
     'cases': {
         "metric": 'newCasesByPublishDate',
@@ -55,6 +59,7 @@ destination_metrics = {
         "caption": "Deaths",
         "heading": "Deaths within 28 days of positive test",
     },
+
 }
 
 AreaTypeNames = {
@@ -67,6 +72,7 @@ AreaTypeNames = {
 
 data_db = CosmosDB(Collection.DATA)
 lookup_db = CosmosDB(Collection.LOOKUP)
+weekly_db = CosmosDB(Collection.WEEKLY)
 
 
 def process_dates(date: str) -> ProcessedDateType:
@@ -123,6 +129,7 @@ def get_latest_value(metric: str, timestamp: str, area_name: str):
     
     return result[0]["value"]
 
+
 @cache_client.memoize(60 * 60 * 12)
 def get_postcode_areas(postcode):
     query = queries.PostcodeLookup
@@ -134,6 +141,20 @@ def get_postcode_areas(postcode):
     return lookup_db.query(query, params=params)
 
 
+@cache_client.memoize(60 * 60 * 6)
+def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
+    get_latest = partial(get_latest_value, timestamp=latest_timestamp, area_name=area_name)
+
+    result = {
+        "transmissionRateMin": get_latest("transmissionRateMin"),
+        "transmissionRateMax": get_latest("transmissionRateMax"),
+        "transmissionRateGrowthRateMin": get_latest("transmissionRateGrowthRateMin"),
+        "transmissionRateGrowthRateMax": get_latest("transmissionRateGrowthRateMax")
+    }
+
+    return result
+
+
 @cache_client.memoize(60 * 60 * 12)
 def get_data_by_code(area_code, timestamp):
     query = queries.LookupByAreaCode
@@ -143,7 +164,10 @@ def get_data_by_code(area_code, timestamp):
     ]
 
     result = lookup_db.query(query, params=params)
-    location_data = result.pop()
+    try:
+        location_data = result.pop()
+    except IndexError:
+        logging.critical(f"Missing lookup value for {params}")
 
     results = dict()
 
@@ -177,6 +201,35 @@ def get_data_by_code(area_code, timestamp):
             pass
 
     return results
+
+
+@cache_client.memoize(60 * 60 * 6)
+def get_msoa_data(postcode, timestamp):
+    query = queries.MsoaData
+    area = get_postcode_areas(postcode).pop()
+    area_code = area['msoa']
+    area_name = area['msoaName']
+
+    params = [
+        {"name": "@id", "value": f"MSOA|{area_code}"}
+    ]
+
+    try:
+        data = weekly_db.query(query, params=params).pop()
+
+        logging.info(data)
+        cases_data = data["latest"]["newCasesBySpecimenDate"]
+
+        response = {
+            "areaName": area_name,
+            "latestSum": cases_data["rollingSum"],
+            "latestDate": process_dates(cases_data["date"])["formatted"],
+            "dataTimestamp": timestamp
+        }
+
+        return response
+    except (KeyError, IndexError):
+        return None
 
 
 def get_data_by_postcode(postcode, timestamp):

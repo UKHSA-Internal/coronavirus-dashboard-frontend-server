@@ -36,6 +36,7 @@ class AutoName(Enum):
 class Collection(AutoName):
     DATA = getenv("AzureCosmosCollection")
     LOOKUP = getenv("AzureCosmosDestinationsCollection")
+    WEEKLY = "weeklyData"
 
 
 class Credentials(AutoName):

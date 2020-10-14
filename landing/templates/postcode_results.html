@@ -21,24 +21,24 @@
 							<a class="govuk-link " href="/">Daily update</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/testing">Tests</a>
+							<a class="govuk-link " href="/details/testing">Tests</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/cases">Cases</a>
+							<a class="govuk-link " href="/details/cases">Cases</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/healthcare">Healthcare</a>
+							<a class="govuk-link " href="/details/healthcare">Healthcare</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/deaths">Deaths</a>
+							<a class="govuk-link " href="/details/deaths">Deaths</a>
 						</li>
 						<hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-section-break--visible">
 
 						<li>
-							<a class="govuk-link" href="/about-data">About the data</a>
+							<a class="govuk-link" href="/details/about-data">About the data</a>
 						</li>
 						<li>
-							<a class="govuk-link" href="/developers-guide">Developer's guide</a>
+							<a class="govuk-link" href="/details/developers-guide">Developer's guide</a>
 						</li>
 					</ul>
 				</div>
@@ -103,6 +103,7 @@
 		</div>
 	</div>
 
+	{% if msoa %}
 	<p class="govuk-body govuk-!-margin-top-2">People tested positive data are also available at more localised levels: </p>
 
 	<details class="govuk-details" data-module="govuk-details">
@@ -112,9 +113,9 @@
       </span>
 		</summary>
 		<div class="govuk-details__text" style="display: flex; flex-direction: column;">
-			<h3 class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 govuk-heading-m"> People tested positive
-				in {{ smallest_area.areaName }}
-				<small class="govuk-caption-m">Latest data provided on </small>
+			<h3 class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 govuk-heading-m"> New cases by specimen date
+				in {{ msoa.areaName }}
+				<small class="govuk-caption-m">Latest data provided on {{ msoa.latestDate }}</small>
 			</h3>
 
 			<div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0" style="width:80%;">
@@ -126,8 +127,8 @@
 					<div class="float tooltip">
 						<h3 class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 							<strong class="number-link"
-							   onclick="showHelp()">3,292
-								<span class="tooltiptext govuk-!-font-size-16 number-link">
+							   onclick="showHelp()">{{ msoa.latestSum | format_number | safe }}
+								<span class="tooltiptext govuk-!-font-size-16 number">
                             Total number of cases in the
                             last 7 days</span>
 							</strong>
@@ -137,6 +138,7 @@
 			</div>
 		</div>
 	</details>
+	{% endif %}
 
 	<h2 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-!-padding-top-0 govuk-!-padding-left-0">
 		Search another location</h2>

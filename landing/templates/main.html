@@ -22,24 +22,24 @@
 							<a class="govuk-link " href="/">Daily update</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/testing">Tests</a>
+							<a class="govuk-link " href="/details/testing">Tests</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/cases">Cases</a>
+							<a class="govuk-link " href="/details/cases">Cases</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/healthcare">Healthcare</a>
+							<a class="govuk-link " href="/details/healthcare">Healthcare</a>
 						</li>
 						<li>
-							<a class="govuk-link " href="/deaths">Deaths</a>
+							<a class="govuk-link " href="/details/deaths">Deaths</a>
 						</li>
 						<hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-section-break--visible">
 
 						<li>
-							<a class="govuk-link" href="/about-data">About the data</a>
+							<a class="govuk-link" href="/details/about-data">About the data</a>
 						</li>
 						<li>
-							<a class="govuk-link" href="/developers-guide">Developer's guide</a>
+							<a class="govuk-link" href="/details/developers-guide">Developer's guide</a>
 						</li>
 					</ul>
 				</div>
@@ -72,10 +72,11 @@
 				</p>
 				<h2 class="govuk-heading-l">UK Summary</h2>
 				<p class="govuk-body-m govuk-!-margin-top-0 govuk-!-margin-bottom-1">
-					The latest R number is estimated at <span><b> {{r_values.transmissionRateMin}} to {{r_values.transmissionRateMax}}</b></span> with
+					The latest R number is estimated at
+					<span><b> {{ r_values.transmissionRateMin }} to {{ r_values.transmissionRateMax }}</b></span> with
 					a daily growth rate range
-					of <span><b>{{r_values.transmissionRateGrowthRateMin}}% to {{r_values.transmissionRateGrowthRateMax}}%</b></span>.
-					
+					of <span><b>{{ r_values.transmissionRateGrowthRateMin }}% to {{ r_values.transmissionRateGrowthRateMax }}%</b></span>.
+
 				</p>
 				<p class="govuk-body-m govuk-!-margin-bottom-2">
 					Data are also available
@@ -88,39 +89,40 @@
 		</div>
 	</div>
 
-	
 
-	
 
-		<div class="card-container govuk-!-margin-left-0">
-			{% for card in cards %}
-				{{ create_card(card, False) }}
-			{% endfor %}
-		</div>
-		
-		<h2 class="govuk-heading-l govuk-!-margin-top-3 govuk-!-margin-bottom-0">What's the situation in your local area?</h2>
 
-		<div class="govuk-grid-row govuk-!-margin-top-2 govuk-!-margin-left-0 govuk-!-padding-left-0">	
-			<div class="govuk-grid-column-one-half govuk-!-margin-left-0 govuk-!-padding-left-0 ">
-	
-					<div class="dashboard-panel govuk-!-margin-left-0">
-					<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
-						Search by postcode
-					</h3>
-					<p class="govuk-body-m">View data for a specific area within the UK.</p>
-					<p class="govuk-body-m">Not all data is available for every area &ndash; we will show the most
-						local information in each category for your selected area.
-					</p>
-					{% include "components/postcode_search.html" %}
-				
-				</div>		
+
+	<div class="card-container govuk-!-margin-left-0">
+		{% for card in cards %}
+			{{ create_card(card, False) }}
+		{% endfor %}
+	</div>
+
+	<h2 class="govuk-heading-l govuk-!-margin-top-3 govuk-!-margin-bottom-0">What's the situation in your local area?</h2>
+
+	<div class="govuk-grid-row govuk-!-margin-top-2 govuk-!-margin-left-0 govuk-!-padding-left-0">
+
+		<div class="govuk-grid-column-one-half govuk-!-margin-left-0 govuk-!-padding-left-0 ">
+
+			<div class="dashboard-panel govuk-!-margin-left-0">
+				<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
+					Search by postcode
+				</h3>
+				<p class="govuk-body-m">View data for a specific area within the UK.</p>
+				<p class="govuk-body-m">Not all data is available for every area &ndash; we will show the most
+					local information in each category for your selected area.
+				</p>
+				{% include "components/postcode_search.html" %}
+
 			</div>
-			
-			{% include "components/msoa_slide.html" %}
-			</div>		
+		</div>
+
+		{% include "components/msoa_slide.html" %}
+	</div>
 
 
-	
+
 
 
 	{#	</div>#}

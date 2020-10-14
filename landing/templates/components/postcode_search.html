@@ -1,6 +1,6 @@
 <div class="govuk-!-margin-top-2">
-	<form action="/search#local" method="GET" id="regionform" rel="next" target="_self">
-		<div class="govuk-form-group {% if invalid_postcode %}govuk-form-group--error{% endif %}">
+	<form action="/search" method="GET" id="regionform" rel="next" target="_self">
+		<div class="govuk-form-group{% if invalid_postcode %} govuk-form-group--error{% endif %}">
 		  <fieldset class="govuk-fieldset" role="group" aria-describedby="postcode-hint">
 				<label class="govuk-label govuk-!-font-weight-bold" for="postcode">
 					Enter a postcode
@@ -13,13 +13,14 @@
 				{% endif %}
 				<p>
 					<input form="regionform"
-					       class="govuk-input govuk-input--width-10 {% if invalid_postcode %}govuk-input--error{% endif %}"
+					       class="govuk-input govuk-input--width-10{% if invalid_postcode %} govuk-input--error{% endif %}"
 					       id="postcode" name="postcode" type="text"
 					       pattern="[A-Za-z]{1,2}\d{1,2}[A-Za-z]?\s?\d{1,2}[A-Za-z]{1,2}"
-					       maxlength="10"><input class="govuk-button" data-module="govuk-button" value="Search" type="submit"/>
+					       style="text-transform:uppercase" maxlength="10">
+					<input class="govuk-button" data-module="govuk-button" value="Search" type="submit"/>
 				</p>
 		  </fieldset>
 		</div>
-		
+
 	</form>
 </div>
