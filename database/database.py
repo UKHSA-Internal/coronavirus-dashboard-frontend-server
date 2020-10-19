@@ -12,9 +12,11 @@ Contributors:  Pouria Hadjibagheri
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+import logging
 from typing import Union, List, Iterable
 from os import getenv
 from hashlib import blake2b
+from sys import stdout
 
 # 3rd party:
 from azure.cosmos.cosmos_client import CosmosClient
@@ -34,6 +36,14 @@ DB_CREDENTIALS = {
 }
 
 DB_NAME = getenv("AzureCosmosDBName")
+
+
+logger = logging.getLogger('azure')
+logger.setLevel(logging.WARNING)
+
+# Configure a console output
+handler = logging.StreamHandler(stream=stdout)
+logger.addHandler(handler)
 
 
 class CosmosDB:

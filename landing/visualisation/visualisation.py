@@ -83,7 +83,7 @@ def get_colour(change, metric_name):
 
     trend_colour = COLOURS["neutral"]
 
-    if improving is not 0:
+    if improving is not 0 and change_value != 0:
         if improving:
             trend_colour = COLOURS["good"]
         else:

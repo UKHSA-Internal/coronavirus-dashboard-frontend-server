@@ -3,6 +3,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
 from os import getenv
+from ..config import Config
 
 # 3rd party:
 import certifi
@@ -27,7 +28,7 @@ server_location = {
 
 
 cache_client = Cache(config={
-    "CACHE_TYPE": "redis",
+    "CACHE_TYPE": "redis" if not Config.DEBUG else "null",
     "CACHE_DEFAULT_TIMEOUT": 300,
     "CACHE_KEY_PREFIX": "frontend::",
     "CACHE_OPTIONS": {

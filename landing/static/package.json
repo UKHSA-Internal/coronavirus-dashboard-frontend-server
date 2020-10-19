@@ -6,12 +6,16 @@
   "rootDir": ".",
   "dependencies": {},
   "scripts": {
-    "watch": "sass --watch ./css/index.scss:./css/application.css --style compressed",
-    "build": "sass ./css/index.scss:./css/application.css --style compressed"
+    "watch": "sass --watch ./css/index.scss:./css/application.css",
+    "build": "set AUTOPREFIXER_GRID=autoplace && sass ./css/index.scss:./css/application.css",
+    "postbuild": "npx postcss ./css/application.css --use autoprefixer -d ./css"
   },
   "eslintConfig": {},
   "devDependencies": {
     "govuk-frontend": "3.8.1",
-    "node-sass": "^4.13.1"
+    "node-sass": "^4.13.1",
+    "postcss": "^8.1.2",
+    "postcss-cli": "^8.1.0",
+    "autoprefixer": "^10.0.1"
   }
 }

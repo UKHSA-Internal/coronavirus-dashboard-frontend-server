@@ -4,7 +4,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Union, List
 from functools import partial
 
@@ -26,7 +26,10 @@ __all__ = [
     'get_data_by_postcode',
     'get_msoa_data',
     'get_latest_value',
-    'get_r_values'
+    'get_r_values',
+    'get_alert_level',
+    'get_postcode_areas',
+    'latest_ltla_rate_by_metric'
 ]
 
 ProcessedDateType = Dict[str, Union[str, datetime]]
@@ -39,16 +42,6 @@ DatabaseRowType = Union[
 DatabaseOutputType = List[DatabaseRowType]
 
 destination_metrics = {
-    'testing': {
-        "metric": 'newPCRTestsByPublishDate',
-        "caption": "Testing",
-        "heading": "PCR tests processed",
-    },
-    'healthcare': {
-        "metric": 'newAdmissions',
-        "caption": "Healthcare",
-        "heading": "Patients admitted",
-    },
     'cases': {
         "metric": 'newCasesByPublishDate',
         "caption": "Cases",
@@ -59,7 +52,16 @@ destination_metrics = {
         "caption": "Deaths",
         "heading": "Deaths within 28 days of positive test",
     },
-
+    'healthcare': {
+        "metric": 'newAdmissions',
+        "caption": "Healthcare",
+        "heading": "Patients admitted",
+    },
+    'testing': {
+        "metric": 'newPCRTestsByPublishDate',
+        "caption": "Testing",
+        "heading": "PCR tests processed",
+    }
 }
 
 AreaTypeNames = {
@@ -98,7 +100,7 @@ def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> DatabaseO
 
     params = [
         {"name": "@releaseTimestamp", "value": timestamp},
-        {"name": "@areaName", "value": area_name.lower()}
+        {"name": "@areaName", "value": area_name.lower()},
     ]
 
     result = [
@@ -156,11 +158,11 @@ def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Di
 
 
 @cache_client.memoize(60 * 60 * 12)
-def get_data_by_code(area_code, timestamp):
+def get_data_by_code(area, timestamp):
     query = queries.LookupByAreaCode
 
     params = [
-        {"name": "@areaCode", "value": area_code},
+        {"name": "@areaCode", "value": area['ltla']},
     ]
 
     result = lookup_db.query(query, params=params)
@@ -176,15 +178,20 @@ def get_data_by_code(area_code, timestamp):
 
         query = queries.DataByAreaCode.substitute(metric=metric_data["metric"])
 
+        area_type = destination['areaType']
         params = [
             {"name": "@seriesDate", "value": timestamp.split('T')[0]},
             {"name": "@releaseTimestamp", "value": timestamp},
-            {"name": "@areaName", "value": destination['areaName'].lower()},
-            {"name": "@areaType", "value": destination['areaType']},
+            {"name": "@areaCode", "value": area[area_type]},
+            {"name": "@areaType", "value": area_type},
         ]
 
         try:
             data = data_db.query(query, params=params)
+            logging.warning(metric_data["metric"])
+            logging.warning(area_type)
+            logging.warning(params)
+            logging.warning(data)
             latest = data[0]
             area_type = latest.pop("areaType")
 
@@ -216,13 +223,12 @@ def get_msoa_data(postcode, timestamp):
 
     try:
         data = weekly_db.query(query, params=params).pop()
-
-        logging.info(data)
         cases_data = data["latest"]["newCasesBySpecimenDate"]
 
         response = {
             "areaName": area_name,
             "latestSum": cases_data["rollingSum"],
+            "latestRate": cases_data["rollingRate"],
             "latestDate": process_dates(cases_data["date"])["formatted"],
             "dataTimestamp": timestamp
         }
@@ -232,9 +238,61 @@ def get_msoa_data(postcode, timestamp):
         return None
 
 
-def get_data_by_postcode(postcode, timestamp):
-    # ToDo: Fail for invalid postcodes
+@cache_client.memoize(60 * 60 * 6)
+def get_alert_level(postcode, timestamp):
     area = get_postcode_areas(postcode)
     area_code = area.pop()['ltla']
 
-    return get_data_by_code(area_code, timestamp)
+    query = queries.AlertLevel
+    params = [
+        {"name": "@releaseTimestamp", "value": timestamp},
+        {"name": "@areaType", "value": "ltla"},
+        {"name": "@areaCode", "value": area_code},
+    ]
+
+    try:
+        response = data_db.query(query, params=params).pop()
+        return response
+    except (KeyError, IndexError):
+        return None
+
+
+@cache_client.memoize(60 * 60 * 6)
+def latest_ltla_rate_by_metric(postcode, timestamp, metric):
+    area = get_postcode_areas(postcode)
+    area_code = area.pop()['ltla']
+
+    query = queries.SpecimenDateData.substitute(metric=metric)
+
+    last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
+    latest_date = (last_published - timedelta(days=5)).strftime("%Y-%m-%d")
+
+    params = [
+        {"name": "@latestDate", "value": latest_date},
+        {"name": "@releaseTimestamp", "value": timestamp},
+        {"name": "@areaCode", "value": area_code},
+        {"name": "@areaType", "value": 'ltla'},
+    ]
+
+    try:
+        result = data_db.query(query, params=params)
+
+        latest = max(result, key=lambda x: x['date'])
+        response = {
+            "date": process_dates(latest['date'])['formatted'],
+            "rollingSum": sum(map(lambda x: x['value'], result)),
+            "rollingRate": latest['rate']
+        }
+
+        return response
+
+    except (KeyError, IndexError) as err:
+        return None
+
+
+def get_data_by_postcode(postcode, timestamp):
+    # ToDo: Fail for invalid postcodes
+    area = get_postcode_areas(postcode)
+    area = area.pop()
+
+    return get_data_by_code(area, timestamp)
