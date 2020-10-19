@@ -25,7 +25,7 @@ from pytz import timezone
 from .visualisation import plot_thumbnail, get_colour
 from .data.queries import (
     get_last_fortnight, get_data_by_postcode,
-    get_msoa_data, get_r_values
+    get_msoa_data, get_r_values, get_postcode_areas
 )
 from .caching import cache_client
 
@@ -318,7 +318,7 @@ def postcode_search() -> render_template:
         postcode_data=response,
         postcode=postcode.upper(),
         timestamp=website_timestamp,
-        r_values=get_r_values(timestamp),
+        r_values=get_r_values(timestamp, get_postcode_areas(postcode).pop()['nhsRegionName'] ),
         smallest_area=get_by_smallest_areatype(list(response.values()), get_area_type),
         msoa=get_msoa_data(postcode, timestamp),
         **data
