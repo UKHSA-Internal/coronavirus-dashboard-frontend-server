@@ -29,7 +29,7 @@ __all__ = [
     'get_r_values',
     'get_alert_level',
     'get_postcode_areas',
-    'latest_ltla_rate_by_metric'
+    'latest_rate_by_metric'
 ]
 
 ProcessedDateType = Dict[str, Union[str, datetime]]
@@ -188,10 +188,10 @@ def get_data_by_code(area, timestamp):
 
         try:
             data = data_db.query(query, params=params)
-            logging.warning(metric_data["metric"])
-            logging.warning(area_type)
-            logging.warning(params)
-            logging.warning(data)
+            #logging.warning(metric_data["metric"])
+            #logging.warning(area_type)
+            #logging.warning(params)
+            #logging.warning(data)
             latest = data[0]
             area_type = latest.pop("areaType")
 
@@ -258,25 +258,34 @@ def get_alert_level(postcode, timestamp):
 
 
 @cache_client.memoize(60 * 60 * 6)
-def latest_ltla_rate_by_metric(postcode, timestamp, metric):
-    area = get_postcode_areas(postcode)
-    area_code = area.pop()['ltla']
-
-    query = queries.SpecimenDateData.substitute(metric=metric)
+def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=""):
+    if ltla:
+        area = get_postcode_areas(postcode)
+        area_code = area.pop()['ltla']
+        query = queries.SpecimenDateData.substitute(metric=metric)
+    else:
+        query = queries.SpecimenDateDataOverview.substitute(metric=metric)
 
     last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
     latest_date = (last_published - timedelta(days=5)).strftime("%Y-%m-%d")
 
-    params = [
+    if ltla:
+        params = [
+            {"name": "@latestDate", "value": latest_date},
+            {"name": "@releaseTimestamp", "value": timestamp},
+            {"name": "@areaCode", "value": area_code},
+            {"name": "@areaType", "value": 'ltla'},
+        ]
+    else:
+        params = [
         {"name": "@latestDate", "value": latest_date},
         {"name": "@releaseTimestamp", "value": timestamp},
-        {"name": "@areaCode", "value": area_code},
-        {"name": "@areaType", "value": 'ltla'},
+        {"name": "@areaType", "value": 'nation'},
     ]
 
     try:
         result = data_db.query(query, params=params)
-
+        logging.warning(result)
         latest = max(result, key=lambda x: x['date'])
         response = {
             "date": process_dates(latest['date'])['formatted'],
