@@ -118,6 +118,23 @@ ORDER BY
     c.date DESC\
 """)
 
+SpecimenDateDataOverview = Template("""\
+SELECT TOP 7 
+    VALUE {
+        'date':  c.date,
+        'value': c.$metric,
+        'rate':  c.${metric}RollingRate ?? null
+    }
+FROM    c 
+WHERE   
+        c.releaseTimestamp = @releaseTimestamp
+    AND c.areaType         = @areaType
+    AND c.date            <= @latestDate
+    AND IS_DEFINED(c.$metric)
+ORDER BY 
+    c.date DESC\
+""")
+
 
 MsoaData = """\
 SELECT 

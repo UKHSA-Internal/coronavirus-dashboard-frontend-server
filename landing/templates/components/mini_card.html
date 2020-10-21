@@ -97,6 +97,25 @@
 			</div>
 
 		</div>
+		{%- if (card.caption) == "Cases" -%}
+		<p class="govuk-caption-m govuk-!-font-weight-regular govuk-!-margin-top-0">
+			Rate per 100k resident population:&nbsp;<strong>
+			
+				{{ cases_rate.rollingRate | format_number }}
+			
+			</strong>
+		</p>
+		{%- endif -%}
+
+		{%- if (card.caption) == "Deaths" and not is_postcode -%}
+		<p class="govuk-caption-m govuk-!-font-weight-regular govuk-!-margin-top-0">
+			Rate per 100k resident population:&nbsp;<strong>
+			
+				{{ deaths_rate.rollingRate | format_number }}
+			
+			</strong>
+		</p>
+		{%- endif -%}
 
 		{%- if not is_postcode -%}
 			<figure class="graph"

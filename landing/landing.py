@@ -26,7 +26,7 @@ from .visualisation import plot_thumbnail, get_colour
 from .data.queries import (
     get_last_fortnight, get_data_by_postcode,
     get_msoa_data, get_r_values, get_alert_level,
-    get_postcode_areas, latest_ltla_rate_by_metric
+    get_postcode_areas, latest_rate_by_metric
 )
 from .caching import cache_client
 
@@ -296,6 +296,8 @@ def postcode_search() -> render_template:
             invalid_postcode=True,
             styles=css_names,
             r_values=get_r_values(timestamp),
+            cases_rate=latest_rate_by_metric(timestamp, "newCasesBySpecimenDate"),
+            deaths_rate=latest_rate_by_metric(timestamp, "newDeaths28DaysByDeathDate"),
             timestamp=website_timestamp,
             **data
         )
@@ -316,6 +318,8 @@ def postcode_search() -> render_template:
             styles=css_names,
             invalid_postcode=True,
             r_values=get_r_values(timestamp),
+            cases_rate=latest_rate_by_metric(timestamp, "newCasesBySpecimenDate"),
+            deaths_rate=latest_rate_by_metric(timestamp, "newDeaths28DaysByDeathDate"),
             timestamp=website_timestamp,
             **data
         )
@@ -327,7 +331,8 @@ def postcode_search() -> render_template:
         postcode_data=response,
         postcode=postcode.upper(),
         area_info=get_postcode_areas(postcode)[0],
-        cases_rate=latest_ltla_rate_by_metric(postcode, timestamp, "newCasesBySpecimenDate"),
+        cases_rate=latest_rate_by_metric(timestamp, "newCasesBySpecimenDate", True, postcode),
+        #deaths_rate=latest__rate_by_metric(timestamp, "newDeaths28DaysByDeathDate", True, postcode),
         timestamp=website_timestamp,
         r_values=get_r_values(timestamp, get_postcode_areas(postcode).pop()['nhsRegionName'] ),
         smallest_area=get_by_smallest_areatype(list(response.values()), get_area_type),
@@ -348,6 +353,8 @@ def index() -> render_template:
         og_images=get_og_image_names(timestamp),
         styles=css_names,
         r_values=get_r_values(timestamp),
+        cases_rate=latest_rate_by_metric(timestamp, "newCasesBySpecimenDate"),
+        deaths_rate=latest_rate_by_metric(timestamp, "newDeaths28DaysByDeathDate"),
         timestamp=website_timestamp,
         **data
     )
