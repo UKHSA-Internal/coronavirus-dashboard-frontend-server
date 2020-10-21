@@ -132,3 +132,6 @@ local.settings.json
 proxies.json
 
 node_modules/
+
+landing/static/css/application.css
+landing/static/css/application.css.map

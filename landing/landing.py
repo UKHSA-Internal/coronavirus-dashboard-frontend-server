@@ -203,7 +203,7 @@ def get_main_data(latest_timestamp: str):
             },
             {
                 "caption": "Testing",
-                "heading": "PCR tests processed",
+                "heading": "Virus tests processed",
                 **data['newPCRTestsByPublishDate'],
                 "data": data['newPCRTestsByPublishDate']['data'],
             },
@@ -334,7 +334,7 @@ def postcode_search() -> render_template:
         cases_rate=latest_rate_by_metric(timestamp, "newCasesBySpecimenDate", True, postcode),
         #deaths_rate=latest__rate_by_metric(timestamp, "newDeaths28DaysByDeathDate", True, postcode),
         timestamp=website_timestamp,
-        r_values=get_r_values(timestamp),
+        r_values=get_r_values(timestamp, get_postcode_areas(postcode).pop()['nhsRegionName'] ),
         smallest_area=get_by_smallest_areatype(list(response.values()), get_area_type),
         alert_level=get_alert_level(postcode, timestamp),
         msoa=get_msoa_data(postcode, timestamp),

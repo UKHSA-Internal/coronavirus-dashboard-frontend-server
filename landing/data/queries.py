@@ -60,7 +60,7 @@ destination_metrics = {
     'testing': {
         "metric": 'newPCRTestsByPublishDate',
         "caption": "Testing",
-        "heading": "PCR tests processed",
+        "heading": "Virus tests processed",
     }
 }
 
@@ -188,10 +188,6 @@ def get_data_by_code(area, timestamp):
 
         try:
             data = data_db.query(query, params=params)
-            #logging.warning(metric_data["metric"])
-            #logging.warning(area_type)
-            #logging.warning(params)
-            #logging.warning(data)
             latest = data[0]
             area_type = latest.pop("areaType")
 

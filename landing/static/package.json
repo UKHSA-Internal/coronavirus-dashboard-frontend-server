@@ -8,7 +8,7 @@
   "scripts": {
     "watch": "sass --watch ./css/index.scss:./css/application.css",
     "build": "set AUTOPREFIXER_GRID=autoplace && sass ./css/index.scss:./css/application.css",
-    "postbuild": "npx postcss ./css/application.css --use autoprefixer -d ./css"
+    "postbuild": "npx postcss ./css/application.css --use autoprefixer -d ./css && uglifycss ./css/application.css --output ./css/application.css"
   },
   "eslintConfig": {},
   "devDependencies": {
@@ -16,6 +16,7 @@
     "node-sass": "^4.13.1",
     "postcss": "^8.1.2",
     "postcss-cli": "^8.1.0",
-    "autoprefixer": "^10.0.1"
+    "autoprefixer": "^10.0.1",
+    "uglifycss": "^0.0.29"
   }
 }
