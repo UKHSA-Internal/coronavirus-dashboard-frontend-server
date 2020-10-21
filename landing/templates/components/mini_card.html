@@ -1,12 +1,18 @@
 {% macro create_card(card, is_postcode=False) %}
 
-	<div class="dashboard-panel card govuk-!-margin-left-0">
+	<div class="mini-card">
 
 		<div>
 			<span class="govuk-caption-m govuk-!-font-weight-regular">{{ card.caption }}</span>
-			<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
-				{{ card.heading }}{% if is_postcode %} in {{ card.areaName }}{% endif %}
-			</h3>
+			{%- if is_postcode -%}
+				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
+					{{ card.heading }} in {{ card.areaName }}
+				</h4>
+			{%- else -%}
+				<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
+					{{ card.heading }}
+				</h3>
+			{%- endif -%}
 		</div>
 
 		<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-2 govuk-!-margin-top-0">
@@ -24,7 +30,7 @@
 					<div class="number-group">
 						<div class="number-container">
 							<div class="float tooltip">
-								<h3 class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+								<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 									<a href="#"
 									   class="govuk-link--no-visited-state number-link number">
 										{{ card.data[0].value | format_number }}
@@ -32,7 +38,7 @@
 											Daily number of {{ card.heading | lower }} on {{ card.data[0].formatted }}
 									</span>
 									</a>
-								</h3>
+								</div>
 							</div>
 
 						</div>
@@ -50,40 +56,40 @@
 					<div class="number-group">
 						<div class="number-container govuk-!-padding-right-4">
 							<div class="float tooltip">
-								<h3 class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+								<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 									<a href="#" class="govuk-link--no-visited-state number-link"
 									   onclick="showHelp()">{{ card.change.total | format_number }}
 										<span class="tooltiptext govuk-!-font-size-16">
 										Total number of {{ card.heading | lower }} in the
 										last 7 days ({{ card.data[6].formatted }} &ndash; {{ card.data[0].formatted }})</span></a>
-								</h3></div>
+								</div></div>
 						</div>
 
 					</div>
 					<div class="number-container">
 						<div class="float tooltip">
-							<h3 class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 								<a href="#"
 								   class="govuk-link--no-visited-state number-link-red"
 								   style="border: none">
 									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1"
 									        style="background: {{ card.colour.fill }}; color: {{ card.colour.line }}">
-										{% if card.change.value != 0 %}
+										{%- if card.change.value != 0 -%}
 											<img src="/assets/public/images/arrow.svg"
 											     width="12px"
-											     alt="down arrow"
+											     alt="arrow"
 											     style="transform: rotate({{ card.change.trend }}deg)">
 											{{ card.change.value | format_number }}
 											<span class="govuk-!-font-weight-regular">({{ card.change.percentage }}%)</span>
-										{% else %}
+										{%- else -%}
 											<span>No change</span>
-										{% endif %}
+										{%- endif -%}
 									</strong>&nbsp;
 									<span class="tooltiptext govuk-!-font-size-16">
 											Change from previous 7 days ({{ card.data[13].formatted }} &ndash; {{ card.data[7].formatted }})
 									</span>
 								</a>
-							</h3>
+							</div>
 						</div>
 					</div>
 
@@ -92,7 +98,7 @@
 
 		</div>
 
-		{% if not is_postcode %}
+		{%- if not is_postcode -%}
 			<figure class="graph"
 			        style="display: flex; width: 100%; height: 100%; justify-content: center; align-items: flex-end">
 				<img src="{{ card.graph }}" alt="Graph" style="">
@@ -101,22 +107,21 @@
 				<a class="govuk-link more-detail govuk-link--no-visited-state" rel="next"
 				   href="/details/{{ card.caption | lower }}" style="margin-top: 1rem;">All {{ card.caption | lower }} data</a>
 			</div>
-		{% else %}
+		{%- else -%}
 				<div class="govuk-!-margin-top-5"
 				     style="display: flex; height: 100%; justify-self: flex-end; justify-content: flex-end; flex-direction: column;">
-					 
 					 <a href="/details/{{ card.caption | lower }}?areaType={{ card.areaType | lower }}&areaName={{ card.areaName }}"
-					 class="govuk-link govuk-link--no-visited-state govuk-!-margin-top-3 govuk-!-font-size-14"
+					 class="govuk-link govuk-link--no-visited-state govuk-!-margin-top-3 govuk-!-font-size-16"
 					 style="text-decoration: none"
 					 rel="next"><b>More details on {{ card.caption | lower }} in {{ card.areaName }}</b></a>
 					
 					 <a href="/downloads/easy_read/{{ card.areaType }}/{{ card.areaName }}.docx"
-					   class="govuk-link govuk-link--no-visited-state grey govuk-!-font-size-14"
+					   class="govuk-link govuk-link--no-visited-state grey govuk-!-font-size-16 govuk-!-margin-top-2"
 					   lang="en-GB" style="text-decoration: none"
 					   type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 					   download>Easy-read report for {{ card.areaName }}</a>
 				</div>
-		{% endif %}
+		{%- endif -%}
 
 	</div>
 {% endmacro %}

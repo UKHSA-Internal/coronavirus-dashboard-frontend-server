@@ -6,7 +6,7 @@
 import logging
 import re
 from operator import itemgetter
-from datetime import datetime
+from datetime import datetime, timedelta
 from gzip import compress
 from os.path import abspath, join as join_path, pardir
 from os import getenv
@@ -25,7 +25,8 @@ from pytz import timezone
 from .visualisation import plot_thumbnail, get_colour
 from .data.queries import (
     get_last_fortnight, get_data_by_postcode,
-    get_msoa_data, get_r_values, get_postcode_areas
+    get_msoa_data, get_r_values, get_alert_level,
+    get_postcode_areas, latest_ltla_rate_by_metric
 )
 from .caching import cache_client
 
@@ -79,8 +80,8 @@ get_area_type = itemgetter("areaType")
 main_metric_names: List[str] = [
     "newCasesByPublishDate",
     "newDeaths28DaysByPublishDate",
-    "newPCRTestsByPublishDate",
     "newAdmissions",
+    "newPCRTestsByPublishDate",
 ]
 
 
@@ -182,18 +183,6 @@ def get_main_data(latest_timestamp: str):
     result = dict(
         cards=[
             {
-                "caption": "Testing",
-                "heading": "PCR tests processed",
-                **data['newPCRTestsByPublishDate'],
-                "data": data['newPCRTestsByPublishDate']['data'],
-            },
-            {
-                "caption": "Healthcare",
-                "heading": "Patients admitted",
-                **data['newAdmissions'],
-                "data": data['newAdmissions']['data'],
-            },
-            {
                 "caption": "Cases",
                 "heading": "People tested positive",
                 **data['newCasesByPublishDate'],
@@ -205,7 +194,19 @@ def get_main_data(latest_timestamp: str):
                 **data['newDeaths28DaysByPublishDate'],
                 "data": data['newDeaths28DaysByPublishDate']['data'],
 
-            }  
+            },
+            {
+                "caption": "Healthcare",
+                "heading": "Patients admitted",
+                **data['newAdmissions'],
+                "data": data['newAdmissions']['data'],
+            },
+            {
+                "caption": "Testing",
+                "heading": "Virus tests processed",
+                **data['newPCRTestsByPublishDate'],
+                "data": data['newPCRTestsByPublishDate']['data'],
+            },
         ] 
     )
 
@@ -237,6 +238,11 @@ def get_by_smallest_areatype(items, areatype_getter):
     return result
 
 
+@app.context_processor
+def inject_debug():
+    return dict(DEBUG=app.debug)
+
+
 @app.after_request
 def prepare_response(resp: Response):
     global timestamp
@@ -246,7 +252,10 @@ def prepare_response(resp: Response):
         "%Y-%m-%dT%H:%M:%S.%fZ"
     )
 
+    expires = datetime.now() + timedelta(minutes=1, seconds=30)
+
     resp.headers['Last-Modified'] = last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    resp.headers['Expires'] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
     minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
     data = str.join("", minified).encode()
@@ -317,9 +326,12 @@ def postcode_search() -> render_template:
         styles=css_names,
         postcode_data=response,
         postcode=postcode.upper(),
+        area_info=get_postcode_areas(postcode)[0],
+        cases_rate=latest_ltla_rate_by_metric(postcode, timestamp, "newCasesBySpecimenDate"),
         timestamp=website_timestamp,
         r_values=get_r_values(timestamp, get_postcode_areas(postcode).pop()['nhsRegionName'] ),
         smallest_area=get_by_smallest_areatype(list(response.values()), get_area_type),
+        alert_level=get_alert_level(postcode, timestamp),
         msoa=get_msoa_data(postcode, timestamp),
         **data
     )

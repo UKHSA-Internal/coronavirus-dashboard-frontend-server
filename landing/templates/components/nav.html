@@ -1,72 +1,54 @@
-<script type="application/javascript">
-	function mobileNavi() {
-		var menuPlaceholder = document.getElementById("mobile-navigation-menu");
-		var isEmpty = menuPlaceholder.innerHTML === "";
-		if (isEmpty){
-			var nav = document.createElement('nav');
-			nav.setAttribute("class", "moj-side-navigation moj-side-navigation-mobile");
-			nav.setAttribute("role", "navigation");
-			nav.innerHTML = `
-			<ul class="moj-side-navigation__list "><li class="moj-side-navigation__item moj-side-navigation__item--active"><a aria-current="location" href="/">UK Summary</a></li><li class="moj-side-navigation__item "><a href="/details/testing">Testing</a></li><li class="moj-side-navigation__item "><a href="/details/cases">Cases</a></li><li class="moj-side-navigation__item "><a href="/details/healthcare">Healthcare</a></li><li class="moj-side-navigation__item "><a href="/details/deaths">Deaths</a></li><li class="moj-side-navigation__item "><a href="/details/about-data">About the data</a></li><li class="moj-side-navigation__item "><a href="/details/developers-guide">Developer's guide</a></li></ul><hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-section-break--visible ">
-			`;
-			menuPlaceholder.appendChild(nav);
-		} else {
-			menuPlaceholder.innerHTML = "";
-		}
-	}
-</script>
+<aside class="dashboard-menu">
+	<nav class="moj-side-navigation govuk-!-padding-right-4 govuk-!-padding-top-2" role="navigation"
+	     aria-label="Side navigation">
+		<ul class="moj-side-navigation__list">
+			<li class="moj-side-navigation__item  moj-side-navigation__item--active ">
+				<a aria-current="page" href="/">Daily update</a>
+			</li>
 
-{#<div class="govuk-grid-row">#}
-	<aside class="dashboard-menu">
-		<nav class="moj-side-navigation govuk-!-padding-right-4 govuk-!-padding-top-2" role="navigation" aria-label="Side navigation">
-			<ul class="moj-side-navigation__list">
-				<li class="moj-side-navigation__item  moj-side-navigation__item--active ">
-					<a aria-current="page" href="/">Daily update</a>
-				</li>
+			<li class="moj-side-navigation__item ">
+				<a href="/details/testing">Testing</a>
+			</li>
 
-				<li class="moj-side-navigation__item ">
-					<a href="/details/testing">Testing</a>
-				</li>
+			<li class="moj-side-navigation__item ">
+				<a href="/details/cases">Cases</a>
+			</li>
 
-				<li class="moj-side-navigation__item ">
-					<a href="/details/cases">Cases</a>
-				</li>
+			<li class="moj-side-navigation__item ">
+				<a href="/details/healthcare">Healthcare</a>
+			</li>
 
-				<li class="moj-side-navigation__item ">
-					<a href="/details/healthcare">Healthcare</a>
-				</li>
+			<li class="moj-side-navigation__item ">
+				<a href="/details/deaths">Deaths</a>
+			</li>
 
-				<li class="moj-side-navigation__item ">
-					<a href="/details/deaths">Deaths</a>
-				</li>
+			<hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-section-break--visible">
 
-				<hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-section-break--visible">
+		</ul>
+	</nav>
 
-			</ul>
-		</nav>
+	<div class="tertiary-menu govuk-!-margin-left-3">
+		<ul class="govuk-list govuk-!-font-size-14">
+			{#				<li class="govuk-!-padding-bottom-1">#}
+			{#					<a class="govuk-link" href="data-menu">Data download</a>#}
+			{#				</li>#}
 
-		<div class="tertiary-menu govuk-!-margin-left-3">
-			<ul class="govuk-list govuk-!-font-size-14">
-{#				<li class="govuk-!-padding-bottom-1">#}
-{#					<a class="govuk-link" href="data-menu">Data download</a>#}
-{#				</li>#}
+			<!--
+      <li class="govuk-!-padding-bottom-1">
+        <a class="govuk-link" href="notifications-menu">Daily notifications</a>
+      </li>
+      -->
+			<li class="govuk-!-padding-bottom-1">
+				<a class="govuk-link" href="/details/about-data">About the data</a>
+			</li>
+			<li>
+				<a class="govuk-link" href="/details/developers-guide">Developer's guide</a>
+			</li>
+			{#				<li class="govuk-!-padding-bottom-1">#}
+			{#					<a class="govuk-link" href="#">Change log</a>#}
+			{#				</li>#}
+		</ul>
+	</div>
 
-				<!--
-        <li class="govuk-!-padding-bottom-1">
-          <a class="govuk-link" href="notifications-menu">Daily notifications</a>
-        </li>
-        -->
-				<li class="govuk-!-padding-bottom-1">
-					<a class="govuk-link" href="/details/about-data">About the data</a>
-				</li>
-				<li>
-					<a class="govuk-link" href="/details/developers-guide">Developer's guide</a>
-				</li>
-{#				<li class="govuk-!-padding-bottom-1">#}
-{#					<a class="govuk-link" href="#">Change log</a>#}
-{#				</li>#}
-			</ul>
-		</div>
-
-	</aside>
+</aside>
 {#</div>#}

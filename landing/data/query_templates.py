@@ -16,7 +16,9 @@ __all__ = [
     'PostcodeLookup',
     'LookupByAreaCode',
     'DataByAreaCode',
-    'MsoaData'
+    'MsoaData',
+    'AlertLevel',
+    'SpecimenDateData'
 ]
 
 
@@ -47,7 +49,8 @@ FROM     c
 WHERE    c.releaseTimestamp = @releaseTimestamp
      AND c.areaNameLower    = @areaName
      AND IS_DEFINED(c.$metric)
-ORDER BY c.releaseTimestamp DESC,
+ORDER BY 
+    c.releaseTimestamp DESC,
     c.date             DESC,
     c.areaType         ASC,
     c.areaNameLower    ASC\
@@ -55,8 +58,8 @@ ORDER BY c.releaseTimestamp DESC,
 
 
 PostcodeLookup = """\
-SELECT
-    TOP 1 VALUE udf.postcodeData(c)
+SELECT TOP 1 
+    VALUE udf.postcodeData(c)
 FROM     c
 WHERE    c.type            = 'postcode'
      AND c.trimmedPostcode = @postcode\
@@ -78,18 +81,38 @@ WHERE   c.type     = 'general'
 
 
 DataByAreaCode = Template("""\
-SELECT  
-    TOP 14 VALUE {
+SELECT TOP 14 
+    VALUE {
         'areaName': c.areaName,
         'areaType': c.areaType,
         'date':     c.date,
-        'value':    c.$metric
+        'value':    c.$metric,
+        'rate':     c.${metric}RollingRate ?? null
     }
 FROM    c 
 WHERE   
         c.releaseTimestamp = @releaseTimestamp
     AND c.areaType         = @areaType
-    AND c.areaNameLower    = @areaName
+    AND c.areaCode         = @areaCode
+    AND IS_DEFINED(c.$metric)
+ORDER BY 
+    c.date DESC\
+""")
+
+
+SpecimenDateData = Template("""\
+SELECT TOP 7 
+    VALUE {
+        'date':  c.date,
+        'value': c.$metric,
+        'rate':  c.${metric}RollingRate ?? null
+    }
+FROM    c 
+WHERE   
+        c.releaseTimestamp = @releaseTimestamp
+    AND c.areaType         = @areaType
+    AND c.areaCode         = @areaCode
+    AND c.date            <= @latestDate
     AND IS_DEFINED(c.$metric)
 ORDER BY 
     c.date DESC\
@@ -101,4 +124,22 @@ SELECT
     VALUE udf.cleanData(c) 
 FROM c 
 WHERE c.id = @id\
+"""
+
+
+AlertLevel = """\
+SELECT 
+    TOP 1
+    VALUE udf.processAlertLevel({
+        'date':       c.date, 
+        'alertLevel': c.alertLevel
+    })
+FROM c 
+WHERE 
+      c.releaseTimestamp = @releaseTimestamp
+  AND c.areaType         = @areaType
+  AND c.areaCode         = @areaCode
+  AND IS_DEFINED(c.alertLevel)\
+ORDER BY 
+    c.date DESC
 """

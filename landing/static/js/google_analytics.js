@@ -1,0 +1,1 @@
+function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","UA-161400643-2",{anonymize_ip:!0});

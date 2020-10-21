@@ -1,57 +1,14 @@
 {% extends "base.html" %}
 {% from "components/mini_card.html" import create_card %}
 
-{% block main %}
+{%- block main -%}
 
 	<div id="top">
 		<div class="sticky-header govuk-!-padding-top-3">
 
-			<!-- The overlay -->
-			<div id="mobile-nav" class="overlay">
-
-				<!-- Button to close the overlay navigation -->
-				<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-
-				<!-- Overlay content -->
-				<div class="overlay-content">
-
-
-					<ul class="govuk-list">
-						<li>
-							<a class="govuk-link " href="/">Daily update</a>
-						</li>
-						<li>
-							<a class="govuk-link " href="/details/testing">Tests</a>
-						</li>
-						<li>
-							<a class="govuk-link " href="/details/cases">Cases</a>
-						</li>
-						<li>
-							<a class="govuk-link " href="/details/healthcare">Healthcare</a>
-						</li>
-						<li>
-							<a class="govuk-link " href="/details/deaths">Deaths</a>
-						</li>
-						<hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-3 govuk-!-margin-bottom-3 govuk-section-break--visible">
-
-						<li>
-							<a class="govuk-link" href="/details/about-data">About the data</a>
-						</li>
-						<li>
-							<a class="govuk-link" href="/details/developers-guide">Developer's guide</a>
-						</li>
-					</ul>
-				</div>
-
-
-			</div>
-
-
-			<div class="govuk-grid-row govuk-!-margin-top-0">
+			<div class="sticky-header govuk-grid-row govuk-!-margin-top-0">
 				<div class="govuk-grid-column-one-half">
-					<span class="govuk-caption-l govuk-!-margin-bottom-0 panel-title-new">Daily update</span>
-				</div>
-				<div class="govuk-grid-column-one-half filters govuk-!-padding-top-1">
+					<h1 class="govuk-caption-l govuk-!-margin-bottom-0 govuk-!-margin-top-0 panel-title-new">Daily update</h1>
 				</div>
 			</div>
 
@@ -61,16 +18,22 @@
 				</div>
 			</div>
 
-
 		</div>
 
 	</div>
-	
-	{#<a href="/"> &lt; Back</a>#}
 
+	{% if area_info.ltla.startswith("E") %}
+		{% set nameAttr = "msoaName" %}
+		{% set codeAttr = "msoa" %}
+		{% set areaType = "msoa" %}
+	{% else %}
+		{% set nameAttr = "ltlaName" %}
+		{% set codeAttr = "ltla" %}
+		{% set areaType = "ltla" %}
+	{% endif %}
 	<div class="local-intro govuk-!-margin-left-0">
 		<h2 class="govuk-heading-l govuk-!-margin-bottom-2 govuk-!-margin-top-0 govuk-!-margin-left-0 govuk-!-padding-top-0 govuk-!-padding-left-0">
-			{{ postcode }} - {{ smallest_area.areaName }}
+			{{ postcode }} &ndash; {{ area_info[nameAttr] }}
 		</h2>
 	</div>
 
@@ -82,92 +45,42 @@
 
 	</p>
 
-{#	<span class="govuk-caption-m govuk-!-font-weight-regular"> Current risk level </span>#}
-{#	<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0"> MEDIUM </h3>#}
-{#	<br>#}
-{##}
-{#	<span class="govuk-caption-m govuk-!-font-weight-regular"> Area subject to local restrictions?</span>#}
-{#	<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0"> Yes </h3>#}
-{#	<a href="#">View Details</a>#}
-{#	<br>#}
-{##}
-{#	<span class="govuk-caption-m govuk-!-font-weight-regular"> Rate of cases compared to national average</span>#}
+	<div class="postcode-lead">
+		<figure class="graph govuk-!-margin-bottom-2"
+		        style="margin: 0;">
+			<img src="https://coronavirus.data.gov.uk/public/assets/frontpage/map_thumbnails/{{ area_info[codeAttr] }}.svg"
+			     style="max-width: min(400px, 100%); height: auto; border: 1px #f3f2f1 solid;"
+			     alt="Scale showing the comparison of {{ postcode }} compared to national average."/>
+		</figure>
 
+		<div style="display: block;">
+			{% include "components/alert_level.html" %}
+			{% include "components/comparison_scale.html" %}
+		</div>
+	</div>
 
-
-{#	<h3 class="govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-heading-m">Most relevant data available#}
-{#		for {{ postcode }}: </h3>#}
+	<h3 class="govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-heading-m">
+		Additional relevant data available for {{ postcode }}:
+	</h3>
 	<p class="govuk-body">
-		Some data are not available at local levels &mdash; for example, healthcare data is only
+		Some data are not available at local levels &mdash; for example, healthcare data are only
 		available by NHS region.
 	</p>
 
-	<div class="govuk-grid-row  govuk-!-margin-left-0 govuk-!-margin-top-0" id="local">
+{#	<div class="govuk-grid-row  govuk-!-margin-left-0 govuk-!-margin-top-0" id="local">#}
 
 		<div class="card-container">
 			{% for category, card in postcode_data.items() %}
 				{{ create_card(card, True) }}
 			{% endfor %}
 		</div>
-	</div>
+{#	</div>#}
 
-	{% if msoa %}
-	<p class="govuk-body govuk-!-margin-top-2">People tested positive data are also available at more localised levels: </p>
+{#	<h2 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-!-padding-top-0 govuk-!-padding-left-0">#}
+{#		Search another location</h2>#}
 
-	<details class="govuk-details" data-module="govuk-details">
-		<summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        Middle Layer Super Output Areas (MSOA) - areas with populations of around 8,000
-      </span>
-		</summary>
-		<div class="govuk-details__text" style="display: flex; flex-direction: column;">
-			<h3 class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 govuk-heading-m"> New cases by specimen date
-				in {{ msoa.areaName }}
-				<small class="govuk-caption-m">Latest data provided on {{ msoa.latestDate }}</small>
-			</h3>
+{%- endblock -%}
 
-			<div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0" style="width:80%;">
-				Last 7 days
-			</div>
-
-			<div class="number-group">
-				<div class="number-container govuk-!-padding-right-4">
-					<div class="float tooltip">
-						<h3 class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-							<strong class="number-link"
-							   onclick="showHelp()">{{ msoa.latestSum | format_number | safe }}
-								<span class="tooltiptext govuk-!-font-size-16 number">
-                            Total number of cases in the
-                            last 7 days</span>
-							</strong>
-						</h3>
-					</div>
-				</div>
-			</div>
-		</div>
-	</details>
-	{% endif %}
-
-	<h2 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-!-padding-top-0 govuk-!-padding-left-0">
-		Search another location</h2>
-
-	<div class="govuk-grid-row govuk-!-margin-top-2 govuk-!-margin-left-0 govuk-!-padding-left-0">
-		<div class="govuk-grid-column-one-half govuk-!-margin-left-0 govuk-!-padding-left-0 ">
-
-			<div class="dashboard-panel govuk-!-margin-left-0">
-				<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
-					Search by postcode
-				</h3>
-				<p class="govuk-body">View data for a specific area within the UK.</p>
-				<p class="govuk-body">Not all data are available for every area &ndash; we will show the most
-					local information in each category for your selected area.
-				</p>
-				{% include "components/postcode_search.html" %}
-
-			</div>
-		</div>
-
-		{% include "components/msoa_slide.html" %}
-	</div>
-
-{% endblock %}
+{%- block postcode_search_header -%}
+	Search another location
+{%- endblock -%}
