@@ -53,7 +53,6 @@ main {
   @include govuk-media-query($from: 1150px) {
     grid-template-columns: repeat(4, minmax(20%, 1fr));
     grid-template-rows: 1fr;
-    //grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     grid-gap: 10px;
     &.double-row {
       grid-template-columns: repeat(2, auto);
@@ -67,66 +66,18 @@ main {
   }
 }
 
-
-
-
 .mini-card {
-  //flex: 1 2 160px;
   padding: 20px;
-  //min-width: 160px;
-  //margin: 10px 10px;
   background-color: #f8f8f8;
   border: 1px #f3f2f1 solid;
   display: flex;
   flex-direction: column;
   align-content: flex-end;
   align-self: stretch;
-
-  //&.map-view {
-  //  display: flex;
-  //  flex-direction: column;
-  //  flex-wrap: wrap;
-  //}
-  //.map-img {
-  //  margin-bottom: -20px;
-  //  max-height: 500px;
-  //}
-  ////&.map {
-  ////
-  ////}
-  //
-  //@include govuk-media-query($from: 600) {
-  //  &.map {
-  //    display: flex;
-  //    //flex-direction: row;
-  //  }
-  //
-  //  .map-img {
-  //    height: 380px;
-  //  }
-  //}
-  //
-  //@include govuk-media-query($from: mobile) {
-  //  &.map-view {
-  //    display: flex;
-  //    //flex-direction: row;
-  //    //flex-wrap: nowrap;
-  //    //flex: 1 2 45%;
-  //    //flex-wrap: wrap;
-  //  }
-  //
-  //  .map-img {
-  //    max-height: 380px;
-  //  }
-  //}
-
 }
 
 .map-view {
   display: grid;
-  //flex-wrap: wrap;
-  //flex-direction: row;
-  //width: 100%;
 
   .map-img {
     max-height: 470px;
@@ -254,7 +205,7 @@ main {
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr auto;
-  grid-gap: 10px;
+  grid-gap: 30px;
 
   @include govuk-media-query($from: mobile) {
     grid-template-columns: 1fr 1fr;
