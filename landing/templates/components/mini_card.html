@@ -98,36 +98,29 @@
 
 		</div>
 		{%- if (card.caption) == "Cases" -%}
-		<p class="govuk-caption-m govuk-!-font-weight-regular govuk-!-margin-top-0">
-			Rate per 100k resident population:&nbsp;<strong>
-			
-				{{ cases_rate.rollingRate | format_number }}
-			
-			</strong>
+		<p class="govuk-!-font-weight-regular govuk-!-margin-top-3 govuk-!-margin-bottom-1 gray-text">
+			Rate per 100k resident
+			population:&nbsp;<strong>{{ cases_rate.rollingRate | format_number }}</strong>
 		</p>
 		{%- endif -%}
 
 		{%- if (card.caption) == "Deaths" and not is_postcode -%}
-		<p class="govuk-caption-m govuk-!-font-weight-regular govuk-!-margin-top-0">
-			Rate per 100k resident population:&nbsp;<strong>
-			
-				{{ deaths_rate.rollingRate | format_number }}
-			
-			</strong>
+		<p class="govuk-caption-s govuk-!-font-weight-regular govuk-!-margin-top-3 govuk-!-margin-bottom-1 gray-text">
+			Rate per 100k resident
+			population:&nbsp;<strong>{{ deaths_rate.rollingRate | format_number }}</strong>
 		</p>
 		{%- endif -%}
 
 		{%- if not is_postcode -%}
-			<figure class="graph"
-			        style="display: flex; width: 100%; height: 100%; justify-content: center; align-items: flex-end">
-				<img src="{{ card.graph }}" alt="Graph" style="">
+			<figure class="graph mini-card-figure">
+				<img src="{{ card.graph }}" alt="Graph">
 			</figure>
-			<div class="govuk-!-margin-top-4" style="display: flex; width: 100%; justify-content: flex-end;">
-				<a class="govuk-link more-detail govuk-link--no-visited-state" rel="next"
-				   href="/details/{{ card.caption | lower }}" style="margin-top: 1rem;">All {{ card.caption | lower }} data</a>
+			<div class="govuk-!-margin-top-4 min-card-more-detail">
+				<a class="govuk-link more-detail govuk-link--no-visited-state govuk-!-margin-top-2" rel="next"
+				   href="/details/{{ card.caption | lower }}">All {{ card.caption | lower }} data</a>
 			</div>
 		{%- else -%}
-				<div class="govuk-!-margin-top-5"
+				<div class="govuk-!-margin-top-0"
 				     style="display: flex; height: 100%; justify-self: flex-end; justify-content: flex-end; flex-direction: column;">
 					 <a href="/details/{{ card.caption | lower }}?areaType={{ card.areaType | lower }}&areaName={{ card.areaName }}"
 					 class="govuk-link govuk-link--no-visited-state govuk-!-margin-top-3 govuk-!-font-size-16"
