@@ -37,14 +37,6 @@
 		</h2>
 	</div>
 
-	<p class="govuk-body-m govuk-!-margin-top-0 govuk-!-margin-bottom-1">
-		The latest R number for this NHS region is estimated at
-		<span><b> {{ r_values.transmissionRateMin }} to {{ r_values.transmissionRateMax }}</b></span> with
-		a daily growth rate range
-		of <span><b>{{ r_values.transmissionRateGrowthRateMin }}% to {{ r_values.transmissionRateGrowthRateMax }}%</b></span>.
-
-	</p>
-
 	<div class="postcode-lead">
 		<figure class="graph govuk-!-margin-bottom-2"
 		        style="margin: 0;">
@@ -62,22 +54,24 @@
 	<h3 class="govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-heading-m">
 		Additional relevant data available for {{ postcode }}:
 	</h3>
-	<p class="govuk-body">
+
+	<p class="govuk-body-m govuk-!-margin-top-2" style="max-width: 40em">
 		Some data are not available at local levels &mdash; for example, healthcare data are only
 		available by NHS region.
 	</p>
 
-{#	<div class="govuk-grid-row  govuk-!-margin-left-0 govuk-!-margin-top-0" id="local">#}
+	<p class="govuk-body-m govuk-!-margin-bottom-1" style="max-width: 40em">
+		The latest R number for the healthcare region of {{ area_info["nhsRegionName"] }} is estimated
+		at&nbsp;<b>{{ r_values.transmissionRateMin }}&nbsp;to&nbsp;{{ r_values.transmissionRateMax }}</b>&nbsp;with
+		a daily growth rate range
+		of&nbsp;<b>{{ r_values.transmissionRateGrowthRateMin }}%&nbsp;to&nbsp;{{ r_values.transmissionRateGrowthRateMax }}%</b>.
+	</p>
 
 		<div class="card-container">
 			{% for category, card in postcode_data.items() %}
 				{{ create_card(card, True) }}
 			{% endfor %}
 		</div>
-{#	</div>#}
-
-{#	<h2 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-5 govuk-!-padding-top-0 govuk-!-padding-left-0">#}
-{#		Search another location</h2>#}
 
 {%- endblock -%}
 
