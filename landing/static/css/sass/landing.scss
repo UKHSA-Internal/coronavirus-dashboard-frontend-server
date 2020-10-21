@@ -251,3 +251,12 @@ main {
   width: 100%;
   justify-content: flex-end;
 }
+
+.tooltiptext {
+  background: rgba(0, 0, 0, .85) !important;
+  border-radius: 3px;
+  transition: opacity 0.3s ease-out;
+  font-size: .9rem !important;
+  padding: .5rem 1rem !important;
+  width: 150px !important;
+}
