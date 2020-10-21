@@ -37,6 +37,14 @@
 		</h2>
 	</div>
 
+	<p class="govuk-body-m govuk-!-margin-top-0 govuk-!-margin-bottom-1">
+		The latest R number for this NHS region is estimated at
+		<span><b> {{ r_values.transmissionRateMin }} to {{ r_values.transmissionRateMax }}</b></span> with
+		a daily growth rate range
+		of <span><b>{{ r_values.transmissionRateGrowthRateMin }}% to {{ r_values.transmissionRateGrowthRateMax }}%</b></span>.
+
+	</p>
+
 	<div class="postcode-lead">
 		<figure class="graph govuk-!-margin-bottom-2"
 		        style="margin: 0;">

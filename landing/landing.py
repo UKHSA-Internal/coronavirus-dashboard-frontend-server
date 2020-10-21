@@ -329,7 +329,7 @@ def postcode_search() -> render_template:
         area_info=get_postcode_areas(postcode)[0],
         cases_rate=latest_ltla_rate_by_metric(postcode, timestamp, "newCasesBySpecimenDate"),
         timestamp=website_timestamp,
-        r_values=get_r_values(timestamp),
+        r_values=get_r_values(timestamp, get_postcode_areas(postcode).pop()['nhsRegionName'] ),
         smallest_area=get_by_smallest_areatype(list(response.values()), get_area_type),
         alert_level=get_alert_level(postcode, timestamp),
         msoa=get_msoa_data(postcode, timestamp),
