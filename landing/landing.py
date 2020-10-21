@@ -203,7 +203,7 @@ def get_main_data(latest_timestamp: str):
             },
             {
                 "caption": "Testing",
-                "heading": "PCR tests processed",
+                "heading": "Virus tests processed",
                 **data['newPCRTestsByPublishDate'],
                 "data": data['newPCRTestsByPublishDate']['data'],
             },
