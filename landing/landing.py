@@ -324,6 +324,12 @@ def postcode_search() -> render_template:
             **data
         )
 
+    postcode_data = get_postcode_areas(postcode).pop()
+
+    healthcare_region = postcode_data['nhsRegionName']
+    if healthcare_region is None:
+        healthcare_region = postcode_data['nationName']
+
     return render_template(
         "postcode_results.html",
         og_images=get_og_image_names(timestamp),
@@ -332,9 +338,8 @@ def postcode_search() -> render_template:
         postcode=postcode.upper(),
         area_info=get_postcode_areas(postcode)[0],
         cases_rate=latest_rate_by_metric(timestamp, "newCasesBySpecimenDate", True, postcode),
-        #deaths_rate=latest__rate_by_metric(timestamp, "newDeaths28DaysByDeathDate", True, postcode),
         timestamp=website_timestamp,
-        r_values=get_r_values(timestamp, get_postcode_areas(postcode).pop()['nhsRegionName'] ),
+        r_values=get_r_values(timestamp, healthcare_region),
         smallest_area=get_by_smallest_areatype(list(response.values()), get_area_type),
         alert_level=get_alert_level(postcode, timestamp),
         msoa=get_msoa_data(postcode, timestamp),
