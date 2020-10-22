@@ -281,7 +281,6 @@ def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=""):
 
     try:
         result = data_db.query(query, params=params)
-        logging.warning(result)
         latest = max(result, key=lambda x: x['date'])
         response = {
             "date": process_dates(latest['date'])['formatted'],
