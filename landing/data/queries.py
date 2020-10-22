@@ -72,6 +72,14 @@ AreaTypeNames = {
     "nation": "Nation"
 }
 
+AreaTypeShortNames = {
+    "nhsRegion": "Healthcare",
+    "ltla": "Local Authority",
+    "utla": "Local Authority",
+    "region": "Region",
+    "nation": "Nation"
+}
+
 data_db = CosmosDB(Collection.DATA)
 lookup_db = CosmosDB(Collection.LOOKUP)
 weekly_db = CosmosDB(Collection.WEEKLY)
@@ -82,7 +90,7 @@ def process_dates(date: str) -> ProcessedDateType:
         'date': datetime.strptime(date, "%Y-%m-%d"),
     }
 
-    result['formatted'] = result['date'].strftime('%-d %b %Y')
+    result['formatted'] = result['date'].strftime('%-d %B %Y')
 
     return result
 
@@ -194,8 +202,12 @@ def get_data_by_code(area, timestamp):
             results[category.capitalize()] = {
                 "value": latest["value"],
                 # "date": process_dates(latest.pop("date"))["formatted"],
-                "areaType_formatted": AreaTypeNames[area_type],
-                "areaType": area_type,
+                # "areaType_formatted": AreaTypeNames[area_type],
+                "areaType": {
+                    "abbr": area_type,
+                    "formatted": AreaTypeNames[area_type],
+                    "short": AreaTypeShortNames[area_type]
+                },
                 "areaName": latest["areaName"],
                 "data": [{**item, **process_dates(item['date'])} for item in data],
                 **metric_data,

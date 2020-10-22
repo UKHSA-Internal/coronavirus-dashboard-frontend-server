@@ -95,6 +95,12 @@ def format_timestamp(latest_timestamp: str) -> str:
     return result
 
 
+@app.template_filter()
+def as_datestamp(latest_timestamp: str) -> str:
+    datestamp = latest_timestamp.split("T")[0]
+    return datestamp
+
+
 @cache_client.memoize(60 * 60 * 6)
 def get_og_image_names(latest_timestamp: str) -> list:
     ts_python_iso = latest_timestamp[:-2]
@@ -155,7 +161,7 @@ def get_card_data(metric_name: str, metric_data, graph=True):
         "data": metric_data,
         "change": change,
         "colour": colour,
-        "latest_date": metric_data[0]["date"].strftime('%-d %B')
+        "latest_date": metric_data[0]["date"].strftime('%-d %B %Y')
     }
 
     if graph:
@@ -230,8 +236,8 @@ def get_by_smallest_areatype(items, areatype_getter):
     result = None
 
     for item_ind, area_type in enumerate(area_types):
-        order_index = order.index(area_type)
-        if area_type in order and order_index < min_index:
+        order_index = order.index(area_type['abbr'])
+        if area_type['abbr'] in order and order_index < min_index:
             result = items[item_ind]
             min_index = order_index
 
