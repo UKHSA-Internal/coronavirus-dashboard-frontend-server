@@ -4,7 +4,7 @@
 <Description of the programme>
 
 Author:        Pouria Hadjibagheri <pouria.hadjibagheri@phe.gov.uk>
-Created:       23 Aug 2020
+Created:       26 Oct 2020
 License:       MIT
 Contributors:  Pouria Hadjibagheri
 """
@@ -15,10 +15,8 @@ Contributors:  Pouria Hadjibagheri
 
 # 3rd party:
 
-# Internal: 
-from .database import CosmosDB
-from .utils import Collection
-from .models import BaseModel
+# Internal:
+from .visualisation import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Header

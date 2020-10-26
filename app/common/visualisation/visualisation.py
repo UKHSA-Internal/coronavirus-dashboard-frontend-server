@@ -96,7 +96,7 @@ def svg_to_url(svg):
     return "data:image/svg+xml;utf8," + quote(svg)
 
 
-# @cache_client.memoize(60 * 10)
+@cache_client.memoize(60 * 60 * 6)
 def plot_thumbnail(timeseries, change, metric_name):
     get_date = itemgetter("date")
     get_value = itemgetter("value")

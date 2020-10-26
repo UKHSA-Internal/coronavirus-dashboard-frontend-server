@@ -4,7 +4,7 @@
 <Description of the programme>
 
 Author:        Pouria Hadjibagheri <pouria.hadjibagheri@phe.gov.uk>
-Created:       23 Aug 2020
+Created:       24 Oct 2020
 License:       MIT
 Contributors:  Pouria Hadjibagheri
 """
@@ -12,13 +12,12 @@ Contributors:  Pouria Hadjibagheri
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+from datetime import datetime
+from typing import Dict, Union, List
 
 # 3rd party:
 
 # Internal: 
-from .database import CosmosDB
-from .utils import Collection
-from .models import BaseModel
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Header
@@ -27,3 +26,16 @@ __copyright__ = "Copyright (c) 2020, Public Health England"
 __license__ = "MIT"
 __version__ = "0.0.1"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ProcessedDateType = Dict[str, Union[str, datetime]]
+
+NumericType = Union[int, float]
+
+DatabaseValueType = Union[str, Union[str, NumericType, ProcessedDateType]]
+
+DatabaseRowType = Union[
+    Dict[str, DatabaseValueType],
+    List[DatabaseValueType]
+]
+
+DatabaseOutputType = List[DatabaseRowType]

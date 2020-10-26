@@ -45,7 +45,7 @@
 			     alt="Scale showing the comparison of {{ postcode }} compared to national average."/>
 		</figure>
 
-		<div style="display: block;">
+		<div>
 			{% include "components/alert_level.html" %}
 			{% include "components/comparison_scale.html" %}
 		</div>
@@ -64,7 +64,7 @@
 	{% set R_growth_max = r_values.transmissionRateGrowthRateMax %}
 	<p class="govuk-body-m govuk-!-margin-bottom-1">
 		The latest R number for
-		{% if area_info["nhsRegionName"] is defined -%}the healthcare region of{%- endif %}
+		{% if area_info["ltla"][0] not in "NSW" -%}the healthcare region of{%- endif %}
 		{{ area_info["nhsRegionName"] | default(area_info['nationName'], true) }} is estimated
 		at&nbsp;<b>{{ r_values.transmissionRateMin }}&nbsp;to&nbsp;{{ r_values.transmissionRateMax }}</b>&nbsp;with
 		a daily infection growth rate range

@@ -24,9 +24,9 @@
 
 		</div>
 
-		<div class="govuk-grid-row govuk-!-margin-top-2 ">
+		<div class="govuk-grid-row">
 			<div class="govuk-grid-column-full ">
-				<p class="govuk-body-m govuk-!-margin-bottom-1">
+				<p class="govuk-body-m govuk-!-margin-bottom-1 govuk-!-margin-top-3">
 					The official UK Government website for data and insights on Coronavirus (COVID-19).
 				</p>
 				<h2 class="govuk-heading-l">UK Summary</h2>
@@ -48,22 +48,11 @@
 		</div>
 	</div>
 
-
-
-
-
 	<div class="card-container">
 		{% for card in cards %}
 			{{ create_card(card, False) }}
 		{% endfor %}
 	</div>
-
-{#	<h2 class="govuk-heading-l govuk-!-margin-top-3 govuk-!-margin-bottom-0">What's the situation in your local area?</h2>#}
-
-
-
-
-	{#	</div>#}
 
 {%- endblock -%}
 

@@ -5,13 +5,15 @@
 # Python:
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, Union, List
-from functools import partial
+from typing import Dict
+from functools import lru_cache
 
 # 3rd party:
+from flask import g
 
 # Internal:
 from . import query_templates as queries
+from . import constants as const, types
 from ..caching import cache_client
 
 try:
@@ -32,61 +34,10 @@ __all__ = [
     'latest_rate_by_metric'
 ]
 
-ProcessedDateType = Dict[str, Union[str, datetime]]
-NumericType = Union[int, float]
-DatabaseValueType = Union[str, Union[str, NumericType, ProcessedDateType]]
-DatabaseRowType = Union[
-    Dict[str, DatabaseValueType],
-    List[DatabaseValueType]
-]
-DatabaseOutputType = List[DatabaseRowType]
 
-destination_metrics = {
-    'cases': {
-        "metric": 'newCasesByPublishDate',
-        "caption": "Cases",
-        "heading": "People tested positive",
-    },
-    'deaths': {
-        "metric": 'newDeaths28DaysByPublishDate',
-        "caption": "Deaths",
-        "heading": "Deaths within 28 days of positive test",
-    },
-    'healthcare': {
-        "metric": 'newAdmissions',
-        "caption": "Healthcare",
-        "heading": "Patients admitted",
-    },
-    'testing': {
-        "metric": 'newPCRTestsByPublishDate',
-        "caption": "Testing",
-        "heading": "Virus tests processed",
-    }
-}
-
-AreaTypeNames = {
-    "nhsRegion": "Healthcare Region",
-    "ltla": "Local Authority (Lower tier)",
-    "utla": "Local Authority (Upper tier)",
-    "region": "Region",
-    "nation": "Nation"
-}
-
-AreaTypeShortNames = {
-    "nhsRegion": "Healthcare",
-    "ltla": "Local Authority",
-    "utla": "Local Authority",
-    "region": "Region",
-    "nation": "Nation"
-}
-
-data_db = CosmosDB(Collection.DATA)
-lookup_db = CosmosDB(Collection.LOOKUP)
-weekly_db = CosmosDB(Collection.WEEKLY)
-
-
-def process_dates(date: str) -> ProcessedDateType:
-    result = {
+@lru_cache(maxsize=512)
+def process_dates(date: str) -> types.ProcessedDateType:
+    result: dict = {
         'date': datetime.strptime(date, "%Y-%m-%d"),
     }
 
@@ -96,7 +47,7 @@ def process_dates(date: str) -> ProcessedDateType:
 
 
 @cache_client.memoize(60 * 5)
-def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> DatabaseOutputType:
+def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> types.DatabaseOutputType:
     """
     Retrieves the last fortnight worth of ``metric`` values
     for ``areaName`` as released on ``timestamp``.
@@ -113,7 +64,7 @@ def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> DatabaseO
 
     result = [
         {**row, **process_dates(row["date"])}
-        for row in data_db.query_iter(query, params=params)
+        for row in g.data_db.query_iter(query, params=params)
     ]
 
     return result
@@ -135,34 +86,37 @@ def get_latest_value(metric: str, timestamp: str, area_name: str):
         {"name": "@areaName", "value": area_name.lower()}
     ]
 
-    result = data_db.query(query, params=params)
+    result = g.data_db.query(query, params=params)
     
     return result[0]["value"]
 
 
 @cache_client.memoize(60 * 60 * 12)
-def get_postcode_areas(postcode):
+def get_postcode_areas_from_db(postcode):
     query = queries.PostcodeLookup
 
     params = [
         {"name": "@postcode", "value": postcode.replace(" ", "").upper()},
     ]
 
-    return lookup_db.query(query, params=params)
+    return g.lookup_db.query(query, params=params).pop()
+
+
+@lru_cache(maxsize=256)
+def get_postcode_areas(postcode) -> Dict[str, str]:
+    return get_postcode_areas_from_db(postcode)
 
 
 @cache_client.memoize(60 * 60 * 6)
 def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
-    get_latest = partial(get_latest_value, timestamp=latest_timestamp, area_name=area_name)
+    query = queries.LatestTransmissionRate
 
-    result = {
-        "transmissionRateMin": get_latest("transmissionRateMin"),
-        "transmissionRateMax": get_latest("transmissionRateMax"),
-        "transmissionRateGrowthRateMin": get_latest("transmissionRateGrowthRateMin"),
-        "transmissionRateGrowthRateMax": get_latest("transmissionRateGrowthRateMax")
-    }
+    params = [
+        {"name": "@releaseTimestamp", "value": latest_timestamp},
+        {"name": "@areaName", "value": area_name.lower()}
+    ]
 
-    return result
+    return g.data_db.query(query, params=params).pop()
 
 
 @cache_client.memoize(60 * 60 * 12)
@@ -173,15 +127,16 @@ def get_data_by_code(area, timestamp):
         {"name": "@areaCode", "value": area['ltla']},
     ]
 
-    result = lookup_db.query(query, params=params)
+    result = g.lookup_db.query(query, params=params)
     try:
         location_data = result.pop()
-    except IndexError:
+    except IndexError as err:
         logging.critical(f"Missing lookup value for {params}")
+        raise err
 
     results = dict()
 
-    for category, metric_data in destination_metrics.items():
+    for category, metric_data in const.DestinationMetrics.items():
         destination = location_data['destinations'].get(category)
 
         query = queries.DataByAreaCode.substitute(metric=metric_data["metric"])
@@ -195,18 +150,16 @@ def get_data_by_code(area, timestamp):
         ]
 
         try:
-            data = data_db.query(query, params=params)
+            data = g.data_db.query(query, params=params)
             latest = data[0]
             area_type = latest.pop("areaType")
 
             results[category.capitalize()] = {
                 "value": latest["value"],
-                # "date": process_dates(latest.pop("date"))["formatted"],
-                # "areaType_formatted": AreaTypeNames[area_type],
                 "areaType": {
                     "abbr": area_type,
-                    "formatted": AreaTypeNames[area_type],
-                    "short": AreaTypeShortNames[area_type]
+                    "formatted": const.AreaTypeNames[area_type],
+                    "short": const.AreaTypeShortNames[area_type]
                 },
                 "areaName": latest["areaName"],
                 "data": [{**item, **process_dates(item['date'])} for item in data],
@@ -221,7 +174,7 @@ def get_data_by_code(area, timestamp):
 @cache_client.memoize(60 * 60 * 6)
 def get_msoa_data(postcode, timestamp):
     query = queries.MsoaData
-    area = get_postcode_areas(postcode).pop()
+    area = get_postcode_areas(postcode)
     area_code = area['msoa']
     area_name = area['msoaName']
 
@@ -230,8 +183,8 @@ def get_msoa_data(postcode, timestamp):
     ]
 
     try:
-        data = weekly_db.query(query, params=params).pop()
-        cases_data = data["latest"]["newCasesBySpecimenDate"]
+        data: Dict[str, dict] = g.weekly_db.query(query, params=params).pop()
+        cases_data: dict = data["latest"]["newCasesBySpecimenDate"]
 
         response = {
             "areaName": area_name,
@@ -249,7 +202,7 @@ def get_msoa_data(postcode, timestamp):
 @cache_client.memoize(60 * 60 * 6)
 def get_alert_level(postcode, timestamp):
     area = get_postcode_areas(postcode)
-    area_code = area.pop()['ltla']
+    area_code = area['ltla']
 
     query = queries.AlertLevel
     params = [
@@ -259,7 +212,7 @@ def get_alert_level(postcode, timestamp):
     ]
 
     try:
-        response = data_db.query(query, params=params).pop()
+        response = g.data_db.query(query, params=params).pop()
         return response
     except (KeyError, IndexError):
         return None
@@ -267,32 +220,45 @@ def get_alert_level(postcode, timestamp):
 
 @cache_client.memoize(60 * 60 * 6)
 def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=""):
+    last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
+
+    offset = 5 if "admissions" not in metric.lower() else 0
+
+    latest_date = (last_published - timedelta(days=offset)).strftime("%Y-%m-%d")
+
     if ltla:
         area = get_postcode_areas(postcode)
-        area_code = area.pop()['ltla']
+
+        if metric != const.DestinationMetrics["healthcare"]["metric"]:
+            # Non-healthcare metrics use LTLA.
+            area_type = 'ltla'
+        elif area['nation'][0].upper() not in "SNW":
+            # England uses NHS Region.
+            area_type = 'nhsRegion'
+        else:
+            # DAs don't have NHS Region - switch to nation.
+            area_type = 'nation'
+
+        area_code = area[area_type]
         query = queries.SpecimenDateData.substitute(metric=metric)
-    else:
-        query = queries.SpecimenDateDataOverview.substitute(metric=metric)
 
-    last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
-    latest_date = (last_published - timedelta(days=5)).strftime("%Y-%m-%d")
-
-    if ltla:
         params = [
             {"name": "@latestDate", "value": latest_date},
             {"name": "@releaseTimestamp", "value": timestamp},
             {"name": "@areaCode", "value": area_code},
-            {"name": "@areaType", "value": 'ltla'},
+            {"name": "@areaType", "value": area_type},
         ]
     else:
+        query = queries.SpecimenDateDataOverview.substitute(metric=metric)
+
         params = [
-        {"name": "@latestDate", "value": latest_date},
-        {"name": "@releaseTimestamp", "value": timestamp},
-        {"name": "@areaType", "value": 'nation'},
-    ]
+            {"name": "@latestDate", "value": latest_date},
+            {"name": "@releaseTimestamp", "value": timestamp},
+            {"name": "@areaType", "value": 'nation'},
+        ]
 
     try:
-        result = data_db.query(query, params=params)
+        result = g.data_db.query(query, params=params)
         latest = max(result, key=lambda x: x['date'])
         response = {
             "date": process_dates(latest['date'])['formatted'],
@@ -302,13 +268,12 @@ def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=""):
 
         return response
 
-    except (KeyError, IndexError) as err:
+    except (KeyError, IndexError):
         return None
 
 
 def get_data_by_postcode(postcode, timestamp):
     # ToDo: Fail for invalid postcodes
     area = get_postcode_areas(postcode)
-    area = area.pop()
 
     return get_data_by_code(area, timestamp)

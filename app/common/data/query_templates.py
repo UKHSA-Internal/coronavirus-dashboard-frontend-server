@@ -18,7 +18,8 @@ __all__ = [
     'DataByAreaCode',
     'MsoaData',
     'AlertLevel',
-    'SpecimenDateData'
+    'SpecimenDateData',
+    'LatestTransmissionRate'
 ]
 
 
@@ -57,9 +58,46 @@ ORDER BY
 """)
 
 
+LatestTransmissionRate = """\
+SELECT TOP 1
+    VALUE {
+        'transmissionRateMin': c.transmissionRateMin,
+        'transmissionRateMax': c.transmissionRateMax,
+        'transmissionRateGrowthRateMin': c.transmissionRateGrowthRateMin,
+        'transmissionRateGrowthRateMax': c.transmissionRateGrowthRateMax
+    }
+FROM     c
+WHERE    c.releaseTimestamp = @releaseTimestamp
+     AND c.areaNameLower    = @areaName
+     AND IS_DEFINED(c.transmissionRateMin)
+ORDER BY 
+    c.releaseTimestamp DESC,
+    c.date             DESC,
+    c.areaType         ASC,
+    c.areaNameLower    ASC\
+"""
+
+
 PostcodeLookup = """\
 SELECT TOP 1 
-    VALUE udf.postcodeData(c)
+    VALUE {
+        'postcode': c.postcode, 
+        'trimmedPostcode': c.trimmedPostcode,
+        'lsoa': c.lsoa, 
+        'lsoaName': c.lsoaName, 
+        'msoa': c.msoa,
+        'msoaName': c.msoaName, 
+        'ltla': c.ltla, 
+        'ltlaName': c.ltlaName, 
+        'utla': c.utla, 
+        'utlaName': c.utlaName, 
+        'region': c.region, 
+        'regionName': c.regionName, 
+        'nhsRegion': c.nhsRegion, 
+        'nhsRegionName': c.nhsRegionName, 
+        'nation': c.nation, 
+        'nationName': c.nationName
+    }
 FROM     c
 WHERE    c.type            = 'postcode'
      AND c.trimmedPostcode = @postcode\
@@ -117,6 +155,7 @@ WHERE
 ORDER BY 
     c.date DESC\
 """)
+
 
 SpecimenDateDataOverview = Template("""\
 SELECT TOP 7 
