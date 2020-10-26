@@ -219,7 +219,7 @@ def get_alert_level(postcode, timestamp):
 
 
 @cache_client.memoize(60 * 60 * 6)
-def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=""):
+def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=None):
     last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
 
     offset = 5 if "admissions" not in metric.lower() else 0
@@ -254,7 +254,7 @@ def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=""):
         params = [
             {"name": "@latestDate", "value": latest_date},
             {"name": "@releaseTimestamp", "value": timestamp},
-            {"name": "@areaType", "value": 'nation'},
+            {"name": "@areaType", "value": 'overview'},
         ]
 
     try:
@@ -262,8 +262,8 @@ def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=""):
         latest = max(result, key=lambda x: x['date'])
         response = {
             "date": process_dates(latest['date'])['formatted'],
-            "rollingSum": sum(map(lambda x: x['value'], result)),
-            "rollingRate": latest['rate']
+            "rollingSum": latest['rollingSum'],
+            "rollingRate": latest['rollingRate']
         }
 
         return response

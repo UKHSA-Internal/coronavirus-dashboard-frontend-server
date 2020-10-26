@@ -139,11 +139,12 @@ ORDER BY
 
 
 SpecimenDateData = Template("""\
-SELECT TOP 7 
+SELECT TOP 7
     VALUE {
-        'date':  c.date,
-        'value': c.$metric,
-        'rate':  c.${metric}RollingRate ?? null
+        'date':         c.date,
+        'value':        c.$metric,
+        'rollingRate':  c.${metric}RollingRate ?? null,
+        'rollingSum':   c.${metric}RollingSum  ?? null
     }
 FROM    c 
 WHERE   
@@ -158,11 +159,12 @@ ORDER BY
 
 
 SpecimenDateDataOverview = Template("""\
-SELECT TOP 7 
+SELECT TOP 1
     VALUE {
-        'date':  c.date,
-        'value': c.$metric,
-        'rate':  c.${metric}RollingRate ?? null
+        'date':        c.date,
+        'value':       c.$metric,
+        'rollingRate': c.${metric}RollingRate ?? null,
+        'rollingSum':  c.${metric}RollingSum  ?? null
     }
 FROM    c 
 WHERE   
