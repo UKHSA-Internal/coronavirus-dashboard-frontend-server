@@ -16,11 +16,6 @@ from . import query_templates as queries
 from . import constants as const, types
 from ..caching import cache_client
 
-try:
-    from __app__.database import CosmosDB, Collection
-except ImportError:
-    from database import CosmosDB, Collection
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
