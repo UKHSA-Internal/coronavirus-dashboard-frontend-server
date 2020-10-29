@@ -128,10 +128,13 @@ obj
 appsettings.json
 local.settings.json
 .python_packages
-
 proxies.json
 
+tests/.env
 node_modules/
 
 landing/static/css/application.css
 landing/static/css/application.css.map
+
+response.txt
+

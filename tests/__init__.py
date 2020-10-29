@@ -3,10 +3,10 @@
 """
 <Description of the programme>
 
-Author:        Pouria Hadjibagheri <pouria.hadjibagheri@phe.gov.uk>
-Created:       23 Aug 2020
+Author:        Brogan Goble <brogan.goble@phe.gov.uk>
+Created:       22 Oct 2020
 License:       MIT
-Contributors:  Pouria Hadjibagheri
+Contributors:  Brogan Goble
 """
 
 # Imports
@@ -15,14 +15,15 @@ Contributors:  Pouria Hadjibagheri
 
 # 3rd party:
 
-# Internal: 
-from .database import CosmosDB
-from .utils import Collection
+# Internal:
+
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Header
-__author__ = "Pouria Hadjibagheri"
+__author__ = "Brogan Goble"
 __copyright__ = "Copyright (c) 2020, Public Health England"
 __license__ = "MIT"
 __version__ = "0.0.1"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+

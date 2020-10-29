@@ -17,7 +17,7 @@ Contributors:  Pouria Hadjibagheri
 
 # Internal:
 
-from .app import main
+from .app import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Header
@@ -28,5 +28,7 @@ __version__ = "0.0.1"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'main'
+    'main',
+    'app',
+    'inject_timestamps_tests'
 ]

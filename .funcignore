@@ -1,6 +1,7 @@
 .git*
 .vscode
 local.settings.json
+/tests/.env
 /test
 /.venv
 

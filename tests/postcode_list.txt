@@ -1,0 +1,23 @@
+CF101AE  # Welsh example to test Healthcare page not showing
+AB101AU  # Scot example - was erroring on local postcode search
+BT11AA   # NI example
+CB12QX   # Julian request - diff MSOa on local page and map page (not an issue just pin accuracy when postcode is whole street)
+TR210PP  # Isles of Scilly E06000053
+TR96QP   # Cornwall E06000052
+LU70BB   # Aylesbury Vale in E07000007 EofE nhsRegion (rare)
+MK170DL  # Aylesbury Vale in E07000007 EofE nhsRegion (rare) - check ?
+HP169PW  # Aylesbury Vale in E07000005 SE   nhsRegion (common)
+Sg141AH  # ??
+DA144HA  # Sid West (wrong msoa names in v 1.5)
+DA157HD  # Sid East (wrong msoa names in v 1.5)
+Yo255HA  # E Riding of York - sim case rate to Eng but avg bar misaligned (now fixed - was due to -20 and +100 skew on bar?)
+W1T6PJ   # terminated postcode on 2020-04
+MK183GZ  # new postcode only in Aug2020 pcode file that maps to E06000060
+HP108AA  # E07000005
+HP100JR  # E07000006
+HP100AA  # E07000007
+CA14 4AB # E07000129 Copeland (some of msoa elsewhere?)
+LE15 8NZ # E07000152 E Northamptonshire (some of msoa elsewhere?)
+BB18 6JH # E07000163 Craven (some of msoa elsewhere?)
+GL7 3HA  # E07000180 Vale of White Horse (some of msoa elsewhere?)
+EC2N 4AA # E09000012 (merged from E09000001) new postcode in CoL

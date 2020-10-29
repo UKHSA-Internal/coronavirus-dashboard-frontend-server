@@ -13,7 +13,8 @@ from typing import Union
 from functools import lru_cache
 
 # 3rd party:
-from flask import Flask, request, Response, g
+from flask import Flask, request, Response, g, appcontext_pushed
+from contextlib import contextmanager
 from azure.functions import HttpRequest, HttpResponse, WsgiMiddleware, Context
 from flask_minify import minify
 from pytz import timezone
@@ -35,7 +36,9 @@ except ImportError:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'main'
+    'main',
+    'app',
+    'inject_timestamps_tests'
 ]
 
 
@@ -55,7 +58,11 @@ instance_path = abspath(join_path(abspath(__file__), pardir))
 
 app = Flask(__name__, instance_path=instance_path)
 
-app.config.from_object('__app__.app.config.Config')
+try:
+    app.config.from_object('__app__.app.config.Config')
+except ImportError:
+    app.config.from_object('app.config.Config')
+
 
 app.register_blueprint(home_page)
 app.register_blueprint(postcode_page)
@@ -105,12 +112,21 @@ def format_number(value: Union[int, float]) -> str:
     return str(value)
 
 
+@contextmanager
+def inject_timestamps_tests(app, timestamp, website_timestamp):
+    def handler(sender, **kwargs):
+        g.timestamp = timestamp
+        g.website_timestamp = website_timestamp
+    with appcontext_pushed.connected_to(handler, app):
+        yield
+
+
 @app.context_processor
 def inject_globals():
     return dict(
         DEBUG=app.debug,
         timestamp=g.website_timestamp,
-        og_images=get_og_image_names(timestamp),
+        og_images=get_og_image_names(g.timestamp),
         styles=css_names
     )
 
@@ -119,8 +135,9 @@ def inject_globals():
 def inject_timestamps():
     global timestamp, website_timestamp
 
-    g.timestamp = timestamp
-    g.website_timestamp = website_timestamp
+    # currently need to comment these two out for testing to work
+    # g.timestamp = timestamp
+    # g.website_timestamp = website_timestamp
 
     g.data_db = CosmosDB(Collection.DATA)
     g.lookup_db = CosmosDB(Collection.LOOKUP)
@@ -172,7 +189,7 @@ def main(req: HttpRequest, context: Context, latestPublished: str,
     global timestamp, website_timestamp
     timestamp = latestPublished
     website_timestamp = websiteTimestamp
-
+    logging.info(timestamp)
     try:
         application = WsgiMiddleware(app.wsgi_app)
         return application.main(req, context)
