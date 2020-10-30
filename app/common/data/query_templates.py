@@ -190,14 +190,15 @@ SELECT
     TOP 1
     VALUE udf.processAlertLevel({
         'date':       c.date, 
-        'alertLevel': c.alertLevel
+        'alertLevel': c.alertLevel,
+        'areaCode':   c.areaCode
     })
 FROM c 
 WHERE 
       c.releaseTimestamp = @releaseTimestamp
   AND c.areaType         = @areaType
   AND c.areaCode         = @areaCode
-  AND IS_DEFINED(c.alertLevel)\
+  AND IS_DEFINED(c.alertLevel)
 ORDER BY 
-    c.date DESC
+    c.date DESC\
 """
