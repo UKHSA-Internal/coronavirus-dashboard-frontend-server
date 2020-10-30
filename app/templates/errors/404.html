@@ -1,0 +1,20 @@
+{% extends 'errors/error.html' %}
+{%- block status_code -%}404{%- endblock -%}
+{%- block error_message -%}Not found{%- endblock -%}
+{%- block error_body -%}
+	<h2>Page not found</h2>
+  <p class="govuk-body">
+    If you typed the web address, check it is correct.
+  </p>
+  <p class="govuk-body">
+    If you pasted the web address, check you copied the entire address.
+  </p>
+  <p class="govuk-body">
+    If the web address is correct or you selected a link or button,
+    please <a
+					class="govuk-link govuk-link--no-visited-state"
+					href="mailto:coronavirus-tracker@phe.gov.uk?Subject=Dashboard%20Error%20(404)"
+					rel="noopener noreferrer"
+					target="_blank">contact us</a> to report the issue.
+  </p>
+{%- endblock -%}

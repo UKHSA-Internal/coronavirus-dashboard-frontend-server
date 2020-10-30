@@ -13,7 +13,7 @@ from typing import Union
 from functools import lru_cache
 
 # 3rd party:
-from flask import Flask, request, Response, g
+from flask import Flask, request, Response, g, render_template
 from azure.functions import HttpRequest, HttpResponse, WsgiMiddleware, Context
 from flask_minify import minify
 from pytz import timezone
@@ -103,6 +103,17 @@ def format_number(value: Union[int, float]) -> str:
         return format(value_int, ',d')
 
     return str(value)
+
+
+@app.errorhandler(404)
+def handle_404(e):
+    return render_template("errors/404.html"), 404
+
+
+# @app.errorhandler(500)
+@app.errorhandler(Exception)
+def handle_500(e):
+    return render_template("errors/500.html"), 500
 
 
 @app.context_processor

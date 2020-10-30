@@ -1,0 +1,19 @@
+{% extends 'errors/error.html' %}
+{%- block status_code -%}500{%- endblock -%}
+{%- block error_message -%}Server error{%- endblock -%}
+{%- block error_body -%}
+	<h2 class="govuk-heading-l">Sorry, there is a problem with the service</h2>
+  <p class="govuk-body">Please try again later.</p>
+  <p class="govuk-body">If the problem persists, please <a
+					class="govuk-link govuk-link--no-visited-state"
+					href="mailto:coronavirus-tracker@phe.gov.uk?Subject=Dashboard%20Error%20(500)"
+					rel="noopener noreferrer"
+					target="_blank">contact us</a> to report the issue. Including details
+	  such as follows would help us diagnose and fix the problem faster:</p>
+	<ul class="govuk-list govuk-list--bullet">
+		<li>What were trying to do &ndash; e.g. Searching a postcode</li>
+		<li>Your device &ndash; e.g. Mac, PC, iPhone</li>
+		<li>Your operating system &ndash; e.g. Windows 10, MacOS 10.14, Android 11</li>
+		<li>Your browser &ndash; e.g. Edge, Safari, Firefox, Chrome</li>
+	</ul>
+{%- endblock -%}
