@@ -11,13 +11,9 @@
 					The official UK Government website for data and insights on Coronavirus (COVID-19).
 				</p>
 				<h2 class="govuk-heading-l">UK Summary</h2>
-				<p class="govuk-body-m govuk-!-margin-top-0 govuk-!-margin-bottom-1">
-					The latest R number is estimated
-					at&nbsp;<b>{{ r_values.transmissionRateMin }}&nbsp;to&nbsp;{{ r_values.transmissionRateMax }}</b>&nbsp;with
-					a daily growth rate range
-					of&nbsp;<span><b>{{ r_values.transmissionRateGrowthRateMin }}%&nbsp;to&nbsp;{{ r_values.transmissionRateGrowthRateMax }}%</b></span>.
 
-				</p>
+				{% include "components/r_number.html" %}
+
 				<p class="govuk-body-m govuk-!-margin-bottom-2">
 					Data are also available
 					to <a class="govuk-link govuk-link--no-visited-state"
