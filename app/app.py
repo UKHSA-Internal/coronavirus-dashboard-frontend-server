@@ -110,9 +110,9 @@ def handle_404(e):
     return render_template("errors/404.html"), 404
 
 
-# @app.errorhandler(500)
 @app.errorhandler(Exception)
 def handle_500(e):
+    logging.exception(e)
     return render_template("errors/500.html"), 500
 
 
