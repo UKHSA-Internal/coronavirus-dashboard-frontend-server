@@ -79,7 +79,7 @@ class TestLanding(unittest.TestCase):
             with app.test_client() as c:
                 response = c.get('/')
                 data = response.data
-                test_change = calculate_change("newTestsByPublishDate").encode('UTF-8')
+                test_change = calculate_change("newPCRTestsByPublishDate").encode('UTF-8')
                 assert test_change in data
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ load_dotenv(find_dotenv())
 from app import app, inject_timestamps_tests
 
 website_timestamp = requests.get('https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').content.decode('ascii')
-timestamp = "2020-11-01T15:50:42.4511435Z"
+timestamp = "2020-11-02T15:36:22.7274825Z"
 timestamp_date = datetime.strptime(timestamp[:10], "%Y-%m-%d")
 str_timestamp_date = datetime.strftime(timestamp_date, "%Y-%m-%d")
 
@@ -72,10 +72,10 @@ def calculate_rate(metric, area: str = "UK"):
     formatted = "{0:0.1f}".format(rate)
     return str(formatted)
 
+
 def calculate_change(metric, area: str = "UK"):
     prev_week_count = 0
     latest_week_count = 0
-    pillar_3 = False
     data = json.loads(requests.get(f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType=overview&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').content.decode())
     
     str_latest_date = data["data"][0]["date"]
@@ -87,39 +87,16 @@ def calculate_change(metric, area: str = "UK"):
    
     date_range_last_7 = get_date_range(current_week_date, str_timestamp_date)
     date_range_prev_7 = get_date_range(date_fortnight_prior, latest_week_ago_date)
-
-    # if metric == "newTestsByPublishDate":
-    #     pillar_3_data = json.loads(requests.get('https://api.coronavirus.data.gov.uk/v1/data?filters=areaType=overview&structure=%7B%22newPillarThreeTestsByPublishDate%22:%22newPillarThreeTestsByPublishDate%22,%22date%22:%22date%22%7D').content.decode())
-    #     pillar_3 = True
-    #     pillar_3_prev_week_count = 0
-    #     pillar_3_latest_week_count = 0
-        
-    #     for item in pillar_3_data["data"]:
-    #         if item["date"] in date_range_prev_7:
-    #             pillar_3_prev_week_count += item["newPillarThreeTestsByPublishDate"]
-            
-    
-    #     for item in pillar_3_data["data"]:
-    #         if item["date"] in date_range_last_7:
-    #             pillar_3_latest_week_count += item["newPillarThreeTestsByPublishDate"]
-        
-
+ 
     for item in data["data"]:
         if item["date"] in date_range_prev_7:
             prev_week_count += item[metric]
-            
-    
+             
     for item in data["data"]:
         if item["date"] in date_range_last_7:
             latest_week_count += item[metric]
 
-    # if pillar_3:
-    #     print(latest_week_count, pillar_3_latest_week_count, prev_week_count, pillar_3_prev_week_count)
-    #     latest_week_count = latest_week_count - pillar_3_latest_week_count
-    #     prev_week_count = prev_week_count - pillar_3_prev_week_count
-        
     change = latest_week_count - prev_week_count
-    
     return(str(f'{change:,}'))
 
 
