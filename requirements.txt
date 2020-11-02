@@ -17,7 +17,7 @@ plotly==4.10.0
 kaleido==0.0.3.post1
 pandas==1.0.5
 uk-covid19==1.2.0
-flask-minify==0.27
+flask-minify==0.29
 werkzeug==1.0.1
 redis==3.5.3
 pytz==2020.01
