@@ -4,7 +4,7 @@ from flask import g
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
-from .utils import website_timestamp, timestamp, output_object_to_file, calculate_rate, calculate_change
+from .utils import website_timestamp, timestamp, calculate_change
 from app import app, inject_timestamps_tests
 
 
@@ -20,67 +20,23 @@ class TestLanding(unittest.TestCase):
         pass
 
     def test_response_status(self):
-        with inject_timestamps_tests(app, timestamp, website_timestamp):
-            with app.test_client() as c:
-                response = c.get('/')
-                # output_object_to_file("response.txt", response)
-                self.assertEqual(response.status_code, 200)
+        with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
+            response = client.get('/')
+            self.assertEqual(response.status_code, 200)
 
-    def test_cases_rate(self):
-        with inject_timestamps_tests(app, timestamp, website_timestamp):
-            with app.test_client() as c:
-                response = c.get('/')
-                data = response.data
-                test_rate = calculate_rate("newCasesBySpecimenDate").encode('UTF-8')
-                assert test_rate in data
-
-    def test_deaths_rate(self):
-        with inject_timestamps_tests(app, timestamp, website_timestamp):
-            with app.test_client() as c:
-                response = c.get('/')
-                data = response.data
-                test_rate = calculate_rate("newDeaths28DaysByDeathDate").encode('UTF-8')
-                assert test_rate in data
+    def test_metric_change(self):
+        with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
+            response = client.get('/')
+            data = response.data
+            cases_change = calculate_change("newCasesByPublishDate").encode()
+            deaths_change = calculate_change("newDeaths28DaysByPublishDate").encode()
+            admissions_change = calculate_change("newAdmissions").encode()
+            tests_change = calculate_change("newPCRTestsByPublishDate").encode()
+            self.assertIn(cases_change, data)
+            self.assertIn(deaths_change, data)
+            self.assertIn(admissions_change, data)
+            self.assertIn(tests_change, data)
     
-    def test_admissions_rate(self):
-        with inject_timestamps_tests(app, timestamp, website_timestamp):
-            with app.test_client() as c:
-                response = c.get('/')
-                data = response.data
-                test_rate = calculate_rate("newAdmissions").encode('UTF-8')
-                assert test_rate in data
-
-    def test_cases_change(self):
-        with inject_timestamps_tests(app, timestamp, website_timestamp):
-            with app.test_client() as c:
-                response = c.get('/')
-                data = response.data
-                test_change = calculate_change("newCasesByPublishDate").encode('UTF-8')
-                assert test_change in data
-    
-    def test_deaths_change(self):
-        with inject_timestamps_tests(app, timestamp, website_timestamp):
-            with app.test_client() as c:
-                response = c.get('/')
-                data = response.data
-                test_change = calculate_change("newDeaths28DaysByPublishDate").encode('UTF-8')
-                assert test_change in data
-
-    def test_admissions_change(self):
-        with inject_timestamps_tests(app, timestamp, website_timestamp):
-            with app.test_client() as c:
-                response = c.get('/')
-                data = response.data
-                test_change = calculate_change("newAdmissions").encode('UTF-8')
-                assert test_change in data
-
-    def test_tests_change(self):
-        with inject_timestamps_tests(app, timestamp, website_timestamp):
-            with app.test_client() as c:
-                response = c.get('/')
-                data = response.data
-                test_change = calculate_change("newPCRTestsByPublishDate").encode('UTF-8')
-                assert test_change in data
 
 if __name__ == "__main__":
     unittest.main()

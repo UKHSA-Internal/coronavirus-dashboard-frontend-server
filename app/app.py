@@ -118,6 +118,7 @@ def inject_timestamps_tests(app, timestamp, website_timestamp):
     def handler(sender, **kwargs):
         g.timestamp = timestamp
         g.website_timestamp = website_timestamp
+        g.testing = True
     with appcontext_pushed.connected_to(handler, app):
         yield
 @app.errorhandler(404)
@@ -143,9 +144,10 @@ def inject_globals():
 
 @app.before_request
 def inject_timestamps():
-    global timestamp, website_timestamp
+    global timestamp, website_timestamp, testing
 
     # currently need to comment these two out for testing to work
+    
     # g.timestamp = timestamp
     # g.website_timestamp = website_timestamp
 

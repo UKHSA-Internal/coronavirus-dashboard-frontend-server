@@ -6,6 +6,7 @@ import requests
 from datetime import datetime, timedelta, date
 import json
 import csv
+import math
 
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
@@ -29,6 +30,8 @@ def output_content_to_file(filename: str, data: object, write_type: str = 'w') -
     f.write(data.decode('UTF-8'))
     f.close()
 
+
+# get all dates between and inclusive of the specified start and end date
 def get_date_range(start_date, end_date):
     start = datetime.strptime(start_date, "%Y-%m-%d")
     end = datetime.strptime(end_date, "%Y-%m-%d")
@@ -37,47 +40,36 @@ def get_date_range(start_date, end_date):
     while start <= end:
         result.append(datetime.strftime(start, "%Y-%m-%d"))
         start += step
-
     return result
 
-
-
-def calculate_rate(metric, area: str = "UK"):
-    count = 0
-    data = json.loads(requests.get(f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType=overview&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').content.decode())
-  
-    if metric == "newAdmissions":
-        latest_complete_date = date.strftime(timestamp_date - timedelta(days=4), "%Y-%m-%d")
-        latest_complete_date_week_prior = date.strftime(timestamp_date - timedelta(days=10), "%Y-%m-%d")
-        date_range = get_date_range(latest_complete_date_week_prior, latest_complete_date)
+# return postcode area as specified
+def get_postcode_area_code(postcode : str, area_type : str):
+    postcode_data = json.loads(requests.get(f'https://api.coronavirus.data.gov.uk/v1/code?category=postcode&search={postcode}').content.decode())
+    
+    # if there's no area_type for the specified NHS region (E.g. areas outside of England) return nation instead
+    if postcode_data[area_type] == None and area_type == "nhsRegion":
+        return postcode_data["nation"]
     else:
-        latest_complete_date = date.strftime(timestamp_date - timedelta(days=5), "%Y-%m-%d")
-        latest_complete_date_week_prior = date.strftime(timestamp_date - timedelta(days=11), "%Y-%m-%d")
-        date_range = get_date_range(latest_complete_date_week_prior, latest_complete_date)
-    
-    if area == "UK":
-        population = 66796807
-    # else:
-    #     populations = csv.reader(open('popestimates.csv'))
-    #     for row in populations:
-    #         if row[0] == 'K02000001':
-    #             print (row[3])
+        return postcode_data[area_type]
 
-    
-    for item in data["data"]:
-        if item["date"] in date_range:
-            count += item[metric]
-
-    rate = (count / population) * 100000
-    formatted = "{0:0.1f}".format(rate)
-    return str(formatted)
-
-
-def calculate_change(metric, area: str = "UK"):
+# calculating the difference between previous 7 days and the 7 prior to that 
+def calculate_change(metric, area_type: str = "UK", postcode: str = ""):
     prev_week_count = 0
     latest_week_count = 0
-    data = json.loads(requests.get(f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType=overview&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').content.decode())
     
+    if area_type == "UK":
+        data = json.loads(requests.get(f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType=overview&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').content.decode())
+    else:
+        # if the area code isn't England use national data instead, if deaths metric in wales or NI also use national
+        area_code = get_postcode_area_code(postcode, area_type)
+        if (area_code[:1] == 'W' or area_code[:1] == 'N') and metric == "newDeaths28DaysByPublishDate":
+            area_code = get_postcode_area_code(postcode, "nation")
+            area_type = "nation"
+
+        elif area_code[:1] != 'E' and area_type == "nhsRegion":
+            area_type = "nation"
+        data = json.loads(requests.get(f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType={area_type};areaCode={area_code}&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').content.decode())
+
     str_latest_date = data["data"][0]["date"]
     latest_date = datetime.strptime(str_latest_date, "%Y-%m-%d")
 
@@ -97,7 +89,7 @@ def calculate_change(metric, area: str = "UK"):
             latest_week_count += item[metric]
 
     change = latest_week_count - prev_week_count
-    return(str(f'{change:,}'))
-
-
-
+    if change == 0:
+        return "No change"
+    else:
+        return(str(f'{change:,}'))

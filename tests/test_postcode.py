@@ -1,11 +1,11 @@
 import unittest
 from flask import g, request
 from tqdm import tqdm as progress_bar
-
+import logging
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
-from .utils import website_timestamp, timestamp, output_object_to_file, output_content_to_file
+from .utils import website_timestamp, timestamp, calculate_change
 from app import app, inject_timestamps_tests
 
 postcodes = [
@@ -32,31 +32,45 @@ class TestLanding(unittest.TestCase):
         pass
 
     def test_postcode_response_status(self):
-        with inject_timestamps_tests(app, timestamp, website_timestamp):
-            with app.test_client() as c:
-                for postcode in progress_bar(postcodes, desc='Postcode Response Status'):
-                    response = c.get(f'/search?postcode={postcode}')
-                    # output_content_to_file("justresp.txt", response.data)
-                    self.assertEqual(response.status_code, 200)
-                    assert request.args['postcode'] == postcode
+        with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
+            for postcode in progress_bar(postcodes, desc='Postcode Response Status'):
+                response = client.get(f'/search?postcode={postcode}')
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(request.args['postcode'], postcode)
 
     def test_postcode_found(self):
-        with inject_timestamps_tests(app, timestamp, website_timestamp):
-            with app.test_client() as c:
-                for postcode in progress_bar(postcodes, desc='Postcode Found Progress'):
-                    response = c.get(f'/search?postcode={postcode}')
-                    data = response.data
-                    postcode = postcode.encode('UTF-8')
-                    assert postcode in data
+        with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
+            for postcode in progress_bar(postcodes, desc='Postcode Found Progress'):
+                response = client.get(f'/search?postcode={postcode}')
+                data = response.data
+                postcode = postcode.encode('UTF-8')
+                self.assertIn(postcode, data)
 
     def test_invalid_postcode(self):
-        with inject_timestamps_tests(app, timestamp, website_timestamp):
-            with app.test_client() as c:
-                for postcode in progress_bar(invalid_postcodes, desc='Invalid Postcode Test'):
-                    response = c.get(f'/search?postcode={postcode}')
-                    data = response.data
-                    invalid_check = b'Invalid postcode'
-                    assert invalid_check in data
+        with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
+            for postcode in progress_bar(invalid_postcodes, desc='Invalid Postcode Test'):
+                response = client.get(f'/search?postcode={postcode}')
+                data = response.data
+                invalid_check = b'Invalid postcode'
+                self.assertIn(invalid_check, data)
+
+    def test_change(self):
+        with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
+            
+            for postcode in progress_bar(postcodes, desc='Weekly change value check: '):
+                response = client.get(f'/search?postcode={postcode}')
+                data = response.data
+
+                cases_change = calculate_change("newCasesByPublishDate", "ltla", postcode).encode()
+                deaths_change = calculate_change("newDeaths28DaysByPublishDate", "ltla", postcode).encode()
+                admissions_change = calculate_change("newAdmissions", "nhsRegion", postcode).encode()
+                tests_change = calculate_change("newPCRTestsByPublishDate", "nation", postcode).encode()
+
+                self.assertIn(cases_change, data)
+                self.assertIn(deaths_change, data)
+                self.assertIn(admissions_change, data)
+                self.assertIn(tests_change, data)
+    
 
 
 if __name__ == "__main__":
