@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{%- block page_title -%}
+		{%- block status_code -%}{%- endblock -%}&nbsp;&mdash;&nbsp;{%- block error_message -%}{%- endblock -%}
+{%- endblock -%}
+
+{%- block main -%}
+	<div class="text-width">{% block error_body %}{% endblock %}</div>
+{%- endblock -%}
+{%- block lower_section -%}{%- endblock -%}

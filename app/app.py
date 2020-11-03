@@ -15,6 +15,7 @@ from functools import lru_cache
 # 3rd party:
 from flask import Flask, request, Response, g, appcontext_pushed
 from contextlib import contextmanager
+from flask import Flask, request, Response, g, render_template
 from azure.functions import HttpRequest, HttpResponse, WsgiMiddleware, Context
 from flask_minify import minify
 from pytz import timezone
@@ -119,6 +120,15 @@ def inject_timestamps_tests(app, timestamp, website_timestamp):
         g.website_timestamp = website_timestamp
     with appcontext_pushed.connected_to(handler, app):
         yield
+@app.errorhandler(404)
+def handle_404(e):
+    return render_template("errors/404.html"), 404
+
+
+@app.errorhandler(Exception)
+def handle_500(e):
+    logging.exception(e)
+    return render_template("errors/500.html"), 500
 
 
 @app.context_processor
