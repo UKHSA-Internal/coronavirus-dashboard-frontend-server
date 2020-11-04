@@ -112,15 +112,17 @@ def format_number(value: Union[int, float]) -> str:
 
     return str(value)
 
-
+# inject timestamps when running tests
 @contextmanager
 def inject_timestamps_tests(app, timestamp, website_timestamp):
     def handler(sender, **kwargs):
         g.timestamp = timestamp
         g.website_timestamp = website_timestamp
-        g.testing = True
+        global testing
+        testing = True
     with appcontext_pushed.connected_to(handler, app):
         yield
+
 @app.errorhandler(404)
 def handle_404(e):
     return render_template("errors/404.html"), 404
@@ -146,10 +148,9 @@ def inject_globals():
 def inject_timestamps():
     global timestamp, website_timestamp, testing
 
-    # currently need to comment these two out for testing to work
-    
-    # g.timestamp = timestamp
-    # g.website_timestamp = website_timestamp
+    if not testing:
+        g.timestamp = timestamp
+        g.website_timestamp = website_timestamp
 
     g.data_db = CosmosDB(Collection.DATA)
     g.lookup_db = CosmosDB(Collection.LOOKUP)
@@ -198,7 +199,8 @@ def prepare_response(resp: Response):
 
 def main(req: HttpRequest, context: Context, latestPublished: str,
          websiteTimestamp: str) -> HttpResponse:
-    global timestamp, website_timestamp
+    global timestamp, website_timestamp, testing
+    testing = False
     timestamp = latestPublished
     website_timestamp = websiteTimestamp
     logging.info(timestamp)

@@ -15,7 +15,7 @@ load_dotenv(find_dotenv())
 from app import app, inject_timestamps_tests
 
 website_timestamp = requests.get('https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').content.decode('ascii')
-timestamp = "2020-11-02T15:36:22.7274825Z"
+timestamp = "2020-11-03T19:28:45.0477225Z"
 timestamp_date = datetime.strptime(timestamp[:10], "%Y-%m-%d")
 str_timestamp_date = datetime.strftime(timestamp_date, "%Y-%m-%d")
 
@@ -60,12 +60,12 @@ def calculate_change(metric, area_type: str = "UK", postcode: str = ""):
     if area_type == "UK":
         data = json.loads(requests.get(f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType=overview&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').content.decode())
     else:
-        # if the area code isn't England use national data instead, if deaths metric in wales or NI also use national
+        # if deaths metric in wales or NI  use national
         area_code = get_postcode_area_code(postcode, area_type)
         if (area_code[:1] == 'W' or area_code[:1] == 'N') and metric == "newDeaths28DaysByPublishDate":
             area_code = get_postcode_area_code(postcode, "nation")
             area_type = "nation"
-
+        # if the area code isn't England use national data instead of nhsRegions
         elif area_code[:1] != 'E' and area_type == "nhsRegion":
             area_type = "nation"
         data = json.loads(requests.get(f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType={area_type};areaCode={area_code}&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').content.decode())
