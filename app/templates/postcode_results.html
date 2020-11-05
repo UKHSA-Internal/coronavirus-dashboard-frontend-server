@@ -1,17 +1,27 @@
 {% extends "base.html" %}
 {% from "components/mini_card.html" import create_card with context %}
 
+{% if area_info.ltla.startswith("E") %}
+	{% set nameAttr = "msoaName" %}
+	{% set codeAttr = "msoa" %}
+	{% set areaType = "msoa" %}
+{% else %}
+	{% set nameAttr = "ltlaName" %}
+	{% set codeAttr = "ltla" %}
+	{% set areaType = "ltla" %}
+{% endif %}
+
+{% block head %}
+	{% cache 1800, 'head-postcode', timestamp, postcode -%}
+		<title>Daily summary | {{ area_info[nameAttr] }}</title>
+		<meta property="og:description" content="Daily summary | {{ area_info[nameAttr] }}">
+		<meta name="twitter:description" content="Daily summary | {{ area_info[nameAttr] }}">
+		<meta property="og:url" content="https://coronavirus.data.gov.uk/search?postcode={{ postcode }}">
+	{% endcache -%}
+{% endblock %}
+
 {%- block page_title -%}Daily update{% endblock %}
 {%- block main -%}
-	{% if area_info.ltla.startswith("E") %}
-		{% set nameAttr = "msoaName" %}
-		{% set codeAttr = "msoa" %}
-		{% set areaType = "msoa" %}
-	{% else %}
-		{% set nameAttr = "ltlaName" %}
-		{% set codeAttr = "ltla" %}
-		{% set areaType = "ltla" %}
-	{% endif %}
 	<div class="local-intro govuk-!-margin-left-0">
 		<h2 class="govuk-heading-l govuk-!-margin-bottom-2 govuk-!-margin-top-0 govuk-!-margin-left-0 govuk-!-padding-top-0 govuk-!-padding-left-0">
 			{{ postcode }} &ndash; {{ area_info[nameAttr] }}
