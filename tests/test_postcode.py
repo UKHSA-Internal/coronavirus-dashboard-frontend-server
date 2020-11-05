@@ -61,15 +61,20 @@ class TestLanding(unittest.TestCase):
                 response = client.get(f'/search?postcode={postcode}')
                 data = response.data
 
-                cases_change = calculate_change("newCasesByPublishDate", "ltla", postcode).encode()
-                deaths_change = calculate_change("newDeaths28DaysByPublishDate", "ltla", postcode).encode()
-                admissions_change = calculate_change("newAdmissions", "nhsRegion", postcode).encode()
-                tests_change = calculate_change("newPCRTestsByPublishDate", "nation", postcode).encode()
+                cases_change, cases_percentage_change = calculate_change("newCasesByPublishDate", "ltla", postcode)
+                deaths_change, deaths_percentage_change = calculate_change("newDeaths28DaysByPublishDate", "ltla", postcode)
+                admissions_change, admissions_percentage_change = calculate_change("newAdmissions", "nhsRegion", postcode)
+                tests_change, tests_percentage_change = calculate_change("newPCRTestsByPublishDate", "nation", postcode)
 
-                self.assertIn(cases_change, data)
-                self.assertIn(deaths_change, data)
-                self.assertIn(admissions_change, data)
-                self.assertIn(tests_change, data)
+                self.assertIn(cases_change.encode(), data)
+                self.assertIn(deaths_change.encode(), data)
+                self.assertIn(admissions_change.encode(), data)
+                self.assertIn(tests_change.encode(), data)
+
+                self.assertIn(cases_percentage_change.encode(), data)
+                self.assertIn(deaths_percentage_change.encode(), data)
+                self.assertIn(admissions_percentage_change.encode(), data)
+                self.assertIn(tests_percentage_change.encode(), data)
     
 
 
