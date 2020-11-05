@@ -68,7 +68,7 @@ def get_change(metric_data):
     sigma_last_week = sum(map(get_value, metric_data[7:14]))
     delta = sigma_this_week - sigma_last_week
 
-    delta_percentage = (sigma_this_week / max(sigma_last_week, 0.5) - 1) * 100
+    delta_percentage = (sigma_this_week / max(sigma_last_week, 1) - 1) * 100
 
     if delta_percentage > 0:
         trend = 0

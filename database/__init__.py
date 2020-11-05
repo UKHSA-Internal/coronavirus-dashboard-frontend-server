@@ -18,6 +18,7 @@ Contributors:  Pouria Hadjibagheri
 # Internal: 
 from .database import CosmosDB
 from .utils import Collection
+# from .models import BaseModel
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Header

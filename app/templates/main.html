@@ -2,8 +2,25 @@
 {% from "components/mini_card.html" import create_card with context %}
 
 {%- block page_title -%}Daily update{% endblock %}
-{%- block main -%}
 
+{% block head %}
+	{% cache 1800, 'head-home', timestamp -%}
+		<title>Daily summary | Coronavirus in the UK</title>
+		<meta property="og:title" content="Official UK Coronavirus Dashboard">
+		<meta property="og:description" content="Daily summary | Coronavirus in the UK">
+		<meta name="twitter:description" content="Daily summary | Coronavirus in the UK">
+		<meta name="twitter:title" content="Official UK Coronavirus Dashboard">
+		<meta property="og:url" content="https://coronavirus.data.gov.uk">
+		{%- for path in og_images -%}
+			{%- if "summary" in path -%}
+				<meta name="twitter:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
+			{%- endif -%}
+				<meta property="og:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
+			{%- endfor -%}
+		{% endcache -%}
+{% endblock %}
+
+{%- block main -%}
 	<div>
 		<div class="govuk-grid-row">
 			<div class="govuk-grid-column-full ">
@@ -30,7 +47,6 @@
 			{{ create_card(card, False) }}
 		{% endfor %}
 	</div>
-
 {%- endblock -%}
 
 {%- block postcode_search_header -%}
