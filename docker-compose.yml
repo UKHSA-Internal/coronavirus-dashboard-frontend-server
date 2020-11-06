@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  web:
+    build: .
+    working_dir: /opt/www
+    restart: always
+    command: python -m app.manage run -h 0.0.0.0
+    volumes:
+      - ./app/:/opt/www/app/
+    ports:
+      - 5000:5000
+    env_file:
+      - .env.dev

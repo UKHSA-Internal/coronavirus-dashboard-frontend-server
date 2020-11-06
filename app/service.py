@@ -35,13 +35,15 @@ except ImportError:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'main'
+    'main',
+    'app'
 ]
 
 
-STORAGE_CONN_STR = getenv("StaticFrontendStorage")
+WEB_STORAGE_CONN_STR = getenv("StaticFrontendStorage")
+MAIN_STORAGE_CONN_STR = getenv("DeploymentBlobStorage")
 
-with StorageClient("$web", f"static/css/", connection_string=STORAGE_CONN_STR) as client:
+with StorageClient("$web", f"static/css/", connection_string=WEB_STORAGE_CONN_STR) as client:
     css_names = [item["name"] for item in client if item["name"].endswith(".css")]
 
 
@@ -55,7 +57,18 @@ instance_path = abspath(join_path(abspath(__file__), pardir))
 
 app = Flask(__name__, instance_path=instance_path)
 
-app.config.from_object('__app__.app.config.Config')
+try:
+    app.config.from_object('__app__.app.config.Config')
+except (ModuleNotFoundError, ImportError):
+    app.config.from_object('app.config.Config')
+    with StorageClient("publicdata", "assets/dispatch/website_timestamp",
+                       connection_string=MAIN_STORAGE_CONN_STR) as client:
+        website_timestamp = client.download().readall().decode()
+
+    with StorageClient("pipeline", "info/latest_published",
+                       connection_string=MAIN_STORAGE_CONN_STR) as client:
+        timestamp = client.download().readall().decode()
+
 
 app.register_blueprint(home_page)
 app.register_blueprint(postcode_page)
@@ -189,3 +202,8 @@ def main(req: HttpRequest, context: Context, latestPublished: str,
         return application.main(req, context)
     except Exception as err:
         logging.exception(err)
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', debug=False, port=80)
+
