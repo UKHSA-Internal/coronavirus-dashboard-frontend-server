@@ -20,11 +20,8 @@
 			<link rel="apple-touch-icon" href="https://coronavirus.data.gov.uk/favicon.png">
 			<link rel="icon" href="https://coronavirus.data.gov.uk/favicon.ico">
 			<link rel="manifest" href="https://coronavirus.data.gov.uk/manifest.json">
-			{%- for css_path in styles -%}
-				<link rel="stylesheet" type="text/css" href="https://coronavirus.data.gov.uk/{{ css_path }}">
-			{%- endfor -%}
 			<link rel="stylesheet" type="text/css"
-			      href="{%- if DEBUG -%}/static/css/application.css{%- else -%}https://coronavirus.data.gov.uk/assets/css/application.css{%- endif -%}">
+			      href="{%- if DEBUG -%}{{ url_for("static", filename="css/application.css") }}{%- else -%}https://coronavirus.data.gov.uk/assets/css/application.css{%- endif -%}">
 		{% endcache %}
 		{% block head %}{% endblock %}
 		{% cache 43200, 'head-v2', timestamp, 'main-tail' -%}

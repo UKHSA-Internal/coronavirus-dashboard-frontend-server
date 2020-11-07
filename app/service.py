@@ -6,14 +6,13 @@
 import logging
 import re
 from datetime import datetime, timedelta
-from gzip import compress
 from os.path import abspath, join as join_path, pardir
 from os import getenv
 from typing import Union
 from functools import lru_cache
 
 # 3rd party:
-from flask import Flask, request, Response, g, render_template
+from flask import Flask, Response, g, render_template
 from azure.functions import HttpRequest, HttpResponse, WsgiMiddleware, Context
 from flask_minify import minify
 from pytz import timezone
@@ -43,10 +42,6 @@ __all__ = [
 WEB_STORAGE_CONN_STR = getenv("StaticFrontendStorage")
 MAIN_STORAGE_CONN_STR = getenv("DeploymentBlobStorage")
 
-with StorageClient("$web", f"static/css/", connection_string=WEB_STORAGE_CONN_STR) as client:
-    css_names = [item["name"] for item in client if item["name"].endswith(".css")]
-
-
 timestamp: str = str()
 website_timestamp: str = str()
 timestamp_pattern = "%A %d %B %Y at %I:%M %p"
@@ -55,7 +50,7 @@ timezone_LN = timezone("Europe/London")
 
 instance_path = abspath(join_path(abspath(__file__), pardir))
 
-app = Flask(__name__, instance_path=instance_path)
+app = Flask(__name__, instance_path=instance_path, static_folder="static")
 
 try:
     app.config.from_object('__app__.app.config.Config')
@@ -134,8 +129,7 @@ def inject_globals():
     return dict(
         DEBUG=app.debug,
         timestamp=g.website_timestamp,
-        og_images=get_og_image_names(timestamp),
-        styles=css_names
+        og_images=get_og_image_names(timestamp)
     )
 
 
@@ -181,11 +175,11 @@ def prepare_response(resp: Response):
     minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
     data = str.join("", minified).encode()
 
-    accept_encoding = request.headers.get("Accept-Encoding", "")
-
-    if 'gzip' in accept_encoding:
-        data = compress(data)
-        resp.headers['Content-Encoding'] = "gzip"
+    # accept_encoding = request.headers.get("Accept-Encoding", "")
+    #
+    # if 'gzip' in accept_encoding:
+    #     data = compress(data)
+    #     resp.headers['Content-Encoding'] = "gzip"
 
     resp.set_data(data)
     return resp
@@ -205,5 +199,5 @@ def main(req: HttpRequest, context: Context, latestPublished: str,
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=False, port=80)
+    app.run(host='0.0.0.0', debug=False, port=5050)
 

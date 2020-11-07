@@ -9,3 +9,12 @@ local.settings.json
 /.idea
 /.github
 /landing/static
+
+docker-compose.yml
+Dockerfile
+uwsgi.ini
+.env.dev
+.env.production
+.env.development
+.env.*
+start.sh
