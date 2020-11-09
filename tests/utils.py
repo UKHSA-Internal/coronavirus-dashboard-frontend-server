@@ -15,7 +15,7 @@ load_dotenv(find_dotenv())
 from app import app, inject_timestamps_tests
 
 website_timestamp = requests.get('https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').content.decode('ascii')
-timestamp = "2020-11-04T15:39:44.4267375Z"
+timestamp = "2020-11-08T15:19:00.0072545Z"
 timestamp_date = datetime.strptime(timestamp[:10], "%Y-%m-%d")
 str_timestamp_date = datetime.strftime(timestamp_date, "%Y-%m-%d")
 
@@ -94,7 +94,7 @@ def calculate_change(metric, area_type: str = "UK", postcode: str = ""):
         percentage_change = (change / prev_week_count) * 100
     except ZeroDivisionError:
         # currently 150 to match methodology, will become 100 after next data refresh
-        percentage_change = change * 150
+        percentage_change = change * 100
     
     percentage_change = "{0:0.1f}".format(percentage_change)
 

@@ -16,7 +16,7 @@ Contributors:  Pouria Hadjibagheri
 # 3rd party:
 
 # Internal:
-from .service import main, app
+from .service import main, app, inject_timestamps_tests
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Header
@@ -28,6 +28,7 @@ __version__ = "0.0.1"
 
 __all__ = [
     'main',
-    'app'
+    'app',
+    'inject_timestamps_tests'
 ]
 

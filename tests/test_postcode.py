@@ -71,11 +71,22 @@ class TestLanding(unittest.TestCase):
                 self.assertIn(admissions_change.encode(), data)
                 self.assertIn(tests_change.encode(), data)
 
+    def test_percentage_change(self):
+        with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
+            
+            for postcode in progress_bar(postcodes, desc='Weekly percentage change value check: '):
+                response = client.get(f'/search?postcode={postcode}')
+                data = response.data
+
+                cases_change, cases_percentage_change = calculate_change("newCasesByPublishDate", "ltla", postcode)
+                deaths_change, deaths_percentage_change = calculate_change("newDeaths28DaysByPublishDate", "ltla", postcode)
+                admissions_change, admissions_percentage_change = calculate_change("newAdmissions", "nhsRegion", postcode)
+                tests_change, tests_percentage_change = calculate_change("newPCRTestsByPublishDate", "nation", postcode)
+
                 self.assertIn(cases_percentage_change.encode(), data)
                 self.assertIn(deaths_percentage_change.encode(), data)
                 self.assertIn(admissions_percentage_change.encode(), data)
                 self.assertIn(tests_percentage_change.encode(), data)
-    
 
 
 if __name__ == "__main__":
