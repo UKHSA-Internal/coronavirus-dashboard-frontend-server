@@ -139,3 +139,7 @@ landing/static/css/application.css.map
 response.txt
 
 proxies.json
+.env.dev
+.env.staging
+.env.production
+.env.*

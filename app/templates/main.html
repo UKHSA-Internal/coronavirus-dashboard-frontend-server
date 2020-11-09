@@ -4,7 +4,7 @@
 {%- block page_title -%}Daily update{% endblock %}
 
 {% block head %}
-	{% cache 1800, 'head-home', timestamp -%}
+	{% cache 43200, 'head-home', timestamp, "main-summary" -%}
 		<title>Daily summary | Coronavirus in the UK</title>
 		<meta property="og:title" content="Official UK Coronavirus Dashboard">
 		<meta property="og:description" content="Daily summary | Coronavirus in the UK">
@@ -14,6 +14,7 @@
 		{%- for path in og_images -%}
 			{%- if "summary" in path -%}
 				<meta name="twitter:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
+				<meta property="og:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
 			{%- endif -%}
 				<meta property="og:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
 			{%- endfor -%}
@@ -21,32 +22,34 @@
 {% endblock %}
 
 {%- block main -%}
-	<div>
-		<div class="govuk-grid-row">
-			<div class="govuk-grid-column-full ">
-				<p class="govuk-body-m govuk-!-margin-bottom-1 govuk-!-margin-top-3">
-					The official UK Government website for data and insights on Coronavirus (COVID-19).
-				</p>
-				<h2 class="govuk-heading-l">UK Summary</h2>
+	{% cache 43200, 'main-body', timestamp, "uk-summary" -%}
+		<div>
+			<div class="govuk-grid-row">
+				<div class="govuk-grid-column-full ">
+					<p class="govuk-body-m govuk-!-margin-bottom-1 govuk-!-margin-top-3">
+						The official UK Government website for data and insights on Coronavirus (COVID-19).
+					</p>
+					<h2 class="govuk-heading-l">UK Summary</h2>
 
-				{% include "components/r_number.html" %}
+					{% include "components/r_number.html" %}
 
-				<p class="govuk-body-m govuk-!-margin-bottom-2">
-					Data are also available
-					to <a class="govuk-link govuk-link--no-visited-state"
-					      href="/downloads/easy_read/overview/United Kingdom.docx">download</a> as
-					an easy to read document.
-				</p>
+					<p class="govuk-body-m govuk-!-margin-bottom-2">
+						Data are also available
+						to <a class="govuk-link govuk-link--no-visited-state"
+						      href="/downloads/easy_read/overview/United Kingdom.docx">download</a> as
+						an easy to read document.
+					</p>
 
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<div class="card-container">
-		{% for card in cards %}
-			{{ create_card(card, False) }}
-		{% endfor %}
-	</div>
+		<div class="card-container">
+			{% for card in cards %}
+				{{ create_card(card, False) }}
+			{% endfor %}
+		</div>
+	{% endcache %}
 {%- endblock -%}
 
 {%- block postcode_search_header -%}

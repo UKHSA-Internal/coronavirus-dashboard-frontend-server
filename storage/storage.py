@@ -5,6 +5,7 @@
 # Python:
 import logging
 from os import getenv
+from sys import stdout
 from typing import Union, NoReturn
 from gzip import compress
 
@@ -15,21 +16,36 @@ from azure.storage.blob import (
     BlobServiceClient, ContainerClient
 )
 
+from azure.storage.blob.aio import (
+    BlobClient as AsyncBlobClient,
+    StorageStreamDownloader as AsyncStorageStreamDownloader,
+    BlobServiceClient as AsyncBlobServiceClient,
+    ContainerClient as AsyncContainerClient
+)
+
 # Internal:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 __all__ = [
-    "StorageClient"
+    "StorageClient",
+    "AsyncStorageClient",
 ]
 
 
-STORAGE_CONNECTION_STRING = getenv("StaticFrontendStorage")
+STORAGE_CONNECTION_STRING = getenv("DeploymentBlobStorage")
 
 DEFAULT_CONTENT_TYPE = "application/json; charset=utf-8"
 DEFAULT_CACHE_CONTROL = "no-cache, max-age=0, stale-while-revalidate=300"
 CONTENT_LANGUAGE = 'en-GB'
+
+logger = logging.getLogger('azure')
+logger.setLevel(logging.WARNING)
+
+# Configure a console output
+handler = logging.StreamHandler(stream=stdout)
+logger.addHandler(handler)
 
 
 class StorageClient:
@@ -83,8 +99,9 @@ class StorageClient:
                  content_type: Union[str, None] = DEFAULT_CONTENT_TYPE,
                  cache_control: str = DEFAULT_CACHE_CONTROL, compressed: bool = True,
                  content_disposition: Union[str, None] = None,
-                 content_language=CONTENT_LANGUAGE, tier: str = 'Hot', **kwargs):
-        self.path = path
+                 content_language: Union[str, None] = CONTENT_LANGUAGE,
+                 tier: str = 'Hot', **kwargs):
+        self._path = path
         self.compressed = compressed
         self._connection_string = connection_string
         self._container_name = container
@@ -105,11 +122,28 @@ class StorageClient:
             **kwargs
         )
 
+        self._initialise()
+
+    def _initialise(self):
         self.client: BlobClient = BlobClient.from_connection_string(
-            conn_str=connection_string,
-            container_name=container,
-            blob_name=path
+            conn_str=self._connection_string,
+            container_name=self._container_name,
+            blob_name=self._path,
+            # retry_to_secondary=True,
+            connection_timeout=60,
+            max_block_size=8 * 1024 * 1024,
+            max_single_put_size=256 * 1024 * 1024,
+            min_large_block_upload_threshold=8 * 1024 * 1024 + 1
         )
+
+    @property
+    def path(self):
+        return self._path
+
+    @path.setter
+    def path(self, value):
+        self._path = value
+        self._initialise()
 
     def __enter__(self) -> 'StorageClient':
         return self
@@ -146,7 +180,9 @@ class StorageClient:
             blob_type=BlobType.BlockBlob,
             content_settings=self._content_settings,
             overwrite=overwrite,
-            standard_blob_tier=self._tier
+            standard_blob_tier=self._tier,
+            timeout=60,
+            max_concurrency=10
         )
         logging.info(f"Uploaded blob '{self._container_name}/{self.path}'")
 
@@ -183,3 +219,98 @@ class StorageClient:
 
     __iter__ = list_blobs
     __repr__ = __str__
+
+
+class AsyncStorageClient:
+    def __init__(self, container: str, path: str = str(),
+                 connection_string: str = STORAGE_CONNECTION_STRING,
+                 content_type: Union[str, None] = DEFAULT_CONTENT_TYPE,
+                 cache_control: str = DEFAULT_CACHE_CONTROL, compressed: bool = True,
+                 content_disposition: Union[str, None] = None,
+                 content_language: Union[str, None] = CONTENT_LANGUAGE,
+                 tier: str = 'Hot', **kwargs):
+        self.path = path
+        self.compressed = compressed
+        self._connection_string = connection_string
+        self._container_name = container
+        self._tier = getattr(StandardBlobTier, tier, None)
+
+        if self._tier is None:
+            raise ValueError(
+                "Tier must be one of 'Hot', 'Cool' or 'Archive'. "
+                "Got <%r> instead." % tier
+            )
+
+        self._content_settings: ContentSettings = ContentSettings(
+            content_type=content_type,
+            cache_control=cache_control,
+            content_encoding="gzip" if self.compressed else None,
+            content_language=content_language,
+            content_disposition=content_disposition,
+            **kwargs
+        )
+
+        self.client: AsyncBlobClient = AsyncBlobClient.from_connection_string(
+            conn_str=connection_string,
+            container_name=container,
+            blob_name=path,
+            # retry_to_secondary=True,
+            connection_timeout=60,
+            max_block_size=8 * 1024 * 1024,
+            max_single_put_size=256 * 1024 * 1024,
+            min_large_block_upload_threshold=8 * 1024 * 1024 + 1
+        )
+
+    async def __aenter__(self) -> 'AsyncStorageClient':
+        await self.client.__aenter__()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> NoReturn:
+        await self.client.__aexit__()
+
+    def set_tier(self, tier: str):
+        self.client.set_standard_blob_tier(tier)
+
+    async def upload(self, data: Union[str, bytes], overwrite: bool = True) -> NoReturn:
+        """
+        Uploads blob data to the storage.
+
+        Parameters
+        ----------
+        data: Union[str, bytes]
+            Data to be uploaded to the storage.
+
+        overwrite: bool
+            Whether to overwrite the file if it already exists. [Default: ``True``]
+
+        Returns
+        -------
+        NoReturn
+        """
+        if self.compressed:
+            prepped_data = compress(data.encode() if isinstance(data, str) else data)
+        else:
+            prepped_data = data
+
+        upload = self.client.upload_blob(
+            data=prepped_data,
+            blob_type=BlobType.BlockBlob,
+            content_settings=self._content_settings,
+            overwrite=overwrite,
+            standard_blob_tier=self._tier,
+            timeout=60,
+            max_concurrency=10
+        )
+
+        return await upload
+
+    async def download(self) -> AsyncStorageStreamDownloader:
+        data = self.client.download_blob()
+        logging.info(f"Downloaded blob '{self._container_name}/{self.path}'")
+        return data
+
+    async def list_blobs(self):
+        async with AsyncBlobServiceClient.from_connection_string(self._connection_string) as client:
+            container: AsyncContainerClient = client.get_container_client(self._container_name)
+            async for blob in container.list_blobs(name_starts_with=self.path):
+                yield blob
