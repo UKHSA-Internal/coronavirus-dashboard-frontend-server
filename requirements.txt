@@ -2,7 +2,7 @@
 # The Python Worker is managed by Azure Functions platform
 # Manually managing azure-functions-worker may cause unexpected issues
 
-azure-core==1.8.2
+azure-core==1.9.0
 azure-common==1.1.25
 azure-nspkg==3.0.2
 azure-functions==1.4.0
