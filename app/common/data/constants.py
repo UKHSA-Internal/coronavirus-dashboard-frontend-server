@@ -29,7 +29,7 @@ DestinationMetrics = {
     'testing': {
         "metric": 'newPCRTestsByPublishDate',
         "caption": "Testing",
-        "heading": "Virus tests processed by laboratories",
+        "heading": "Virus tests processed",
     }
 }
 
