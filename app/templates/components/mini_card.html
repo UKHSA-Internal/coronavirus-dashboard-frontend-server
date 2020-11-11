@@ -37,7 +37,7 @@
 									   class="govuk-link--no-visited-state number-link number">
 										{{ card.data[0].value | format_number }}
 										<span class="tooltiptext govuk-!-font-size-16">
-											Daily number of {{ card.heading | lower }} on {{ card.data[0].formatted }}
+											Daily number of {{ card.heading | lower }} reported on {{ card.data[0].formatted }}
 									</span>
 									</a>
 								</div>
@@ -59,7 +59,7 @@
 									<a href="#" class="govuk-link--no-visited-state number-link"
 									   onclick="showHelp()">{{ card.change.total | format_number }}
 										<span class="tooltiptext govuk-!-font-size-16">
-										Total number of {{ card.heading | lower }} in the
+										Total number of {{ card.heading | lower }} reported in the
 										last 7 days ({{ card.data[6].formatted }} &ndash; {{ card.data[0].formatted }})</span></a>
 								</div>
 							</div>
