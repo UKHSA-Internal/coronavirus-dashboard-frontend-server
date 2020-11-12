@@ -20,7 +20,7 @@ from pytz import timezone
 # Internal:
 from .postcode.views import postcode_page
 from .landing.views import home_page
-
+from .common.data.constants import NationalAdjectives
 from .common.caching import cache_client
 from .common.utils import get_og_image_names
 
@@ -128,6 +128,7 @@ def handle_500(e):
 def inject_globals():
     return dict(
         DEBUG=app.debug,
+        national_adjectives=NationalAdjectives,
         timestamp=g.website_timestamp,
         og_images=get_og_image_names(timestamp)
     )
