@@ -64,7 +64,8 @@ SELECT TOP 1
         'transmissionRateMin': c.transmissionRateMin,
         'transmissionRateMax': c.transmissionRateMax,
         'transmissionRateGrowthRateMin': c.transmissionRateGrowthRateMin,
-        'transmissionRateGrowthRateMax': c.transmissionRateGrowthRateMax
+        'transmissionRateGrowthRateMax': c.transmissionRateGrowthRateMax,
+        'date': c.date
     }
 FROM     c
 WHERE    c.releaseTimestamp = @releaseTimestamp

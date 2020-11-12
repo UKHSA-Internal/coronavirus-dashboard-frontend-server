@@ -111,7 +111,11 @@ def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Di
         {"name": "@areaName", "value": area_name.lower()}
     ]
 
-    return g.data_db.query(query, params=params).pop()
+    result = g.data_db.query(query, params=params).pop()
+
+    result['date'] = process_dates(result['date'])['formatted']
+
+    return result
 
 
 @cache_client.memoize(60 * 60 * 12)

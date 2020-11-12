@@ -18,7 +18,7 @@
 		{%- elif R_growth_min > 0 -%}
 			+{{ R_growth_min }}%
 		{%- elif R_growth_min < 0 -%}
-			&ndash;{{ R_growth_min }}%
+			{{ R_growth_min }}%
 		{%- else -%}
 			{{ R_growth_min }}%
 		{%- endif -%}
@@ -28,9 +28,9 @@
 		{%- elif R_growth_max > 0 -%}
 			+{{ R_growth_max }}%
 		{%- elif R_growth_max < 0 -%}
-			&ndash;{{ R_growth_max }}%
+			{{ R_growth_max }}%
 		{%- else -%}
 			{{ R_growth_max }}%
 		{%- endif -%}
-	</b>.
+	</b> as of {{ r_values.date }}.
 </p>
