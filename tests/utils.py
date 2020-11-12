@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, date
 import json
 import csv
 import math
+import urllib3
 
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
@@ -14,8 +15,10 @@ load_dotenv(find_dotenv())
 
 from app import app, inject_timestamps_tests
 
-website_timestamp = requests.get('https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').content.decode('ascii')
-timestamp = "2020-11-08T15:19:00.0072545Z"
+http = urllib3.PoolManager()
+
+website_timestamp = http.request('GET', 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').data.decode('ascii')
+timestamp = "2020-11-11T15:50:33.4175085Z"
 timestamp_date = datetime.strptime(timestamp[:10], "%Y-%m-%d")
 str_timestamp_date = datetime.strftime(timestamp_date, "%Y-%m-%d")
 
@@ -32,7 +35,7 @@ def output_content_to_file(filename: str, data: object, write_type: str = 'w') -
 
 
 # get all dates between and inclusive of the specified start and end date
-def get_date_range(start_date, end_date):
+def get_date_range(start_date: str, end_date: str) -> list:
     start = datetime.strptime(start_date, "%Y-%m-%d")
     end = datetime.strptime(end_date, "%Y-%m-%d")
     result = []
@@ -44,7 +47,7 @@ def get_date_range(start_date, end_date):
 
 # return postcode area as specified
 def get_postcode_area_code(postcode : str, area_type : str):
-    postcode_data = json.loads(requests.get(f'https://api.coronavirus.data.gov.uk/v1/code?category=postcode&search={postcode}').content.decode())
+    postcode_data = json.loads(http.request('GET', f'https://api.coronavirus.data.gov.uk/v1/code?category=postcode&search={postcode}').data.decode())
     
     # if there's no area_type for the specified NHS region (E.g. areas outside of England) return nation instead
     if postcode_data[area_type] == None and area_type == "nhsRegion":
@@ -52,13 +55,9 @@ def get_postcode_area_code(postcode : str, area_type : str):
     else:
         return postcode_data[area_type]
 
-# calculating the difference between previous 7 days and the 7 prior to that 
-def calculate_change(metric, area_type: str = "UK", postcode: str = ""):
-    prev_week_count = 0
-    latest_week_count = 0
-    
+def get_area_data(metric: str, area_type: str, postcode: str):
     if area_type == "UK":
-        data = json.loads(requests.get(f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType=overview&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').content.decode())
+        data = json.loads(http.request('GET', f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType=overview&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').data.decode())
     else:
         # if deaths metric in wales or NI  use national
         area_code = get_postcode_area_code(postcode, area_type)
@@ -68,8 +67,13 @@ def calculate_change(metric, area_type: str = "UK", postcode: str = ""):
         # if the area code isn't England use national data instead of nhsRegions
         elif area_code[:1] != 'E' and area_type == "nhsRegion":
             area_type = "nation"
-        data = json.loads(requests.get(f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType={area_type};areaCode={area_code}&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').content.decode())
+        data = json.loads(http.request('GET', f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType={area_type};areaCode={area_code}&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').data.decode())
 
+    return data
+
+
+def calculate_dates(data):
+    
     str_latest_date = data["data"][0]["date"]
     latest_date = datetime.strptime(str_latest_date, "%Y-%m-%d")
 
@@ -77,9 +81,25 @@ def calculate_change(metric, area_type: str = "UK", postcode: str = ""):
     latest_week_ago_date = date.strftime(latest_date - timedelta(days=7), "%Y-%m-%d")
     date_fortnight_prior = date.strftime(latest_date - timedelta(days=13), "%Y-%m-%d")
    
-    date_range_last_7 = get_date_range(current_week_date, str_timestamp_date)
+    date_range_last_7 = get_date_range(current_week_date, str_latest_date)
     date_range_prev_7 = get_date_range(date_fortnight_prior, latest_week_ago_date)
- 
+
+
+    return  [str_latest_date, latest_date, current_week_date, latest_week_ago_date, date_fortnight_prior, date_range_last_7, date_range_prev_7]
+
+
+# calculating the difference between previous 7 days and the 7 prior to that 
+def calculate_change(metric: str, area_type: str = "UK", postcode: str = "") -> tuple:
+    prev_week_count = 0
+    latest_week_count = 0
+
+    data = get_area_data(metric, area_type, postcode)
+    
+    dates = calculate_dates(data)
+
+    date_range_last_7 = dates[5]
+    date_range_prev_7 = dates[6]
+
     for item in data["data"]:
         if item["date"] in date_range_prev_7:
             prev_week_count += item[metric]
@@ -89,16 +109,34 @@ def calculate_change(metric, area_type: str = "UK", postcode: str = ""):
             latest_week_count += item[metric]
 
     change = latest_week_count - prev_week_count
-
+    
     try:
         percentage_change = (change / prev_week_count) * 100
     except ZeroDivisionError:
-        # currently 150 to match methodology, will become 100 after next data refresh
-        percentage_change = change * 100
+        percentage_change = change * 150
     
     percentage_change = "{0:0.1f}".format(percentage_change)
 
+    
     if change == 0:
         return ("No change", "No change")
     else:
         return(str(f'{change:,}'), str(percentage_change))
+
+def get_date_min_max(metric: str, area_type: str = "UK", postcode: str = " ") -> tuple:
+    data = get_area_data(metric, area_type, postcode)
+    dates = calculate_dates(data)    
+
+    for index, current_date in enumerate(dates):
+        if index != 1 and index < 5:
+            current_date = datetime.strptime(current_date, "%Y-%m-%d")
+            dates[index] = datetime.strftime(current_date, "%d %B %Y").lstrip("0")
+
+    
+    latest_date = dates[0]
+    current_week_date = dates[2]
+
+    latest_week_ago_date = dates[3]
+    date_fortnight_prior = dates[4]
+
+    return latest_date, current_week_date, latest_week_ago_date, date_fortnight_prior
