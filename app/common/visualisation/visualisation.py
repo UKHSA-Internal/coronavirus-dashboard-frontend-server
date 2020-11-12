@@ -72,7 +72,7 @@ COLOURS = {
 IsImproving: Dict[str, Callable[[Union[int, float]], bool]] = {
     "newCasesByPublishDate": lambda x: x < 0,
     "newDeaths28DaysByPublishDate": lambda x: x < 0,
-    "newPCRTestsByPublishDate": lambda x: 0,
+    "newVirusTests": lambda x: 0,
     "newAdmissions": lambda x: x < 0,
 }
 
