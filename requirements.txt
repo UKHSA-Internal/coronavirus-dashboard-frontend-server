@@ -3,7 +3,7 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 azure-core==1.8.2
-azure-common==1.1.25
+azure-common==1.1.26
 azure-nspkg==3.0.2
 azure-functions==1.4.0
 azure-storage-common==2.1.0
