@@ -18,7 +18,6 @@ invalid_postcodes = [
     'W1T6PJ', '111111', 'TK202NEEE', ' '
 ]
 
-
 class TestPostcode(unittest.TestCase):
     def setUp(self) -> None:
         app.config['TESTING'] = True
@@ -107,6 +106,7 @@ class TestPostcode(unittest.TestCase):
             self.assertIn(deaths_latest_date.encode(), data), self.assertIn(deaths_current_week_date.encode(), data), self.assertIn(deaths_latest_week_ago_date.encode(), data), self.assertIn(deaths_date_fortnight_prior.encode(), data)
             self.assertIn(admissions_latest_date.encode(), data), self.assertIn(admissions_current_week_date.encode(), data), self.assertIn(admissions_latest_week_ago_date.encode(), data), self.assertIn(admissions_date_fortnight_prior.encode(), data)
             self.assertIn(tests_latest_date.encode(), data), self.assertIn(tests_current_week_date.encode(), data), self.assertIn(tests_latest_week_ago_date.encode(), data), self.assertIn(tests_date_fortnight_prior.encode(), data)
+
 
 if __name__ == "__main__":
     unittest.main()

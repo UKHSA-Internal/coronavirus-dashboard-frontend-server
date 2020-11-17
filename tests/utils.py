@@ -18,9 +18,11 @@ from app import app, inject_timestamps_tests
 http = urllib3.PoolManager()
 
 website_timestamp = http.request('GET', 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').data.decode('ascii')
-timestamp = "2020-11-11T15:50:33.4175085Z"
+timestamp = "2020-11-16T17:50:25.8534325Z"
 timestamp_date = datetime.strptime(timestamp[:10], "%Y-%m-%d")
 str_timestamp_date = datetime.strftime(timestamp_date, "%Y-%m-%d")
+
+
 
 def output_object_to_file(filename: str, data: object, write_type: str = 'w') -> None:
     f = open(filename, write_type)
@@ -113,10 +115,13 @@ def calculate_change(metric: str, area_type: str = "UK", postcode: str = "") -> 
     try:
         percentage_change = (change / prev_week_count) * 100
     except ZeroDivisionError:
-        percentage_change = change * 150
+        if change == 1:
+            percentage_change = change * 100
+        else:
+            percentage_change = change * 180
     
     percentage_change = "{0:0.1f}".format(percentage_change)
-
+    
     
     if change == 0:
         return ("No change", "No change")
