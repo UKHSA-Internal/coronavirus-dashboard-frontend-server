@@ -24,6 +24,7 @@ class TestLanding(unittest.TestCase):
             response = client.get('/')
             self.assertEqual(response.status_code, 200)
 
+    # test if the change between weeks is calculated correctly
     def test_metric_change(self):
         with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
             response = client.get('/')
@@ -36,7 +37,7 @@ class TestLanding(unittest.TestCase):
             self.assertIn(deaths_change.encode(), data)
             self.assertIn(admissions_change.encode(), data)
             self.assertIn(tests_change.encode(), data)
-
+    # test the percentage of the change in value between weeks
     def test_percentage_change(self):
         with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
             response = client.get('/')
@@ -51,6 +52,7 @@ class TestLanding(unittest.TestCase):
             self.assertIn(admissions_percentage_change.encode(), data)
             self.assertIn(tests_percentage_change.encode(), data)
     
+    # confirm the start and end of the date ranges are correct
     def test_date_range(self):
         with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
             response = client.get('/')

@@ -16,6 +16,7 @@ http = urllib3.PoolManager()
 
 website_timestamp = http.request('GET', 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').data.decode('ascii')
 
+# get release timestamp from file, if date is old fetch the latest from the API
 with open("timefile.txt", 'r' ) as f:
     timestamp = f.read()
 
@@ -26,20 +27,6 @@ if datetime.now().replace(hour=0, minute= 0, second=0, microsecond=0) - timedelt
     timestamp = json_timestamp["timestamp"]
     with open("timefile.txt", "w") as f:
         f.write(timestamp)
-
-
-
-
-def output_object_to_file(filename: str, data: object, write_type: str = 'w') -> None:
-    f = open(filename, write_type)
-    f.write(str(getmembers(data)))
-    f.close()
-
-
-def output_content_to_file(filename: str, data: object, write_type: str = 'w') -> None:
-    f = open(filename, write_type)
-    f.write(data.decode('UTF-8'))
-    f.close()
 
 
 # get all dates between and inclusive of the specified start and end date
@@ -133,6 +120,8 @@ def calculate_change(metric: str, area_type: str = "UK", postcode: str = "") -> 
         return ("No change", "No change")
     else:
         return(str(f'{change:,}'), str(percentage_change))
+
+# get the first and last date of relevant date ranges
 
 def get_date_min_max(metric: str, area_type: str = "UK", postcode: str = " ") -> tuple:
     data = get_area_data(metric, area_type, postcode)

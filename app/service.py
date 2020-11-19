@@ -208,7 +208,6 @@ def main(req: HttpRequest, context: Context, latestPublished: str,
     testing = False
     timestamp = latestPublished
     website_timestamp = websiteTimestamp
-    logging.info(timestamp)
     try:
         application = WsgiMiddleware(app.wsgi_app)
         return application.main(req, context)
