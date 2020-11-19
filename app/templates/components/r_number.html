@@ -13,7 +13,7 @@
 	at&nbsp;<b>{{ r_values.transmissionRateMin }}&nbsp;to&nbsp;{{ r_values.transmissionRateMax }}</b>&nbsp;with
 	a daily infection growth rate range
 	of&nbsp;<b>
-		{%- if not R_growth_min -%}
+		{%- if not R_growth_min and Rate_growth_min != 0 -%}
 			N/A
 		{%- elif R_growth_min > 0 -%}
 			+{{ R_growth_min }}%
@@ -23,7 +23,7 @@
 			{{ R_growth_min }}%
 		{%- endif -%}
 		&nbsp;to&nbsp;
-		{%- if not R_growth_max -%}
+		{%- if not R_growth_max and Rate_growth_max != 0 -%}
 			N/A
 		{%- elif R_growth_max > 0 -%}
 			+{{ R_growth_max }}%

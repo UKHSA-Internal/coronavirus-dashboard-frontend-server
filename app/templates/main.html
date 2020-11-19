@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "components/mini_card.html" import create_card with context %}
+{% from "components/default_tail.html" import tail_banners with context %}
 
 {%- block page_title -%}Daily update{% endblock %}
 
@@ -52,6 +53,6 @@
 	{% endcache %}
 {%- endblock -%}
 
-{%- block postcode_search_header -%}
-	What's the situation in your local area?
-{%- endblock -%}
+{% block lower_section %}
+	{{ tail_banners("What's the situation in your local area?") }}
+{% endblock %}
