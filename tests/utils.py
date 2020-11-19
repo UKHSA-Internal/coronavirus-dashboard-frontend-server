@@ -12,15 +12,21 @@ import urllib3
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
-
-from app import app, inject_timestamps_tests
-
 http = urllib3.PoolManager()
 
 website_timestamp = http.request('GET', 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').data.decode('ascii')
-timestamp = "2020-11-16T17:50:25.8534325Z"
-timestamp_date = datetime.strptime(timestamp[:10], "%Y-%m-%d")
-str_timestamp_date = datetime.strftime(timestamp_date, "%Y-%m-%d")
+
+with open("timefile.txt", 'r' ) as f:
+    timestamp = f.read()
+
+timestamp_obj = datetime.strptime(timestamp[:10], "%Y-%m-%d")
+
+if datetime.now().replace(hour=0, minute= 0, second=0, microsecond=0) - timedelta(days=1) > timestamp_obj:
+    json_timestamp = json.loads(http.request('GET','https://api.coronavirus.data.gov.uk/v2/data?areaType=overview&metric=releaseTimestamp').data.decode())
+    timestamp = json_timestamp["timestamp"]
+    with open("timefile.txt", "w") as f:
+        f.write(timestamp)
+
 
 
 
@@ -118,7 +124,7 @@ def calculate_change(metric: str, area_type: str = "UK", postcode: str = "") -> 
         if change == 1:
             percentage_change = change * 100
         else:
-            percentage_change = change * 180
+            percentage_change = change * 100
     
     percentage_change = "{0:0.1f}".format(percentage_change)
     

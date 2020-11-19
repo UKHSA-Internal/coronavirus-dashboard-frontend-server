@@ -4,7 +4,7 @@ from tqdm import tqdm as progress_bar
 import logging
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
-from .utils import website_timestamp, timestamp, calculate_change, get_date_min_max
+from ..utils import website_timestamp, timestamp, calculate_change, get_date_min_max
 from app import app, inject_timestamps_tests
 
 postcodes = [

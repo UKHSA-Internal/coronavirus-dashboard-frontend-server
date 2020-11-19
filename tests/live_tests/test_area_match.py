@@ -4,7 +4,7 @@ from flask import g
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
-from .utils import website_timestamp, timestamp, postcodes, get_postcode_area_code
+from ..utils import website_timestamp, timestamp, get_postcode_area_code
 from app import app, inject_timestamps_tests
 
 
