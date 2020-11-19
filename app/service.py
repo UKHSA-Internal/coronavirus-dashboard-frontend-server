@@ -113,6 +113,11 @@ def format_number(value: Union[int, float]) -> str:
     return str(value)
 
 
+@app.template_filter()
+def isnone(value):
+    return value is None
+
+
 @app.errorhandler(404)
 def handle_404(e):
     return render_template("errors/404.html"), 404
