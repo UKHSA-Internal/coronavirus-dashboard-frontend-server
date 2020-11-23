@@ -3,12 +3,11 @@ import logging
 import unittest
 from flask import g
 import requests
-from datetime import datetime, timedelta, date
 import json
 import csv
 import math
 import urllib3
-
+import datetime
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
@@ -17,26 +16,26 @@ http = urllib3.PoolManager()
 website_timestamp = http.request('GET', 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').data.decode('ascii')
 
 # get release timestamp from file, if date is old fetch the latest from the API
-with open("timefile.txt", 'r' ) as f:
+with open("../timefile.txt", 'r' ) as f:
     timestamp = f.read()
 
-timestamp_obj = datetime.strptime(timestamp[:10], "%Y-%m-%d")
+timestamp_obj = datetime.datetime.strptime(timestamp[:10], "%Y-%m-%d")
 
-if datetime.now().replace(hour=0, minute= 0, second=0, microsecond=0) - timedelta(days=1) > timestamp_obj:
+if datetime.datetime.now().replace(hour=0, minute= 0, second=0, microsecond=0) - datetime.timedelta(days=1) > timestamp_obj:
     json_timestamp = json.loads(http.request('GET','https://api.coronavirus.data.gov.uk/v2/data?areaType=overview&metric=releaseTimestamp').data.decode())
-    timestamp = json_timestamp["timestamp"]
+    timestamp = json_timestamp["body"][0]["releaseTimestamp"]
     with open("timefile.txt", "w") as f:
         f.write(timestamp)
 
 
 # get all dates between and inclusive of the specified start and end date
 def get_date_range(start_date: str, end_date: str) -> list:
-    start = datetime.strptime(start_date, "%Y-%m-%d")
-    end = datetime.strptime(end_date, "%Y-%m-%d")
+    start = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.datetime.strptime(end_date, "%Y-%m-%d")
     result = []
-    step = timedelta(days=1)
+    step = datetime.timedelta(days=1)
     while start <= end:
-        result.append(datetime.strftime(start, "%Y-%m-%d"))
+        result.append(datetime.datetime.strftime(start, "%Y-%m-%d"))
         start += step
     return result
 
@@ -70,11 +69,11 @@ def get_area_data(metric: str, area_type: str, postcode: str):
 def calculate_dates(data):
     
     str_latest_date = data["data"][0]["date"]
-    latest_date = datetime.strptime(str_latest_date, "%Y-%m-%d")
+    latest_date = datetime.datetime.strptime(str_latest_date, "%Y-%m-%d")
 
-    current_week_date = date.strftime(latest_date - timedelta(days=6), "%Y-%m-%d")
-    latest_week_ago_date = date.strftime(latest_date - timedelta(days=7), "%Y-%m-%d")
-    date_fortnight_prior = date.strftime(latest_date - timedelta(days=13), "%Y-%m-%d")
+    current_week_date = datetime.date.strftime(latest_date - datetime.timedelta(days=6), "%Y-%m-%d")
+    latest_week_ago_date = datetime.date.strftime(latest_date - datetime.timedelta(days=7), "%Y-%m-%d")
+    date_fortnight_prior = datetime.date.strftime(latest_date - datetime.timedelta(days=13), "%Y-%m-%d")
    
     date_range_last_7 = get_date_range(current_week_date, str_latest_date)
     date_range_prev_7 = get_date_range(date_fortnight_prior, latest_week_ago_date)
@@ -129,8 +128,8 @@ def get_date_min_max(metric: str, area_type: str = "UK", postcode: str = " ") ->
 
     for index, current_date in enumerate(dates):
         if index != 1 and index < 5:
-            current_date = datetime.strptime(current_date, "%Y-%m-%d")
-            dates[index] = datetime.strftime(current_date, "%d %B %Y").lstrip("0")
+            current_date = datetime.datetime.strptime(current_date, "%Y-%m-%d")
+            dates[index] = datetime.datetime.strftime(current_date, "%d %B %Y").lstrip("0")
 
     
     latest_date = dates[0]
@@ -140,3 +139,14 @@ def get_date_min_max(metric: str, area_type: str = "UK", postcode: str = " ") ->
     date_fortnight_prior = dates[4]
 
     return latest_date, current_week_date, latest_week_ago_date, date_fortnight_prior
+
+def read_dict_file(file: str):
+    output = []
+    
+    with open(file, "r") as f:
+        for line in f:
+            line = line.rstrip()
+            dictobj = eval(line)
+            output.append(dictobj)
+
+    return output
