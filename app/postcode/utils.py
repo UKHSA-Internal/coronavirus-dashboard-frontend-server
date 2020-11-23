@@ -61,6 +61,16 @@ def get_change(metric_data) -> Dict[str, Union[int, float, str]]:
         "trend": trend
     }
 
+# def get_change(latest_timestamp, metric):
+#     data = change_by_metric(latest_timestamp, metric)
+
+#     return {
+#         "percentage": data["changePercentage"],
+#         "value": data["change"],
+#         "total": data["value"],
+#         "trend": data["changeDirection"]
+
+#     }
 
 @cache_client.memoize(60 * 60 * 6)
 def get_card_data(metric_name: str, metric_data, graph=True):

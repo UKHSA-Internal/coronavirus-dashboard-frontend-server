@@ -203,3 +203,41 @@ WHERE
 ORDER BY 
     c.date DESC\
 """
+LatestChangeData = Template("""\
+SELECT TOP 1
+    VALUE {
+        'date':        c.date,
+        'value':       c.$metric,
+        'change': c.${metric}Change ?? null,
+        'changePercentage':  c.${metric}ChangePercentage  ?? null,
+        'changeDirection': c.${metric}Direction ?? null
+    }
+FROM    c 
+WHERE   
+        c.releaseTimestamp = @releaseTimestamp
+    AND c.areaType         = @areaType
+    AND c.areaCode         = @areaCode
+    AND c.date            <= @latestDate
+    AND IS_DEFINED(c.$metric)
+ORDER BY 
+    c.date DESC\
+""")
+
+LatestChangeDataOverview = Template("""\
+SELECT TOP 1
+    VALUE {
+        'date':        c.date,
+        'value':       c.$metric,
+        'change': c.${metric}Change ?? null,
+        'changePercentage':  c.${metric}ChangePercentage  ?? null,
+        'changeDirection': c.${metric}Direction ?? null
+    }
+FROM    c 
+WHERE   
+        c.releaseTimestamp = @releaseTimestamp
+    AND c.areaType         = @areaType
+    AND c.date            <= @latestDate
+    AND IS_DEFINED(c.$metric)
+ORDER BY 
+    c.date DESC\
+""")
