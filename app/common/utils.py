@@ -57,37 +57,22 @@ def get_og_image_names(latest_timestamp: str) -> list:
     return og_names
 
 
-# def get_change(metric_data):
-#     sigma_this_week = sum(map(get_value, metric_data[:7]))
-#     sigma_last_week = sum(map(get_value, metric_data[7:14]))
-#     delta = sigma_this_week - sigma_last_week
-
-#     delta_percentage = (sigma_this_week / max(sigma_last_week, 1) - 1) * 100
-
-#     if delta_percentage > 0:
-#         trend = 0
-#     elif delta_percentage < 0:
-#         trend = 180
-#     else:
-#         trend = 90
-
-#     logging.warning(trend)
-#     return {
-#         "percentage": format(delta_percentage, ".1f"),
-#         "value": int(round(delta)),
-#         "total": sigma_this_week,
-#         "trend": trend
-#     }
-
-
 def get_change(timestamp, metric):
     data = change_by_metric(timestamp, metric)
+
+    if data["changeDirection"] == "UP":
+        trend = 0
+    elif data["changeDirection"] == "DOWN":
+        trend = 180
+    else:
+        trend = 90
+
 
     return {
         "percentage": data["changePercentage"],
         "value": data["change"],
         "total": data["value"],
-        "trend": data["changeDirection"]
+        "trend": trend
 
     }
 

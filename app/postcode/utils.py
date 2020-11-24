@@ -3,6 +3,7 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+import logging
 import re
 from operator import itemgetter
 from typing import List, Dict, Union
@@ -12,7 +13,7 @@ from functools import lru_cache
 
 # Internal:
 from ..common.caching import cache_client
-from ..common.data.queries import get_last_fortnight
+from ..common.data.queries import get_last_fortnight, change_by_metric
 from ..common.visualisation import plot_thumbnail, get_colour
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,41 +41,49 @@ def get_validated_postcode(params: dict) -> Union[str, None]:
 
 
 # @lru_cache(maxsize=256)
-def get_change(metric_data) -> Dict[str, Union[int, float, str]]:
-    sigma_this_week = sum(map(get_value, metric_data[:7]))
-    sigma_last_week = sum(map(get_value, metric_data[7:14]))
-    delta = sigma_this_week - sigma_last_week
+# def get_change(metric_data) -> Dict[str, Union[int, float, str]]:
+#     sigma_this_week = sum(map(get_value, metric_data[:7]))
+#     sigma_last_week = sum(map(get_value, metric_data[7:14]))
+#     delta = sigma_this_week - sigma_last_week
 
-    delta_percentage = (sigma_this_week / max(sigma_last_week, 0.5) - 1) * 100
+#     delta_percentage = (sigma_this_week / max(sigma_last_week, 0.5) - 1) * 100
 
-    if delta_percentage > 0:
+#     if delta_percentage > 0:
+#         trend = 0
+#     elif delta_percentage < 0:
+#         trend = 180
+#     else:
+#         trend = 90
+
+#     return {
+#         "percentage": format(delta_percentage, ".1f"),
+#         "value": int(round(delta)),
+#         "total": sigma_this_week,
+#         "trend": trend
+#     }
+
+def get_change(timestamp, metric, postcode):
+    data = change_by_metric(timestamp, metric, ltla=True, postcode=postcode)
+
+    if data["changeDirection"] == "UP":
         trend = 0
-    elif delta_percentage < 0:
+    elif data["changeDirection"] == "DOWN":
         trend = 180
     else:
         trend = 90
 
+
     return {
-        "percentage": format(delta_percentage, ".1f"),
-        "value": int(round(delta)),
-        "total": sigma_this_week,
+        "percentage": data["changePercentage"],
+        "value": data["change"],
+        "total": data["value"],
         "trend": trend
+
     }
 
-# def get_change(latest_timestamp, metric):
-#     data = change_by_metric(latest_timestamp, metric)
-
-#     return {
-#         "percentage": data["changePercentage"],
-#         "value": data["change"],
-#         "total": data["value"],
-#         "trend": data["changeDirection"]
-
-#     }
-
 @cache_client.memoize(60 * 60 * 6)
-def get_card_data(metric_name: str, metric_data, graph=True):
-    change = get_change(metric_data)
+def get_card_data(timestamp: str, metric_name: str, metric_data, graph=True, postcode=None):
+    change = get_change(timestamp, metric_name, postcode)
     colour = get_colour(change, metric_name)
 
     response = {
