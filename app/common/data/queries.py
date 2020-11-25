@@ -285,11 +285,12 @@ def change_by_metric(timestamp, metric, ltla=False, postcode=None):
 
 
     latest_date = last_published.strftime("%Y-%m-%d")
-
     if ltla:
         area = get_postcode_areas(postcode)
 
-        if metric != const.DestinationMetrics["healthcare"]["metric"]:
+        if metric == const.DestinationMetrics["testing"]["metric"]:
+            area_type = 'nation'
+        elif metric != const.DestinationMetrics["healthcare"]["metric"]:
             # Non-healthcare metrics use LTLA.
             area_type = 'ltla'
         elif area['nation'][0].upper() not in "SNW":
@@ -317,6 +318,8 @@ def change_by_metric(timestamp, metric, ltla=False, postcode=None):
             {"name": "@areaType", "value": 'overview'},
         ]
 
+    #logging.warning(f'Params: {params}  \n  Query: {query}')
+
     try:
         result = g.data_db.query(query, params=params)
         response = {
@@ -326,7 +329,7 @@ def change_by_metric(timestamp, metric, ltla=False, postcode=None):
             "changePercentage" : result[0]["changePercentage"],
             "changeDirection" : result[0]["changeDirection"]
         }
-        logging.warning(response)
+        
         return response
 
     except (KeyError, IndexError):

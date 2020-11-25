@@ -204,6 +204,10 @@ WHERE
 ORDER BY 
     c.date DESC\
 """
+
+
+
+
 LatestChangeData = Template("""\
 SELECT TOP 1
     VALUE {
