@@ -9,7 +9,7 @@
       "name": "req",
       "methods": [
         "get",
-        "post"
+        "head"
       ],
       "route": "{*path}"
     },
