@@ -63,7 +63,11 @@
         border-color: govuk-colour("blue");
         background-color: govuk-colour("light-grey");
         color: govuk-colour("blue");
-        font-weight: bold;
+        @include govuk-font(19, $weight: bold);
+
+        @include govuk-media-query($from: tablet) {
+            @include govuk-font(16, $weight: bold);
+        }
     }
 
     a:focus {

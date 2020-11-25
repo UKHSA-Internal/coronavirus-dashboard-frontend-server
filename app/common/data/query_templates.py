@@ -19,7 +19,8 @@ __all__ = [
     'MsoaData',
     'AlertLevel',
     'SpecimenDateData',
-    'LatestTransmissionRate'
+    'LatestTransmissionRate',
+    "HealthCheck"
 ]
 
 
@@ -241,3 +242,11 @@ WHERE
 ORDER BY 
     c.date DESC\
 """)
+
+
+HealthCheck = """\
+SELECT 
+    VALUE MAX(c.releaseTimestamp) 
+FROM c
+ORDER BY c.releaseTimestamp DESC\
+"""
