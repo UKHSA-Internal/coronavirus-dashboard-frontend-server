@@ -78,7 +78,7 @@
 											<img src="/assets/public/images/arrow.svg"
 											     width="12px"
 											     alt="arrow"
-											     style="transform: rotate({{ card.change.trend }}deg)">
+											     style="transform: rotate({{ card.change.trend | get_rotation }}deg)">
 											{{ card.change.value | format_number }}
 											<span class="govuk-!-font-weight-regular">({{ card.change.percentage }}%)</span>
 										{%- else -%}

@@ -60,19 +60,11 @@ def get_og_image_names(latest_timestamp: str) -> list:
 def get_change(timestamp, metric):
     data = change_by_metric(timestamp, metric)
 
-    if data["changeDirection"] == "UP":
-        trend = 0
-    elif data["changeDirection"] == "DOWN":
-        trend = 180
-    else:
-        trend = 90
-
-
     return {
         "percentage": data["changePercentage"],
         "value": data["change"],
         "total": data["value"],
-        "trend": trend
+        "trend": data["changeDirection"]
 
     }
 

@@ -44,19 +44,11 @@ def get_validated_postcode(params: dict) -> Union[str, None]:
 def get_change(timestamp, metric, postcode):
     data = change_by_metric(timestamp, metric, ltla=True, postcode=postcode)
 
-    if data["changeDirection"] == "UP":
-        trend = 0
-    elif data["changeDirection"] == "DOWN":
-        trend = 180
-    else:
-        trend = 90
-
-
     return {
         "percentage": data["changePercentage"],
         "value": data["change"],
         "total": data["value"],
-        "trend": trend
+        "trend": data["changeDirection"]
 
     }
 
