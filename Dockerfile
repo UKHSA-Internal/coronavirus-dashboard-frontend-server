@@ -14,7 +14,7 @@ RUN rm -rf node_modules
 FROM tiangolo/uwsgi-nginx-flask:python3.8
 
 ENV UWSGI_INI /app/uwsgi.ini
-ENV STATIC_URL /static
+ENV STATIC_URL /assets
 ENV STATIC_PATH /app/static
 ENV LISTEN_PORT 5000
 ENV NGINX_WORKER_PROCESSES auto
@@ -27,12 +27,14 @@ ENV UWSGI_PROCESSES 51
 WORKDIR /app
 
 COPY --from=builder /app/static/dist ./static
+COPY ./app/static/images             ./static/images
+COPY ./app/static/govuk-frontend     ./static/govuk-frontend
 
-COPY ./database         ./database
-COPY ./storage          ./storage
-COPY ./uwsgi.ini        ./uwsgi.ini
-COPY ./app              ./app
-COPY ./requirements.txt ./requirements.txt
+COPY ./database          ./database
+COPY ./storage           ./storage
+COPY ./uwsgi.ini         ./uwsgi.ini
+COPY ./app               ./app
+COPY ./requirements.txt  ./requirements.txt
 
 RUN apt-get update && apt-get install -y wget --no-install-recommends
 
