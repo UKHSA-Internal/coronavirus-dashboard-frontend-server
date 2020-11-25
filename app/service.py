@@ -12,7 +12,7 @@ from typing import Union
 from functools import lru_cache
 
 # 3rd party:
-from flask import Flask, Response, g, render_template
+from flask import Flask, Response, g, render_template, make_response
 from azure.functions import HttpRequest, HttpResponse, WsgiMiddleware, Context
 from flask_minify import minify
 from pytz import timezone
@@ -189,6 +189,17 @@ def prepare_response(resp: Response):
 
     resp.set_data(data)
     return resp
+
+
+@app.route("/healthcheck", methods=("HEAD", "GET"))
+def health_check(**kwargs):
+    from .common.data.query_templates import HealthCheck
+    result = g.data_db.query(HealthCheck, params=list()).pop()
+
+    if result.endswith("Z"):
+        return make_response("", 200)
+
+    raise make_response("", 500)
 
 
 def main(req: HttpRequest, context: Context, latestPublished: str,
