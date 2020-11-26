@@ -62,8 +62,8 @@ ORDER BY
 LatestTransmissionRate = """\
 SELECT TOP 1
     VALUE {
-        'transmissionRateMin': c.transmissionRateMin,
-        'transmissionRateMax': c.transmissionRateMax,
+        'transmissionRateMin':           c.transmissionRateMin,
+        'transmissionRateMax':           c.transmissionRateMax,
         'transmissionRateGrowthRateMin': c.transmissionRateGrowthRateMin,
         'transmissionRateGrowthRateMax': c.transmissionRateGrowthRateMax,
         'date': c.date
@@ -83,22 +83,22 @@ ORDER BY
 PostcodeLookup = """\
 SELECT TOP 1 
     VALUE {
-        'postcode': c.postcode, 
+        'postcode':        c.postcode, 
         'trimmedPostcode': c.trimmedPostcode,
-        'lsoa': c.lsoa, 
-        'lsoaName': c.lsoaName, 
-        'msoa': c.msoa,
-        'msoaName': c.msoaName, 
-        'ltla': c.ltla, 
-        'ltlaName': c.ltlaName, 
-        'utla': c.utla, 
-        'utlaName': c.utlaName, 
-        'region': c.region, 
-        'regionName': c.regionName, 
-        'nhsRegion': c.nhsRegion, 
-        'nhsRegionName': c.nhsRegionName, 
-        'nation': c.nation, 
-        'nationName': c.nationName
+        'lsoa':            c.lsoa, 
+        'lsoaName':        c.lsoaName, 
+        'msoa':            c.msoa,
+        'msoaName':        c.msoaName, 
+        'ltla':            c.ltla, 
+        'ltlaName':        c.ltlaName, 
+        'utla':            c.utla, 
+        'utlaName':        c.utlaName, 
+        'region':          c.region, 
+        'regionName':      c.regionName, 
+        'nhsRegion':       c.nhsRegion, 
+        'nhsRegionName':   c.nhsRegionName, 
+        'nation':          c.nation, 
+        'nationName':      c.nationName
     }
 FROM     c
 WHERE    c.type            = 'postcode'
@@ -206,17 +206,15 @@ ORDER BY
 """
 
 
-
-
 LatestChangeData = Template("""\
 SELECT TOP 1
     VALUE {
-        'date':        c.date,
-        'value':       c.$metric,
-        'change': c.${metric}Change ?? null,
+        'date':              c.date,
+        'value':             c.$metric,
+        'change':            c.${metric}Change ?? null,
         'changePercentage':  c.${metric}ChangePercentage  ?? null,
-        'changeDirection': c.${metric}Direction ?? null,
-        'rollingSum': c.${metric}RollingSum ?? null
+        'changeDirection':   c.${metric}Direction ?? null,
+        'rollingSum':        c.${metric}RollingSum ?? null
     }
 FROM    c 
 WHERE   
@@ -232,12 +230,12 @@ ORDER BY
 LatestChangeDataOverview = Template("""\
 SELECT TOP 1
     VALUE {
-        'date':        c.date,
-        'value':       c.$metric,
-        'change': c.${metric}Change ?? null,
-        'changePercentage':  c.${metric}ChangePercentage  ?? null,
-        'changeDirection': c.${metric}Direction ?? null,
-        'rollingSum': c.${metric}RollingSum ?? null
+        'date':             c.date,
+        'value':            c.$metric,
+        'change':           c.${metric}Change ?? null,
+        'changePercentage': c.${metric}ChangePercentage  ?? null,
+        'changeDirection':  c.${metric}Direction ?? null,
+        'rollingSum':       c.${metric}RollingSum ?? null
     }
 FROM    c 
 WHERE   
