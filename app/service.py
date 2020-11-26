@@ -117,9 +117,10 @@ def format_number(value: Union[int, float]) -> str:
 def isnone(value):
     return value is None
 
+
 @app.template_filter()
 def get_rotation(value: str) -> int:
-    
+
     if value == "UP":
         value = 0 
     elif value == "DOWN":
@@ -128,7 +129,7 @@ def get_rotation(value: str) -> int:
         value = 90 
 
     return value 
-	
+
 
 @app.errorhandler(404)
 def handle_404(e):
