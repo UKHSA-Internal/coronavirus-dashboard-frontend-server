@@ -184,12 +184,6 @@ def prepare_response(resp: Response):
     minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
     data = str.join("", minified).encode()
 
-    # accept_encoding = request.headers.get("Accept-Encoding", "")
-    #
-    # if 'gzip' in accept_encoding:
-    #     data = compress(data)
-    #     resp.headers['Content-Encoding'] = "gzip"
-
     resp.set_data(data)
     return resp
 
