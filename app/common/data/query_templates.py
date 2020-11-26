@@ -213,8 +213,12 @@ SELECT TOP 1
         'value':             c.$metric,
         'change':            c.${metric}Change ?? null,
         'changePercentage':  c.${metric}ChangePercentage  ?? null,
-        'changeDirection':   c.${metric}Direction ?? null,
-        'rollingSum':        c.${metric}RollingSum ?? null
+        'rollingSum':        c.${metric}RollingSum ?? null,
+        'changeDirection':   c.${metric}Direction = 'UP' 
+                                 ? 0 
+                                 : c.${metric}Direction = 'DOWN' 
+                                 ? 180 
+                                 : 90
     }
 FROM    c 
 WHERE   
