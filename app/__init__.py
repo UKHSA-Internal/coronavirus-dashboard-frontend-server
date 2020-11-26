@@ -11,9 +11,6 @@ Contributors:  Pouria Hadjibagheri
 
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Python:
-
-# 3rd party:
 
 # Internal:
 from .service import main, app

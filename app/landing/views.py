@@ -22,12 +22,6 @@ from ..common.utils import get_main_data
 from ..common.data.queries import get_r_values, latest_rate_by_metric
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Header
-__author__ = "Pouria Hadjibagheri"
-__copyright__ = "Copyright (c) 2020, Public Health England"
-__license__ = "MIT"
-__version__ = "0.0.1"
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
     'home_page'

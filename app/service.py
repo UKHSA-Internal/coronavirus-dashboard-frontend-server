@@ -7,7 +7,6 @@ import logging
 import re
 from datetime import datetime, timedelta
 from os.path import abspath, join as join_path, pardir
-from os import getenv
 from typing import Union
 from functools import lru_cache
 
@@ -24,12 +23,8 @@ from .common.data.constants import NationalAdjectives
 from .common.caching import cache_client
 from .common.utils import get_og_image_names
 
-try:
-    from __app__.database import CosmosDB, Collection
-    from __app__.storage import StorageClient
-except ImportError:
-    from database import CosmosDB, Collection
-    from storage import StorageClient
+from database import CosmosDB, Collection
+from storage import StorageClient
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -39,11 +34,17 @@ __all__ = [
 ]
 
 
-WEB_STORAGE_CONN_STR = getenv("StaticFrontendStorage")
-MAIN_STORAGE_CONN_STR = getenv("DeploymentBlobStorage")
+WEBSITE_TIMESTAMP = {
+    "container": "publicdata",
+    "path":  "assets/dispatch/website_timestamp"
+}
 
-timestamp: str = str()
-website_timestamp: str = str()
+LATEST_PUBLISHED_TIMESTAMP = {
+    "container": "pipeline",
+    "path": "info/latest_published"
+}
+
+
 timestamp_pattern = "%A %d %B %Y at %I:%M %p"
 timezone_LN = timezone("Europe/London")
 
@@ -51,18 +52,7 @@ timezone_LN = timezone("Europe/London")
 instance_path = abspath(join_path(abspath(__file__), pardir))
 
 app = Flask(__name__, instance_path=instance_path, static_folder="static")
-
-try:
-    app.config.from_object('__app__.app.config.Config')
-except (ModuleNotFoundError, ImportError):
-    app.config.from_object('app.config.Config')
-    with StorageClient("publicdata", "assets/dispatch/website_timestamp",
-                       connection_string=MAIN_STORAGE_CONN_STR) as client:
-        website_timestamp = client.download().readall().decode()
-
-    with StorageClient("pipeline", "info/latest_published",
-                       connection_string=MAIN_STORAGE_CONN_STR) as client:
-        timestamp = client.download().readall().decode()
+app.config.from_object('app.config.Config')
 
 
 app.register_blueprint(home_page)
@@ -147,16 +137,17 @@ def inject_globals():
         DEBUG=app.debug,
         national_adjectives=NationalAdjectives,
         timestamp=g.website_timestamp,
-        og_images=get_og_image_names(timestamp)
+        og_images=get_og_image_names(g.timestamp)
     )
 
 
 @app.before_request
 def inject_timestamps():
-    global timestamp, website_timestamp
+    with StorageClient(**WEBSITE_TIMESTAMP) as client:
+        g.website_timestamp = client.download().readall().decode()
 
-    g.timestamp = timestamp
-    g.website_timestamp = website_timestamp
+    with StorageClient(**LATEST_PUBLISHED_TIMESTAMP) as client:
+        g.timestamp = client.download().readall().decode()
 
     g.data_db = CosmosDB(Collection.DATA)
     g.lookup_db = CosmosDB(Collection.LOOKUP)
@@ -214,12 +205,7 @@ def health_check(**kwargs):
     raise make_response("", 500)
 
 
-def main(req: HttpRequest, context: Context, latestPublished: str,
-         websiteTimestamp: str) -> HttpResponse:
-    global timestamp, website_timestamp
-    timestamp = latestPublished
-    website_timestamp = websiteTimestamp
-
+def main(req: HttpRequest, context: Context) -> HttpResponse:
     try:
         application = WsgiMiddleware(app.wsgi_app)
         return application.main(req, context)

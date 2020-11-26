@@ -19,13 +19,6 @@ from ..common.data.queries import (
 from .utils import get_validated_postcode, get_card_data
 from ..common.utils import get_main_data
 
-try:
-    from __app__.database import CosmosDB
-    from __app__.storage import StorageClient
-except ImportError:
-    from database import CosmosDB
-    from storage import StorageClient
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [

@@ -12,10 +12,9 @@ Contributors:  Pouria Hadjibagheri
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-import logging
 from datetime import datetime
 from operator import itemgetter
-from typing import List, Dict
+from typing import Dict
 
 # 3rd party:
 
@@ -25,17 +24,6 @@ from .visualisation import get_colour, plot_thumbnail
 from .data.queries import get_last_fortnight, change_by_metric
 from .data.constants import DestinationMetrics
 
-try:
-    from __app__.database import CosmosDB
-except ImportError:
-    from database import CosmosDB
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Header
-__author__ = "Pouria Hadjibagheri"
-__copyright__ = "Copyright (c) 2020, Public Health England"
-__license__ = "MIT"
-__version__ = "0.0.1"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 get_value = itemgetter("value")
