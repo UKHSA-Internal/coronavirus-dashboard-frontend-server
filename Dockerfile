@@ -14,12 +14,12 @@ RUN rm -rf node_modules
 FROM tiangolo/uwsgi-nginx-flask:python3.8
 
 ENV UWSGI_INI /app/uwsgi.ini
-ENV STATIC_URL /assets
-ENV STATIC_PATH /app/static
-ENV LISTEN_PORT 5000
-ENV NGINX_WORKER_PROCESSES auto
-ENV NGINX_WORKER_CONNECTIONS 1024
-ENV NGINX_WORKER_OPEN_FILES 1024
+#ENV STATIC_URL /assets
+#ENV STATIC_PATH /app/static
+#ENV LISTEN_PORT 5000
+#ENV NGINX_WORKER_PROCESSES auto
+#ENV NGINX_WORKER_CONNECTIONS 2048
+#ENV NGINX_WORKER_OPEN_FILES 2048
 
 ENV UWSGI_CHEAPER 50
 ENV UWSGI_PROCESSES 51
@@ -30,11 +30,15 @@ COPY --from=builder /app/static/dist ./static
 COPY ./app/static/images             ./static/images
 COPY ./app/static/govuk-frontend     ./static/govuk-frontend
 
-COPY ./database          ./database
-COPY ./storage           ./storage
-COPY ./uwsgi.ini         ./uwsgi.ini
-COPY ./app               ./app
-COPY ./requirements.txt  ./requirements.txt
+COPY ./server/nginx.conf             ./
+COPY ./server/upload.conf            /etc/nginx/conf.d/upload.conf
+COPY ./server/engine.conf            /etc/nginx/conf.d/engine.conf
+
+COPY ./database                      ./database
+COPY ./storage                       ./storage
+COPY ./uwsgi.ini                     ./uwsgi.ini
+COPY ./app                           ./app
+COPY ./requirements.txt              ./requirements.txt
 
 RUN apt-get update && apt-get install -y wget --no-install-recommends
 

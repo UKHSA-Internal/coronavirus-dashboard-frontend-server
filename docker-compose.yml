@@ -6,6 +6,8 @@ services:
     restart: always
     volumes:
       - ./app/:/app/app/
+      - ./server/upload.conf:/etc/nginx/conf.d/upload.conf
+      - ./server/engine.conf:/etc/nginx/conf.d/engine.conf
     ports:
       - 5000:5000
     env_file:
