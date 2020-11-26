@@ -24,9 +24,9 @@ COPY --from=builder /app/static/dist ./static
 COPY ./app/static/images             ./static/images
 COPY ./app/static/govuk-frontend     ./static/govuk-frontend
 
-COPY ./server/nginx.conf             ./
-COPY ./server/upload.conf            /etc/nginx/conf.d/upload.conf
-COPY ./server/engine.conf            /etc/nginx/conf.d/engine.conf
+COPY server/base.nginx             ./nginx.conf
+COPY server/upload.nginx            /etc/nginx/conf.d/upload.conf
+COPY server/engine.nginx            /etc/nginx/conf.d/engine.conf
 
 COPY ./database                      ./database
 COPY ./storage                       ./storage
