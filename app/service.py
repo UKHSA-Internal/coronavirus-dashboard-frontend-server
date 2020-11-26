@@ -120,7 +120,6 @@ def isnone(value):
 
 @app.template_filter()
 def get_rotation(value: str) -> int:
-
     if value == "UP":
         value = 0 
     elif value == "DOWN":
