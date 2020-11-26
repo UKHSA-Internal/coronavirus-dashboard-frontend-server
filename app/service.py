@@ -12,7 +12,6 @@ from functools import lru_cache
 
 # 3rd party:
 from flask import Flask, Response, g, render_template, make_response
-from azure.functions import HttpRequest, HttpResponse, WsgiMiddleware, Context
 from flask_minify import minify
 from pytz import timezone
 
