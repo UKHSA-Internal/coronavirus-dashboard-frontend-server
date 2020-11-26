@@ -57,20 +57,9 @@ def get_og_image_names(latest_timestamp: str) -> list:
     return og_names
 
 
-def get_change(timestamp, metric, postcode=None):
-    data = change_by_metric(timestamp, metric, postcode=postcode)
-
-    return {
-        "percentage": data["changePercentage"],
-        "value": data["change"],
-        "total": data["total"],
-        "trend": data["changeDirection"]
-
-    }
-
 
 def get_card_data(latest_timestamp: str, metric_name: str, metric_data, graph=True):
-    change = get_change(latest_timestamp, metric_name)
+    change = change_by_metric(latest_timestamp, metric_name, postcode=None)
     colour = get_colour(change, metric_name)
 
     response = {

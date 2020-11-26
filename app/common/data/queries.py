@@ -323,11 +323,9 @@ def change_by_metric(timestamp, metric, postcode=None):
     try:
         result = g.data_db.query(query, params=params)
         response = {
-            "date" : result[0]["date"],
-            "change" : result[0]["change"],
-            "value" : result[0]["value"],
-            "changePercentage" : result[0]["changePercentage"],
-            "changeDirection" : result[0]["changeDirection"],
+            "value" : result[0]["change"],
+            "percentage" : result[0]["changePercentage"],
+            "trend" : result[0]["changeDirection"],
             "total" : result[0]["rollingSum"]
         }
         return response

@@ -15,7 +15,6 @@ from functools import lru_cache
 from ..common.caching import cache_client
 from ..common.data.queries import get_last_fortnight, change_by_metric
 from ..common.visualisation import plot_thumbnail, get_colour
-from ..common.utils import get_change
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -46,7 +45,7 @@ def get_validated_postcode(params: dict) -> Union[str, None]:
 
 @cache_client.memoize(60 * 60 * 6)
 def get_card_data(timestamp: str, metric_name: str, metric_data, graph=True, postcode=None):
-    change = get_change(timestamp, metric_name, postcode)
+    change = change_by_metric(timestamp, metric_name, postcode)
     colour = get_colour(change, metric_name)
 
     response = {
