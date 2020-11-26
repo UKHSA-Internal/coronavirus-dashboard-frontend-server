@@ -284,7 +284,6 @@ def change_by_metric(timestamp, metric, postcode=None):
     last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
     latest_date = last_published.strftime("%Y-%m-%d")
 
-    
     if postcode != None:
         area = get_postcode_areas(postcode)
 
@@ -318,15 +317,13 @@ def change_by_metric(timestamp, metric, postcode=None):
             {"name": "@areaType", "value": 'overview'},
         ]
 
-    #logging.warning(f'Params: {params}  \n  Query: {query}')
-
     try:
         result = g.data_db.query(query, params=params)
         response = {
-            "value" : result[0]["change"],
-            "percentage" : result[0]["changePercentage"],
-            "trend" : result[0]["changeDirection"],
-            "total" : result[0]["rollingSum"]
+            "value": result[0]["change"],
+            "percentage": result[0]["changePercentage"],
+            "trend": result[0]["changeDirection"],
+            "total": result[0]["rollingSum"]
         }
         return response
 
