@@ -21,7 +21,7 @@ from pytz import timezone
 # Internal:
 from .postcode.views import postcode_page
 from .landing.views import home_page
-
+from .common.data.constants import NationalAdjectives
 from .common.caching import cache_client
 from .common.utils import get_og_image_names
 
@@ -129,6 +129,23 @@ def inject_timestamps_tests(app, timestamp, website_timestamp):
     with appcontext_pushed.connected_to(handler, app):
         yield
 
+@app.template_filter()
+def isnone(value):
+    return value is None
+
+@app.template_filter()
+def get_rotation(value: str) -> int:
+    
+    if value == "UP":
+        value = 0 
+    elif value == "DOWN":
+        value = 180 
+    else:
+        value = 90 
+
+    return value 
+	
+
 @app.errorhandler(404)
 def handle_404(e):
     return render_template("errors/404.html"), 404
@@ -144,6 +161,7 @@ def handle_500(e):
 def inject_globals():
     return dict(
         DEBUG=app.debug,
+        national_adjectives=NationalAdjectives,
         timestamp=g.website_timestamp,
         og_images=get_og_image_names(timestamp)
     )
@@ -200,6 +218,17 @@ def prepare_response(resp: Response):
 
     resp.set_data(data)
     return resp
+
+
+@app.route("/healthcheck", methods=("HEAD", "GET"))
+def health_check(**kwargs):
+    from .common.data.query_templates import HealthCheck
+    result = g.data_db.query(HealthCheck, params=list()).pop()
+
+    if result.endswith("Z"):
+        return make_response("", 200)
+
+    raise make_response("", 500)
 
 
 def main(req: HttpRequest, context: Context, latestPublished: str,

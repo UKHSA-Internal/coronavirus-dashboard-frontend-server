@@ -19,7 +19,8 @@ __all__ = [
     'MsoaData',
     'AlertLevel',
     'SpecimenDateData',
-    'LatestTransmissionRate'
+    'LatestTransmissionRate',
+    "HealthCheck"
 ]
 
 
@@ -64,7 +65,8 @@ SELECT TOP 1
         'transmissionRateMin': c.transmissionRateMin,
         'transmissionRateMax': c.transmissionRateMax,
         'transmissionRateGrowthRateMin': c.transmissionRateGrowthRateMin,
-        'transmissionRateGrowthRateMax': c.transmissionRateGrowthRateMax
+        'transmissionRateGrowthRateMax': c.transmissionRateGrowthRateMax,
+        'date': c.date
     }
 FROM     c
 WHERE    c.releaseTimestamp = @releaseTimestamp
@@ -201,4 +203,56 @@ WHERE
   AND IS_DEFINED(c.alertLevel)
 ORDER BY 
     c.date DESC\
+"""
+
+
+
+
+LatestChangeData = Template("""\
+SELECT TOP 1
+    VALUE {
+        'date':        c.date,
+        'value':       c.$metric,
+        'change': c.${metric}Change ?? null,
+        'changePercentage':  c.${metric}ChangePercentage  ?? null,
+        'changeDirection': c.${metric}Direction ?? null,
+        'rollingSum': c.${metric}RollingSum ?? null
+    }
+FROM    c 
+WHERE   
+        c.releaseTimestamp = @releaseTimestamp
+    AND c.areaType         = @areaType
+    AND c.areaCode         = @areaCode
+    AND c.date            <= @latestDate
+    AND IS_DEFINED(c.$metric)
+ORDER BY 
+    c.date DESC\
+""")
+
+LatestChangeDataOverview = Template("""\
+SELECT TOP 1
+    VALUE {
+        'date':        c.date,
+        'value':       c.$metric,
+        'change': c.${metric}Change ?? null,
+        'changePercentage':  c.${metric}ChangePercentage  ?? null,
+        'changeDirection': c.${metric}Direction ?? null,
+        'rollingSum': c.${metric}RollingSum ?? null
+    }
+FROM    c 
+WHERE   
+        c.releaseTimestamp = @releaseTimestamp
+    AND c.areaType         = @areaType
+    AND c.date            <= @latestDate
+    AND IS_DEFINED(c.$metric)
+ORDER BY 
+    c.date DESC\
+""")
+
+
+HealthCheck = """\
+SELECT 
+    VALUE MAX(c.releaseTimestamp) 
+FROM c
+ORDER BY c.releaseTimestamp DESC\
 """

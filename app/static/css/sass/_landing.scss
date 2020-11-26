@@ -265,7 +265,7 @@ main {
   background: rgba(0, 0, 0, .85) !important;
   border-radius: 3px;
   transition: opacity 0.3s ease-out;
-  font-size: .9rem !important;
+  @include govuk-font(16);
   padding: .5rem 1rem !important;
   width: 150px !important;
 }
@@ -327,9 +327,27 @@ main {
 }
 
 .body-small {
-  font-size: 0.9rem;
+  @include govuk-font(16);
 }
 
 .text-width {
   max-width: 40em;
+}
+
+
+.change-box {
+  &.bad {
+    background: #F6D7D2;
+    color: #942514;
+  }
+
+  &.good {
+    background: #CCE2D8;
+    color: #005A30;
+  }
+
+  &.neutral {
+    background: #EBE9E7;
+    color: #383F43;
+  }
 }

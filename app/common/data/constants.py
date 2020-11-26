@@ -27,9 +27,9 @@ DestinationMetrics = {
         "heading": "Patients admitted",
     },
     'testing': {
-        "metric": 'newPCRTestsByPublishDate',
+        "metric": 'newVirusTests',
         "caption": "Testing",
-        "heading": "Virus tests processed",
+        "heading": "Virus tests conducted",
     }
 }
 
@@ -47,4 +47,11 @@ AreaTypeShortNames = {
     "utla": "Local Authority",
     "region": "Region",
     "nation": "Nation"
+}
+
+NationalAdjectives = {
+    "England": "English",
+    "Wales": "Welsh",
+    "Scotland": "Scottish",
+    "Northern Ireland": "Northern Irish"
 }

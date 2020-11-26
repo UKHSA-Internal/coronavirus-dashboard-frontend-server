@@ -22,7 +22,8 @@ from typing import List, Dict
 # Internal:
 from .caching import cache_client
 from .visualisation import get_colour, plot_thumbnail
-from .data.queries import get_last_fortnight
+from .data.queries import get_last_fortnight, change_by_metric
+from .data.constants import DestinationMetrics
 
 try:
     from __app__.database import CosmosDB
@@ -40,13 +41,6 @@ __version__ = "0.0.1"
 get_value = itemgetter("value")
 get_area_type = itemgetter("areaType")
 
-main_metric_names: List[str] = [
-    "newCasesByPublishDate",
-    "newDeaths28DaysByPublishDate",
-    "newAdmissions",
-    "newPCRTestsByPublishDate",
-]
-
 
 @cache_client.memoize(60 * 60 * 12)
 def get_og_image_names(latest_timestamp: str) -> list:
@@ -54,8 +48,8 @@ def get_og_image_names(latest_timestamp: str) -> list:
     ts = datetime.fromisoformat(ts_python_iso)
     date = ts.strftime("%Y%m%d")
     og_names = [
-        f"/downloads/og-images/og-{metric}_{date}.png"
-        for metric in main_metric_names
+        f"/downloads/og-images/og-{metric['metric']}_{date}.png"
+        for metric in DestinationMetrics.values()
     ]
 
     og_names.insert(0, f"/downloads/og-images/og-summary_{date}.png")
@@ -63,30 +57,9 @@ def get_og_image_names(latest_timestamp: str) -> list:
     return og_names
 
 
-def get_change(metric_data):
-    sigma_this_week = sum(map(get_value, metric_data[:7]))
-    sigma_last_week = sum(map(get_value, metric_data[7:14]))
-    delta = sigma_this_week - sigma_last_week
 
-    delta_percentage = (sigma_this_week / max(sigma_last_week, 1) - 1) * 100
-
-    if delta_percentage > 0:
-        trend = 0
-    elif delta_percentage < 0:
-        trend = 180
-    else:
-        trend = 90
-
-    return {
-        "percentage": format(delta_percentage, ".1f"),
-        "value": int(round(delta)),
-        "total": sigma_this_week,
-        "trend": trend
-    }
-
-
-def get_card_data(metric_name: str, metric_data, graph=True):
-    change = get_change(metric_data)
+def get_card_data(latest_timestamp: str, metric_name: str, metric_data, graph=True):
+    change = change_by_metric(latest_timestamp, metric_name, postcode=None)
     colour = get_colour(change, metric_name)
 
     response = {
@@ -106,9 +79,10 @@ def get_card_data(metric_name: str, metric_data, graph=True):
 def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
     result = dict()
 
-    for name in main_metric_names:
-        metric_data = get_last_fortnight(latest_timestamp, area_name, name)
-        result[name] = get_card_data(name, metric_data)
+    for item in DestinationMetrics.values():
+        metric_name = item['metric']
+        metric_data = get_last_fortnight(latest_timestamp, area_name, metric_name)
+        result[metric_name] = get_card_data(latest_timestamp, metric_name, metric_data, area_name)
 
     return result
 
@@ -118,37 +92,12 @@ def get_main_data(latest_timestamp: str):
     # ToDo: Integrate this with postcode data.
     data = get_fortnight_data(latest_timestamp)
 
-    result = dict(
-        cards=[
-            {
-                "caption": "Cases",
-                "heading": "People tested positive",
-                **data['newCasesByPublishDate'],
-                "data": data['newCasesByPublishDate']['data'],
-            },
-            {
-                "caption": "Deaths",
-                "heading": "Deaths within 28 days of positive test",
-                **data['newDeaths28DaysByPublishDate'],
-                "data": data['newDeaths28DaysByPublishDate']['data'],
+    cards = [
+        {**item, **data[item['metric']], "data": data[item["metric"]]['data']}
+        for item in DestinationMetrics.values()
+    ]
 
-            },
-            {
-                "caption": "Healthcare",
-                "heading": "Patients admitted",
-                **data['newAdmissions'],
-                "data": data['newAdmissions']['data'],
-            },
-            {
-                "caption": "Testing",
-                "heading": "Virus tests processed",
-                **data['newPCRTestsByPublishDate'],
-                "data": data['newPCRTestsByPublishDate']['data'],
-            },
-        ]
-    )
-
-    return result
+    return dict(cards=cards)
 
 
 def get_by_smallest_areatype(items, areatype_getter):

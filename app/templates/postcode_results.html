@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "components/mini_card.html" import create_card with context %}
+{% from "components/default_tail.html" import tail_banners with context %}
 
 {% if area_info.ltla.startswith("E") %}
 	{% set nameAttr = "msoaName" %}
@@ -63,6 +64,6 @@
 
 {%- endblock -%}
 
-{%- block postcode_search_header -%}
-	Search another location
-{%- endblock -%}
+{% block lower_section %}
+	{{ tail_banners("Search another location") }}
+{% endblock %}

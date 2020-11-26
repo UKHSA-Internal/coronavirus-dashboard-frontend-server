@@ -5,7 +5,7 @@
 		{%- if alert_level -%}
 			{{ alert_level.value | upper }}
 		{%- else -%}
-			<span class="govuk-!-font-size-24">Restrictions are different in {{ area_info.nationName }}.</span>
+			<span class="govuk-!-font-size-24">{{ national_adjectives[area_info.nationName] }} restrictions apply.</span>
 		{% endif %}
 	</h3>
 	<p class="govuk-body govuk-!-margin-top-2">
