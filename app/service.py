@@ -44,6 +44,9 @@ LATEST_PUBLISHED_TIMESTAMP = {
     "path": "info/latest_published"
 }
 
+PYTHON_TIMESTAMP_LEN = 24
+
+HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
 timestamp_pattern = "%A %d %B %Y at %I:%M %p"
 timezone_LN = timezone("Europe/London")
@@ -72,7 +75,7 @@ minifier = minify(
 @app.template_filter()
 @lru_cache(maxsize=256)
 def format_timestamp(latest_timestamp: str) -> str:
-    ts_python_iso = latest_timestamp[:-1] + "+00:00"
+    ts_python_iso = latest_timestamp[:PYTHON_TIMESTAMP_LEN] + "+00:00"
     ts = datetime.fromisoformat(ts_python_iso)
     ts_london = ts.astimezone(timezone_LN)
     formatted = ts_london.strftime(timestamp_pattern)
@@ -111,13 +114,13 @@ def isnone(value):
 @app.template_filter()
 def get_rotation(value: str) -> int:
     if value == "UP":
-        value = 0 
+        value = 0
     elif value == "DOWN":
-        value = 180 
+        value = 180
     else:
-        value = 90 
+        value = 90
 
-    return value 
+    return value
 
 
 @app.errorhandler(404)
@@ -172,14 +175,14 @@ def teardown_db(exception):
 @app.after_request
 def prepare_response(resp: Response):
     last_modified = datetime.strptime(
-        g.timestamp[:24] + "Z",
+        g.timestamp[:PYTHON_TIMESTAMP_LEN] + "Z",
         "%Y-%m-%dT%H:%M:%S.%fZ"
     )
 
     expires = datetime.now() + timedelta(minutes=1, seconds=30)
 
-    resp.headers['Last-Modified'] = last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT")
-    resp.headers['Expires'] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    resp.headers['Last-Modified'] = last_modified.strftime(HTTP_DATE_FORMAT)
+    resp.headers['Expires'] = expires.strftime(HTTP_DATE_FORMAT)
 
     minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
     data = str.join("", minified).encode()
