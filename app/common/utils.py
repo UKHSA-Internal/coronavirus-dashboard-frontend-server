@@ -22,7 +22,7 @@ from typing import List, Dict
 # Internal:
 from .caching import cache_client
 from .visualisation import get_colour, plot_thumbnail
-from .data.queries import get_last_fortnight
+from .data.queries import get_last_fortnight, change_by_metric
 from .data.constants import DestinationMetrics
 
 try:
@@ -57,30 +57,8 @@ def get_og_image_names(latest_timestamp: str) -> list:
     return og_names
 
 
-def get_change(metric_data):
-    sigma_this_week = sum(map(get_value, metric_data[:7]))
-    sigma_last_week = sum(map(get_value, metric_data[7:14]))
-    delta = sigma_this_week - sigma_last_week
-
-    delta_percentage = (sigma_this_week / max(sigma_last_week, 1) - 1) * 100
-
-    if delta_percentage > 0:
-        trend = 0
-    elif delta_percentage < 0:
-        trend = 180
-    else:
-        trend = 90
-
-    return {
-        "percentage": format(delta_percentage, ".1f"),
-        "value": int(round(delta)),
-        "total": sigma_this_week,
-        "trend": trend
-    }
-
-
-def get_card_data(metric_name: str, metric_data, graph=True):
-    change = get_change(metric_data)
+def get_card_data(latest_timestamp: str, metric_name: str, metric_data, graph=True):
+    change = change_by_metric(latest_timestamp, metric_name, postcode=None)
     colour = get_colour(change, metric_name)
 
     response = {
@@ -103,7 +81,7 @@ def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom")
     for item in DestinationMetrics.values():
         metric_name = item['metric']
         metric_data = get_last_fortnight(latest_timestamp, area_name, metric_name)
-        result[metric_name] = get_card_data(metric_name, metric_data)
+        result[metric_name] = get_card_data(latest_timestamp, metric_name, metric_data, area_name)
 
     return result
 

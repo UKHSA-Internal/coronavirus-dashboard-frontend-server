@@ -118,6 +118,18 @@ def isnone(value):
     return value is None
 
 
+@app.template_filter()
+def get_rotation(value: str) -> int:
+    if value == "UP":
+        value = 0 
+    elif value == "DOWN":
+        value = 180 
+    else:
+        value = 90 
+
+    return value 
+
+
 @app.errorhandler(404)
 def handle_404(e):
     return render_template("errors/404.html"), 404

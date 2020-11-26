@@ -26,7 +26,8 @@ __all__ = [
     'get_r_values',
     'get_alert_level',
     'get_postcode_areas',
-    'latest_rate_by_metric'
+    'latest_rate_by_metric',
+    'change_by_metric'
 ]
 
 
@@ -276,3 +277,55 @@ def get_data_by_postcode(postcode, timestamp):
     area = get_postcode_areas(postcode)
 
     return get_data_by_code(area, timestamp)
+
+
+@cache_client.memoize(60 * 60 * 6)
+def change_by_metric(timestamp, metric, postcode=None):
+    last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
+    latest_date = last_published.strftime("%Y-%m-%d")
+
+    if postcode != None:
+        area = get_postcode_areas(postcode)
+
+        if metric == const.DestinationMetrics["testing"]["metric"]:
+            area_type = 'nation'
+        elif metric != const.DestinationMetrics["healthcare"]["metric"]:
+            # Non-healthcare metrics use LTLA.
+            area_type = 'ltla'
+        elif area['nation'][0].upper() not in "SNW":
+            # England uses NHS Region.
+            area_type = 'nhsRegion'
+        else:
+            # DAs don't have NHS Region - switch to nation.
+            area_type = 'nation'
+
+        area_code = area[area_type]
+        query = queries.LatestChangeData.substitute(metric=metric)
+
+        params = [
+            {"name": "@latestDate", "value": latest_date},
+            {"name": "@releaseTimestamp", "value": timestamp},
+            {"name": "@areaCode", "value": area_code},
+            {"name": "@areaType", "value": area_type},
+        ]
+    else:
+        query = queries.LatestChangeDataOverview.substitute(metric=metric)
+
+        params = [
+            {"name": "@latestDate", "value": latest_date},
+            {"name": "@releaseTimestamp", "value": timestamp},
+            {"name": "@areaType", "value": 'overview'},
+        ]
+
+    try:
+        result = g.data_db.query(query, params=params)
+        response = {
+            "value": result[0]["change"],
+            "percentage": result[0]["changePercentage"],
+            "trend": result[0]["changeDirection"],
+            "total": result[0]["rollingSum"]
+        }
+        return response
+
+    except (KeyError, IndexError):
+        return None

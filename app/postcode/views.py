@@ -83,7 +83,7 @@ def postcode_search() -> render_template:
         response = {
             category: {
                 **values,
-                **get_card_data(values["metric"], values['data'], False)
+                **get_card_data(g.timestamp, values["metric"], values['data'], False, postcode)
             }
             for category, values in get_data_by_postcode(postcode, g.timestamp).items()
         }
@@ -118,5 +118,3 @@ def postcode_search() -> render_template:
         msoa=get_msoa_data(postcode, g.timestamp),
         **data
     )
-
-
