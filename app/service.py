@@ -29,7 +29,6 @@ from storage import StorageClient
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'main',
     'app'
 ]
 
@@ -202,14 +201,5 @@ def health_check(**kwargs):
     raise make_response("", 500)
 
 
-def main(req: HttpRequest, context: Context) -> HttpResponse:
-    try:
-        application = WsgiMiddleware(app.wsgi_app)
-        return application.main(req, context)
-    except Exception as err:
-        logging.exception(err)
-
-
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=False, port=5050)
-
