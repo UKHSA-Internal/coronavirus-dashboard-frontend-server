@@ -4,7 +4,7 @@
 map $http_upgrade $connection_upgrade {
 
     default            upgrade;
-    ''                 close;
+    ""                 close;
 
 }
 
@@ -29,11 +29,19 @@ server {
         access_log             off;
         log_not_found          off;
 
+        limit_except GET HEAD {
+            deny    all;
+        }
+
     }
 
     location / {
 
         try_files              $uri @app;
+
+        limit_except GET HEAD {
+            deny    all;
+        }
 
     }
 
@@ -59,9 +67,13 @@ server {
 
         proxy_read_timeout     86400;
 
+        limit_except GET HEAD {
+            deny    all;
+        }
+
     }
 
-    location ~ /assets/images/(.+)$ {
+    location ~ ^/assets/images/(.+)$ {
 
         root                   /app/static/images;
         autoindex              on;
@@ -81,9 +93,13 @@ server {
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
 
+        limit_except GET HEAD {
+            deny    all;
+        }
+
     }
 
-    location ~ /assets/govuk-frontend/(.+)$ {
+    location ~ ^/assets/govuk-frontend/(.+)$ {
 
         root                   /app/static/govuk-frontend;
         autoindex              on;
@@ -103,9 +119,13 @@ server {
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
 
+        limit_except GET HEAD {
+            deny    all;
+        }
+
     }
 
-    location ~ /assets/(.+\.css)$ {
+    location ~ ^/assets/(.+\.css)$ {
 
         root                   /app/static;
         autoindex              on;
@@ -125,9 +145,13 @@ server {
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
 
+        limit_except GET HEAD {
+            deny    all;
+        }
+
     }
 
-    location ~ /assets/(.+)$ {
+    location ~ ^/assets/(.+)$ {
 
         root                   /app/static;
         autoindex              on;
@@ -142,6 +166,10 @@ server {
         proxy_cache_valid      any 30s;
         proxy_cache_lock       on;
         proxy_cache_use_stale  updating;
+
+        limit_except GET HEAD {
+            deny    all;
+        }
 
     }
 
