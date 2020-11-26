@@ -57,13 +57,13 @@ def get_og_image_names(latest_timestamp: str) -> list:
     return og_names
 
 
-def get_change(timestamp, metric):
-    data = change_by_metric(timestamp, metric)
+def get_change(timestamp, metric, postcode=None):
+    data = change_by_metric(timestamp, metric, postcode=postcode)
 
     return {
         "percentage": data["changePercentage"],
         "value": data["change"],
-        "total": data["value"],
+        "total": data["total"],
         "trend": data["changeDirection"]
 
     }

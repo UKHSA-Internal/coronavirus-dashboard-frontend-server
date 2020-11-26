@@ -280,12 +280,12 @@ def get_data_by_postcode(postcode, timestamp):
 
 
 @cache_client.memoize(60 * 60 * 6)
-def change_by_metric(timestamp, metric, ltla=False, postcode=None):
+def change_by_metric(timestamp, metric, postcode=None):
     last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
-
-
     latest_date = last_published.strftime("%Y-%m-%d")
-    if ltla:
+
+    
+    if postcode != None:
         area = get_postcode_areas(postcode)
 
         if metric == const.DestinationMetrics["testing"]["metric"]:
@@ -327,9 +327,9 @@ def change_by_metric(timestamp, metric, ltla=False, postcode=None):
             "change" : result[0]["change"],
             "value" : result[0]["value"],
             "changePercentage" : result[0]["changePercentage"],
-            "changeDirection" : result[0]["changeDirection"]
+            "changeDirection" : result[0]["changeDirection"],
+            "total" : result[0]["rollingSum"]
         }
-        
         return response
 
     except (KeyError, IndexError):

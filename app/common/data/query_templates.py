@@ -215,7 +215,8 @@ SELECT TOP 1
         'value':       c.$metric,
         'change': c.${metric}Change ?? null,
         'changePercentage':  c.${metric}ChangePercentage  ?? null,
-        'changeDirection': c.${metric}Direction ?? null
+        'changeDirection': c.${metric}Direction ?? null,
+        'rollingSum': c.${metric}RollingSum ?? null
     }
 FROM    c 
 WHERE   
@@ -235,7 +236,8 @@ SELECT TOP 1
         'value':       c.$metric,
         'change': c.${metric}Change ?? null,
         'changePercentage':  c.${metric}ChangePercentage  ?? null,
-        'changeDirection': c.${metric}Direction ?? null
+        'changeDirection': c.${metric}Direction ?? null,
+        'rollingSum': c.${metric}RollingSum ?? null
     }
 FROM    c 
 WHERE   
