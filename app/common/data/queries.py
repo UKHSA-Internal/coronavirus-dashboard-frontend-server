@@ -289,9 +289,14 @@ def change_by_metric(timestamp, metric, postcode=None):
 
         if metric == const.DestinationMetrics["testing"]["metric"]:
             area_type = 'nation'
+
+        elif metric == const.DestinationMetrics["deaths"]["metric"] and area['nation'][0].upper() in "WN":
+            area_type = 'nation'
+
         elif metric != const.DestinationMetrics["healthcare"]["metric"]:
             # Non-healthcare metrics use LTLA.
             area_type = 'ltla'
+
         elif area['nation'][0].upper() not in "SNW":
             # England uses NHS Region.
             area_type = 'nhsRegion'
@@ -316,6 +321,7 @@ def change_by_metric(timestamp, metric, postcode=None):
             {"name": "@releaseTimestamp", "value": timestamp},
             {"name": "@areaType", "value": 'overview'},
         ]
+
 
     try:
         result = g.data_db.query(query, params=params)
