@@ -13,7 +13,7 @@ from flask import g
 
 # Internal:
 from . import query_templates as queries
-from . import constants as const, types
+from . import variables as const, types
 from ..caching import cache_client
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
