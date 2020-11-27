@@ -19,7 +19,7 @@ from pytz import timezone
 # Internal:
 from .postcode.views import postcode_page
 from .landing.views import home_page
-from .common.data.constants import NationalAdjectives
+from .common.data.variables import NationalAdjectives, IsImproving
 from .common.caching import cache_client
 from .common.utils import get_og_image_names
 
@@ -96,6 +96,16 @@ def format_timestamp(latest_timestamp: str) -> str:
 def as_datestamp(latest_timestamp: str) -> str:
     datestamp = latest_timestamp.split("T")[0]
     return datestamp
+
+
+@app.context_processor
+def is_improving():
+    def inner(metric, value):
+        improving = IsImproving[metric](value)
+        if improving is not 0 and value != 0:
+            return improving
+        return None
+    return dict(is_improving=inner)
 
 
 @app.template_filter()
