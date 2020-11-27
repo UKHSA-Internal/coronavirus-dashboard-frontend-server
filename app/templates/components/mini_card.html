@@ -75,7 +75,7 @@
 									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1"
 									        style="background: {{ card.colour.fill }}; color: {{ card.colour.line }}">
 										{%- if card.change.value != 0 -%}
-											<img src="/assets/public/images/arrow.svg"
+											<img src="{{ url_for("static", filename="images/arrow.svg") }}"
 											     width="12px"
 											     alt="arrow"
 											     style="transform: rotate({{ card.change.trend }}deg)">
