@@ -20,8 +20,7 @@
 			<link rel="apple-touch-icon" href="https://coronavirus.data.gov.uk/favicon.png">
 			<link rel="icon" href="https://coronavirus.data.gov.uk/favicon.ico">
 			<link rel="manifest" href="https://coronavirus.data.gov.uk/manifest.json">
-			<link rel="stylesheet" type="text/css"
-			      href="{%- if DEBUG -%}{{ url_for("static", filename="css/application.css") }}{%- else -%}https://coronavirus.data.gov.uk/assets/css/application.css{%- endif -%}">
+			<link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="application.css") }}">
 		{% endcache %}
 		{% block head %}{% endblock %}
 		<script src="://www.atmrum.net/rum.js"></script>
