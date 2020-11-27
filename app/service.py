@@ -52,7 +52,14 @@ timezone_LN = timezone("Europe/London")
 
 instance_path = abspath(join_path(abspath(__file__), pardir))
 
-app = Flask(__name__, instance_path=instance_path, static_folder="static")
+app = Flask(
+    __name__,
+    instance_path=instance_path,
+    static_folder="static",
+    static_url_path="/assets",
+    template_folder='templates'
+)
+
 app.config.from_object('app.config.Config')
 
 
@@ -73,7 +80,7 @@ minifier = minify(
 @app.template_filter()
 @lru_cache(maxsize=256)
 def format_timestamp(latest_timestamp: str) -> str:
-    ts_python_iso = latest_timestamp[:PYTHON_TIMESTAMP_LEN] + "+00:00"
+    ts_python_iso = latest_timestamp[:-1] + "+00:00"
     ts = datetime.fromisoformat(ts_python_iso)
     ts_london = ts.astimezone(timezone_LN)
     formatted = ts_london.strftime(timestamp_pattern)
