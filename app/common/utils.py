@@ -22,7 +22,7 @@ from typing import Dict
 from .caching import cache_client
 from .visualisation import get_colour, plot_thumbnail
 from .data.queries import get_last_fortnight, change_by_metric
-from .data.constants import DestinationMetrics
+from .data.variables import DestinationMetrics
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
