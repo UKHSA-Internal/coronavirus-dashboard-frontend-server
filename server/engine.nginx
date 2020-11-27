@@ -60,7 +60,7 @@ server {
         proxy_set_header       Upgrade                   $http_upgrade;
         proxy_set_header       Connection                $connection_upgrade;
 
-        add_header             Cache-Control             "must-revalidate, s-maxage=90";
+        add_header             Cache-Control             "s-maxage=60, max-age=90, stale-while-revalidate=30";
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
         add_header             Content-Language          "en-GB";
@@ -89,7 +89,7 @@ server {
         proxy_cache_lock       on;
         proxy_cache_use_stale  updating;
 
-        add_header             Cache-Control             "s-maxage=86400";
+        add_header             Cache-Control             "s-maxage=86400, max-age=604800, stale-while-revalidate=300";
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
 
@@ -141,7 +141,7 @@ server {
         proxy_cache_lock       on;
         proxy_cache_use_stale  updating;
 
-        add_header             Cache-Control             "s-maxage=7200";
+        add_header             Cache-Control             "max-age=7200, stale-while-revalidate=300";
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
 
@@ -166,6 +166,10 @@ server {
         proxy_cache_valid      any 30s;
         proxy_cache_lock       on;
         proxy_cache_use_stale  updating;
+
+        add_header             Cache-Control             "s-maxage=86400, max-age=86400, stale-while-revalidate=300";
+        add_header             x-phe-media-type          "PHE-COVID19.v1";
+        add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
 
         limit_except GET HEAD {
             deny    all;
