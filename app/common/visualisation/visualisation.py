@@ -5,7 +5,6 @@
 # Python:
 from operator import itemgetter
 from urllib.parse import quote
-from typing import Dict, Union, Callable
 
 # 3rd party:
 from plotly import graph_objects as go
@@ -13,6 +12,7 @@ from pandas import Series
 
 # Internal:
 from ..caching import cache_client
+from ..data.variables import IsImproving
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -66,14 +66,6 @@ COLOURS = {
         "line": "rgba(56,63,67,1)",
         "fill": "rgba(235,233,231,1)"
     }
-}
-
-
-IsImproving: Dict[str, Callable[[Union[int, float]], bool]] = {
-    "newCasesByPublishDate": lambda x: x < 0,
-    "newDeaths28DaysByPublishDate": lambda x: x < 0,
-    "newVirusTests": lambda x: 0,
-    "newAdmissions": lambda x: x < 0,
 }
 
 
