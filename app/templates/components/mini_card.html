@@ -2,6 +2,18 @@
 
 {% macro create_card(card, is_postcode=False) %}
 
+	{% set improving = is_improving(card.metric, card.change.value) %}
+	{% if improving %}
+		{% set image = "images/arrow-up-green.png" %}
+		{% set colour = 'good' %}
+	{% elif improving == None %}
+		{% set image = "images/arrow-up-grey.png" %}
+		{% set colour = 'neutral' %}
+	{% else %}
+		{% set image = "images/arrow-up-red.png" %}
+		{% set colour = 'bad' %}
+	{% endif %}
+
 	<div class="mini-card">
 
 		<div>
@@ -70,12 +82,10 @@
 						<div class="float tooltip">
 							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 								<a href="#"
-								   class="govuk-link--no-visited-state number-link-red"
-								   style="border: none">
-									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1"
-									        style="background: {{ card.colour.fill }}; color: {{ card.colour.line }}">
+								   class="govuk-link--no-visited-state number-link-red" style="border: none">
+									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1 change-box {{ colour }}">
 										{%- if card.change.value != 0 -%}
-											<img src="{{ url_for("static", filename="images/arrow.svg") }}"
+											<img src="{{ url_for("static", filename=image) }}"
 											     width="12px"
 											     alt="arrow"
 											     style="transform: rotate({{ card.change.trend }}deg)">
