@@ -5,6 +5,7 @@
 # Python:
 import logging
 import re
+from os import getenv
 from datetime import datetime, timedelta
 from os.path import abspath, join as join_path, pardir
 from typing import Union
@@ -41,6 +42,8 @@ LATEST_PUBLISHED_TIMESTAMP = {
     "container": "pipeline",
     "path": "info/latest_published"
 }
+
+APP_INSIGHT_KEY = "APPINSIGHTS_INSTRUMENTATIONKEY"
 
 PYTHON_TIMESTAMP_LEN = 24
 
@@ -133,6 +136,7 @@ def inject_globals():
         DEBUG=app.debug,
         national_adjectives=NationalAdjectives,
         timestamp=g.website_timestamp,
+        app_insight_token=getenv(APP_INSIGHT_KEY, ""),
         og_images=get_og_image_names(g.timestamp)
     )
 

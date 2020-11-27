@@ -69,7 +69,7 @@
 </div>
 {%- cache 43200, 'footer', timestamp -%}
 	{% include "components/footer.html" %}
-	<script type="application/javascript">rum.start("129b370ce22e87d992b520e4006016d1");</script>
+	<script type="application/javascript">rum.start({{ app_insight_token }});</script>
 {%- endcache -%}
 </body>
 </html>
