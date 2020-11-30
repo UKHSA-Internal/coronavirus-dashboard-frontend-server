@@ -153,17 +153,12 @@ def inject_globals():
     )
 
 
-@app.before_first_request
-def inject_instance_globals():
+@app.before_request
+def inject_timestamps():
     g.data_db = CosmosDB(Collection.DATA)
     g.lookup_db = CosmosDB(Collection.LOOKUP)
     g.weekly_db = CosmosDB(Collection.WEEKLY)
 
-    return None
-
-
-@app.before_request
-def inject_timestamps():
     with StorageClient(**WEBSITE_TIMESTAMP) as client:
         g.website_timestamp = client.download().readall().decode()
 
