@@ -4,7 +4,13 @@
 		Seven days to {{ msoa.latestDate | default(cases_rate.date, true) }}
 	</small>
 	<span class="govuk-!-font-size-36 govuk-!-margin-bottom-0">
-		{{ msoa.latestSum | default(cases_rate.rollingSum, true) | format_number | safe }}
+		{%- if areaType == "msoa" and  msoa.latestSum -%}
+			{{ msoa.latestSum | format_number | safe }}
+		{% elif areaType != "msoa" %}
+			 {{ default(cases_rate.rollingSum, true) | format_number | safe }}
+		{% else %}
+			0 &ndash; 2
+		{% endif %}
 	</span>
 </h3>
 
