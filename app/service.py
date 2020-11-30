@@ -37,16 +37,15 @@ WEBSITE_TIMESTAMP = {
     "container": "publicdata",
     "path":  "assets/dispatch/website_timestamp"
 }
-
 LATEST_PUBLISHED_TIMESTAMP = {
     "container": "pipeline",
     "path": "info/latest_published"
 }
-
+NOT_AVAILABLE = "N/A"
 APP_INSIGHT_KEY = "APPINSIGHTS_INSTRUMENTATIONKEY"
-SERVER_LOCATION = "SERVER_LOCATION"
+SERVER_LOCATION_KEY = "SERVER_LOCATION"
+SERVER_LOCATION = getenv(SERVER_LOCATION_KEY, NOT_AVAILABLE)
 PYTHON_TIMESTAMP_LEN = 24
-
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
 timestamp_pattern = "%A %d %B %Y at %I:%M %p"
@@ -118,7 +117,7 @@ def format_number(value: Union[int, float]) -> str:
             value = "0 &ndash; 2"
         return str(value)
     except TypeError:
-        return "N/A"
+        return NOT_AVAILABLE
 
     if value == value_int:
         return format(value_int, ',d')
@@ -192,7 +191,7 @@ def prepare_response(resp: Response):
 
     resp.headers['Last-Modified'] = last_modified.strftime(HTTP_DATE_FORMAT)
     resp.headers['Expires'] = expires.strftime(HTTP_DATE_FORMAT)
-    resp.headers['PHE-Server-Loc'] = getenv(SERVER_LOCATION, "N/A")
+    resp.headers['PHE-Server-Loc'] = SERVER_LOCATION
 
     minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
     data = str.join("", minified).encode()
