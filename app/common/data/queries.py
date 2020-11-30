@@ -12,7 +12,7 @@ from flask import g
 
 # Internal:
 from . import query_templates as queries
-from . import variables as const, types
+from . import variables as const, dtypes
 from ..caching import cache_client
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,7 +30,7 @@ __all__ = [
 ]
 
 
-def process_dates(date: str) -> types.ProcessedDateType:
+def process_dates(date: str) -> dtypes.ProcessedDateType:
     result: dict = {
         'date': datetime.strptime(date, "%Y-%m-%d"),
     }
@@ -41,7 +41,7 @@ def process_dates(date: str) -> types.ProcessedDateType:
 
 
 @cache_client.memoize(60 * 5)
-def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> types.DatabaseOutputType:
+def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> dtypes.DatabaseOutputType:
     """
     Retrieves the last fortnight worth of ``metric`` values
     for ``areaName`` as released on ``timestamp``.

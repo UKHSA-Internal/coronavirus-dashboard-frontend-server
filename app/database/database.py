@@ -24,7 +24,7 @@ from azure.cosmos import ContainerProxy, DatabaseProxy
 
 # Internal:
 from .utils import Credentials, Collection
-from .types import ParametersType, ItemType, ResponseType, PaginatedResponse
+from .dtypes import ParametersType, ItemType, ResponseType, PaginatedResponse
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

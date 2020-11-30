@@ -17,11 +17,11 @@ from flask_minify import minify
 from pytz import timezone
 
 # Internal:
-from .postcode.views import postcode_page
-from .landing.views import home_page
-from .common.data.variables import NationalAdjectives, IsImproving
-from .common.caching import cache_client
-from .common.utils import get_og_image_names
+from app.postcode.views import postcode_page
+from app.landing.views import home_page
+from app.common.data.variables import NationalAdjectives, IsImproving
+from app.common.caching import cache_client
+from app.common.utils import get_og_image_names
 
 from database import CosmosDB, Collection
 from storage import StorageClient
@@ -44,7 +44,7 @@ LATEST_PUBLISHED_TIMESTAMP = {
 }
 
 APP_INSIGHT_KEY = "APPINSIGHTS_INSTRUMENTATIONKEY"
-
+SERVER_LOCATION = "SERVER_LOCATION"
 PYTHON_TIMESTAMP_LEN = 24
 
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
@@ -102,7 +102,7 @@ def as_datestamp(latest_timestamp: str) -> str:
 def is_improving():
     def inner(metric, value):
         improving = IsImproving[metric](value)
-        if improving is not 0 and value != 0:
+        if improving != 0 and value != 0:
             return improving
         return None
     return dict(is_improving=inner)
@@ -151,6 +151,15 @@ def inject_globals():
     )
 
 
+@app.before_first_request
+def inject_instance_globals():
+    g.data_db = CosmosDB(Collection.DATA)
+    g.lookup_db = CosmosDB(Collection.LOOKUP)
+    g.weekly_db = CosmosDB(Collection.WEEKLY)
+
+    return None
+
+
 @app.before_request
 def inject_timestamps():
     with StorageClient(**WEBSITE_TIMESTAMP) as client:
@@ -158,10 +167,6 @@ def inject_timestamps():
 
     with StorageClient(**LATEST_PUBLISHED_TIMESTAMP) as client:
         g.timestamp = client.download().readall().decode()
-
-    g.data_db = CosmosDB(Collection.DATA)
-    g.lookup_db = CosmosDB(Collection.LOOKUP)
-    g.weekly_db = CosmosDB(Collection.WEEKLY)
 
     return None
 
@@ -190,6 +195,7 @@ def prepare_response(resp: Response):
 
     resp.headers['Last-Modified'] = last_modified.strftime(HTTP_DATE_FORMAT)
     resp.headers['Expires'] = expires.strftime(HTTP_DATE_FORMAT)
+    resp.headers['PHE-Server-Loc'] = getenv(SERVER_LOCATION, "N/A")
 
     minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
     data = str.join("", minified).encode()
