@@ -106,6 +106,8 @@ def format_number(value: Union[int, float]) -> str:
         if value == "0-2":
             value = "0 &ndash; 2"
         return str(value)
+    except TypeError:
+        return "N/A"
 
     if value == value_int:
         return format(value_int, ',d')
