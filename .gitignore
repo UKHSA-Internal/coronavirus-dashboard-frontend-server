@@ -140,3 +140,4 @@ landing/static/css/application.css.map
 .env.staging
 .env.production
 .env.*
+host.json

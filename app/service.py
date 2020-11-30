@@ -17,11 +17,11 @@ from flask_minify import minify
 from pytz import timezone
 
 # Internal:
-from .postcode.views import postcode_page
-from .landing.views import home_page
-from .common.data.variables import NationalAdjectives, IsImproving
-from .common.caching import cache_client
-from .common.utils import get_og_image_names
+from app.postcode.views import postcode_page
+from app.landing.views import home_page
+from app.common.data.variables import NationalAdjectives, IsImproving
+from app.common.caching import cache_client
+from app.common.utils import get_og_image_names
 
 from database import CosmosDB, Collection
 from storage import StorageClient
@@ -37,16 +37,15 @@ WEBSITE_TIMESTAMP = {
     "container": "publicdata",
     "path":  "assets/dispatch/website_timestamp"
 }
-
 LATEST_PUBLISHED_TIMESTAMP = {
     "container": "pipeline",
     "path": "info/latest_published"
 }
-
+NOT_AVAILABLE = "N/A"
 APP_INSIGHT_KEY = "APPINSIGHTS_INSTRUMENTATIONKEY"
-
+SERVER_LOCATION_KEY = "SERVER_LOCATION"
+SERVER_LOCATION = getenv(SERVER_LOCATION_KEY, NOT_AVAILABLE)
 PYTHON_TIMESTAMP_LEN = 24
-
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
 timestamp_pattern = "%A %d %B %Y at %I:%M %p"
@@ -102,7 +101,7 @@ def as_datestamp(latest_timestamp: str) -> str:
 def is_improving():
     def inner(metric, value):
         improving = IsImproving[metric](value)
-        if improving is not 0 and value != 0:
+        if improving != 0 and value != 0:
             return improving
         return None
     return dict(is_improving=inner)
@@ -117,6 +116,8 @@ def format_number(value: Union[int, float]) -> str:
         if value == "0-2":
             value = "0 &ndash; 2"
         return str(value)
+    except TypeError:
+        return NOT_AVAILABLE
 
     if value == value_int:
         return format(value_int, ',d')
@@ -153,15 +154,15 @@ def inject_globals():
 
 @app.before_request
 def inject_timestamps():
+    g.data_db = CosmosDB(Collection.DATA)
+    g.lookup_db = CosmosDB(Collection.LOOKUP)
+    g.weekly_db = CosmosDB(Collection.WEEKLY)
+
     with StorageClient(**WEBSITE_TIMESTAMP) as client:
         g.website_timestamp = client.download().readall().decode()
 
     with StorageClient(**LATEST_PUBLISHED_TIMESTAMP) as client:
         g.timestamp = client.download().readall().decode()
-
-    g.data_db = CosmosDB(Collection.DATA)
-    g.lookup_db = CosmosDB(Collection.LOOKUP)
-    g.weekly_db = CosmosDB(Collection.WEEKLY)
 
     return None
 
@@ -190,6 +191,7 @@ def prepare_response(resp: Response):
 
     resp.headers['Last-Modified'] = last_modified.strftime(HTTP_DATE_FORMAT)
     resp.headers['Expires'] = expires.strftime(HTTP_DATE_FORMAT)
+    resp.headers['PHE-Server-Loc'] = SERVER_LOCATION
 
     minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
     data = str.join("", minified).encode()
