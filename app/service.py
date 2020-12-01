@@ -23,8 +23,8 @@ from app.common.data.variables import NationalAdjectives, IsImproving
 from app.common.caching import cache_client
 from app.common.utils import get_og_image_names
 
-from database import CosmosDB, Collection
-from storage import StorageClient
+from app.database import CosmosDB, Collection
+from app.storage import StorageClient
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
