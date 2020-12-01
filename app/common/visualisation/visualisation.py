@@ -70,7 +70,7 @@ COLOURS = {
 
 
 def get_colour(change, metric_name):
-    change_value = float(change["value"])
+    change_value = float(change["value"] or 0)
     improving = IsImproving[metric_name](change_value)
 
     trend_colour = COLOURS["neutral"]
