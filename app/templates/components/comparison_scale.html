@@ -7,7 +7,7 @@
 		{%- if areaType == "msoa" and  msoa.latestSum -%}
 			{{ msoa.latestSum | format_number | safe }}
 		{% elif areaType != "msoa" %}
-			 {{ default(cases_rate.rollingSum, true) | format_number | safe }}
+			 {{ cases_rate.rollingSum | format_number | safe }}
 		{% else %}
 			0 &ndash; 2
 		{% endif %}
