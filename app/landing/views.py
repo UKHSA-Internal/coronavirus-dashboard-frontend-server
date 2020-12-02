@@ -44,7 +44,7 @@ def index() -> render_template:
     data = get_main_data(g.timestamp)
     return render_template(
         "main.html",
-        changelog = get_notification_content(),
+        changelog = get_notification_content(g.timestamp),
         r_values=get_r_values(g.timestamp),
         cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
         deaths_rate=latest_rate_by_metric(g.timestamp, "newDeaths28DaysByDeathDate"),

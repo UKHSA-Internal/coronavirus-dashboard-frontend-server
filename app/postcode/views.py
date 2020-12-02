@@ -71,7 +71,7 @@ def postcode_search() -> render_template:
     if postcode is None:
         return render_template(
             "main.html",
-            changelog = get_notification_content(),
+            changelog = get_notification_content(g.timestamp),
             invalid_postcode=True,
             r_values=get_r_values(g.timestamp),
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
@@ -92,7 +92,7 @@ def postcode_search() -> render_template:
         logging.exception(err)
         return render_template(
             "main.html",
-            changelog = get_notification_content(),
+            changelog = get_notification_content(g.timestamp),
             invalid_postcode=True,
             r_values=get_r_values(g.timestamp),
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
@@ -109,7 +109,7 @@ def postcode_search() -> render_template:
 
     return render_template(
         "postcode_results.html",
-        changelog = get_notification_content(),
+        changelog = get_notification_content(g.timestamp),
         postcode_data=response,
         postcode=postcode.upper(),
         area_info=postcode_data,
