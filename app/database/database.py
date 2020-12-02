@@ -40,9 +40,11 @@ DB_NAME = getenv("AzureCosmosDBName")
 UK_SOUTH = "UKS"
 UK_WEST = "UKW"
 
-SERVER_LOCATION = getenv("SERVER_LOCATION", "UKS")
+SERVER_LOCATION = getenv("SERVER_LOCATION", f"{UK_SOUTH}_00")
 
-if SERVER_LOCATION == UK_SOUTH:
+location = SERVER_LOCATION.split("_")[0]
+
+if location == UK_SOUTH:
     PREFERRED_LOCATIONS = [
         "UK South",
         "UK West"
