@@ -1,0 +1,9 @@
+{% if changelog is defined and changelog is not none %}
+
+<div class="notification-container govuk-body white-text">
+
+    <strong class="govuk-tag--white">{{changelog.type}}</strong> {{changelog.headline}} <a class="white-text" href="{{changelog.relativeUrl}}">More</a>
+
+</div>
+
+{% endif %}

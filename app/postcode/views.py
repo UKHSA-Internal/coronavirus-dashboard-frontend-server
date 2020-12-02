@@ -17,7 +17,7 @@ from ..common.data.queries import (
 )
 
 from .utils import get_validated_postcode, get_card_data
-from ..common.utils import get_main_data
+from ..common.utils import get_main_data, get_notification_content
 
 try:
     from __app__.database import CosmosDB
@@ -71,6 +71,7 @@ def postcode_search() -> render_template:
     if postcode is None:
         return render_template(
             "main.html",
+            changelog = get_notification_content(),
             invalid_postcode=True,
             r_values=get_r_values(g.timestamp),
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
@@ -91,6 +92,7 @@ def postcode_search() -> render_template:
         logging.exception(err)
         return render_template(
             "main.html",
+            changelog = get_notification_content(),
             invalid_postcode=True,
             r_values=get_r_values(g.timestamp),
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
@@ -107,6 +109,7 @@ def postcode_search() -> render_template:
 
     return render_template(
         "postcode_results.html",
+        changelog = get_notification_content(),
         postcode_data=response,
         postcode=postcode.upper(),
         area_info=postcode_data,

@@ -1306,3 +1306,17 @@
         color: #206BC9;
         background: #D7E9FF;
     }
+
+    .govuk-notification-tag--white {
+      color: #1d70b8;
+      background: #fff;
+      padding: 0.3%;
+    }
+
+    .notification-container {
+      background-color: #1d70b8;
+      position: relative;
+      padding: 9.656px;
+      padding-top: 0.344px;
+      text-align: center;
+    }
