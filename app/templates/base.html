@@ -30,13 +30,10 @@
 	</head>
 <body class="govuk-template__body">
 <script>document.body.className = ((document.body.className) ? document.body.className + ' js-enabled' : 'js-enabled');</script>
-
-{%- cache 43200, 'header-v2', timestamp -%}
 	{%- include "components/header.html" -%}
 	{%- include "components/mobile_nav.html" -%}
-{%- endcache -%}
 
-{%- cache 300, 'header-v2', timestamp -%}
+{%- cache 300, 'change_log', timestamp -%}
 	{%- include "components/change_notification.html" -%}
 {%- endcache -%}
 
