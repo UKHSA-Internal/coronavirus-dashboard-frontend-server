@@ -71,7 +71,7 @@ def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom")
     for item in DestinationMetrics.values():
         metric_name = item['metric']
         metric_data = get_last_fortnight(latest_timestamp, area_name, metric_name)
-        result[metric_name] = get_card_data(latest_timestamp, metric_name, metric_data, area_name)
+        result[metric_name] = get_card_data(latest_timestamp, metric_name, metric_data)
 
     return result
 
