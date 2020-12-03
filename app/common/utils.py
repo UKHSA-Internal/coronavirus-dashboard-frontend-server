@@ -15,6 +15,7 @@ Contributors:  Pouria Hadjibagheri
 from datetime import datetime
 from operator import itemgetter
 from typing import Dict
+import json
 
 # 3rd party:
 
@@ -110,3 +111,22 @@ def get_by_smallest_areatype(items, areatype_getter):
             min_index = order_index
 
     return result
+
+
+def get_notification_content(latest_timestamp):
+    ts_python_iso = latest_timestamp[:-1]
+    ts = datetime.fromisoformat(ts_python_iso)
+    timestamp_date = ts.strftime("%Y-%m-%d")
+
+    test_json= '{"type": {"newMetric": "NEW METRIC","newFeature": "NEW FEATURE","changedMetric": "CHANGE TO METRIC","update": "UPDATE","newContent": "NEW CONTENT"},"changeLog": [{"type": "NEW FEATURE","date": "2020-12-02","displayBanner": true,"relativeUrl": "/details/download","headline": "MSOA data have been added to the downloads page.","body": "Area types in the download page now include MSOAs. The data are now available for  download by region, local authority, a single MSOA, or the full dataset. Downloaded  conetnts will also include information on region and local authority as well as MSOA. "},{"type": "NEW CONTENT","date": "2020-12-02","displayBanner": true,"linkText": "Cases by age group","relativeUrl": "/details/cases","headline": null,"body": "These have been added to the cases page. The current trend is a higher rate is starting  to appear in the over 60s, leading to increased hospital admissions. "},{"type": "NEW CONTENT","date": "2020-12-02","displayBanner": true,"linkText": "Local R numbers","relativeUrl": "/","headline": null,"body": "When you search for a postcode, the local R number for the region will now be displayed."},{"type": "NEW CONTENT","date": "2020-10-19","displayBanner": true,"linkText": "Local alert levels","relativeUrl": "/","headline": null,"body": "When you search for a postcode, the local alert level will now be displayed."}]}'
+    data = json.loads(test_json)
+
+    for item in data["changeLog"]:
+        if item["displayBanner"] is True and item["date"] >= timestamp_date:
+            response = {
+                "type": item["type"],
+                "headline": item["headline"],
+                "relativeUrl": item["relativeUrl"]
+            }
+            return response
+    return None
