@@ -1,11 +1,22 @@
 {% if changelog is defined and changelog is not none %}
 
+
+
+
 <div class="notification-container govuk-body white-text" id="notification-container" style="display: block;">
 
     <strong class="govuk-tag--white">{{changelog.type}}</strong> {{changelog.headline}} <a class="white-text" href="{{changelog.relativeUrl}}">More</a>
     <noscript><style> .close-changelog { display: none } </style></noscript>
-    <strong class="close-changelog"><button onclick="getElementById('notification-container').style.display='none'" class="white-text" href="#"> &emsp;&emsp; &#x2716;</button></strong>
+    <strong class="close-changelog">  &emsp;&emsp; <button onclick="document.getElementById('notification-container').style.display='none'; sessionStorage.setItem('changeDismissed', 'dismissed');" class="white-text" href="#"> &#x2716;</button></strong>
 
 </div>
+
+<script type="application/javascript">
+    // Persists hiding of notification for length of sessions
+    if (sessionStorage.getItem('changeDismissed') === 'dismissed'){
+        document.getElementById('notification-container').style.display='none';
+    }
+
+</script>
 
 {% endif %}

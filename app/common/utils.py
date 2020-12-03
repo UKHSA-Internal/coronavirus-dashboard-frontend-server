@@ -124,7 +124,7 @@ def get_by_smallest_areatype(items, areatype_getter):
     return result
 
 def get_notification_content(latest_timestamp):
-    ts_python_iso = latest_timestamp[:-2]
+    ts_python_iso = latest_timestamp[:-1]
     ts = datetime.fromisoformat(ts_python_iso)
     timestamp_date = ts.strftime("%Y-%m-%d")
 
@@ -132,7 +132,7 @@ def get_notification_content(latest_timestamp):
     data = json.loads(test_json)
 
     for item in data["changeLog"]:
-        if item["displayBanner"] is True and item["date"] == timestamp_date:
+        if item["displayBanner"] is True and item["date"] >= timestamp_date:
             response = {
                 "type": item["type"],
                 "headline": item["headline"],

@@ -35,8 +35,13 @@
 {%- cache 43200, 'header-v2', timestamp -%}
 	{%- include "components/mobile_nav.html" -%}
 	{%- include "components/header.html" -%}
+{%- endcache -%}
+
+{%- cache 300, 'header-v2', timestamp -%}
 	{%- include "components/change_notification.html" -%}
 {%- endcache -%}
+
+
 <div class="govuk-width-container">
 	{%- cache 600, 'timestamp', timestamp -%}
 		<div class="govuk-!-margin-top-5 govuk-!-margin-bottom-5" role="region" aria-labelledby="last-update">
