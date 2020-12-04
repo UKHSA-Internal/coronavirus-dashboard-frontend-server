@@ -155,7 +155,12 @@ def handle_500(err):
         extra={
             'custom_dimensions': {
                 'website_timestamp': g.website_timestamp,
-                'latest_release': g.timestamp
+                'latest_release': g.timestamp,
+                'db_host': getenv("AzureCosmosHost", NOT_AVAILABLE),
+                "API_environment": getenv("API_ENV", NOT_AVAILABLE),
+                "server_location": getenv("SERVER_LOCATION", NOT_AVAILABLE),
+                "is_dev": getenv("IS_DEV", NOT_AVAILABLE),
+                "redis": getenv("AZURE_REDIS_HOST", NOT_AVAILABLE)
             }
         }
     )
