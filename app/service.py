@@ -160,7 +160,13 @@ def handle_500(err):
                 "API_environment": getenv("API_ENV", NOT_AVAILABLE),
                 "server_location": getenv("SERVER_LOCATION", NOT_AVAILABLE),
                 "is_dev": getenv("IS_DEV", NOT_AVAILABLE),
-                "redis": getenv("AZURE_REDIS_HOST", NOT_AVAILABLE)
+                "redis": getenv("AZURE_REDIS_HOST", NOT_AVAILABLE),
+                "AzureCosmosDBName": getenv("AzureCosmosDBName", NOT_AVAILABLE),
+                "AzureCosmosCollection": getenv("AzureCosmosCollection", NOT_AVAILABLE),
+                "AzureCosmosDestinationsCollection": getenv(
+                    "AzureCosmosDestinationsCollection",
+                    NOT_AVAILABLE
+                ),
             }
         }
     )
