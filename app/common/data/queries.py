@@ -101,8 +101,10 @@ def get_postcode_areas_from_db(postcode):
         return g.lookup_db.query(query, params=params).pop()
     except CosmosResourceNotFoundError as err:
         logger.exception(err, extra={
-            "query": query,
-            "query_params": params
+            "custom_dimensions": {
+                "query": query,
+                "query_params": params
+            }
         })
         raise err
 
