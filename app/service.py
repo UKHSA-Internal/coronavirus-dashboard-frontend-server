@@ -5,7 +5,6 @@
 # Python:
 import re
 import logging
-from sys import stdout
 from os import getenv
 from datetime import datetime, timedelta
 from os.path import abspath, join as join_path, pardir
@@ -26,6 +25,7 @@ from app.common.caching import cache_client
 from app.common.utils import get_og_image_names
 from app.database import CosmosDB, Collection
 from app.storage import StorageClient
+from app.common.data.query_templates import HealthCheck
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -48,6 +48,7 @@ SERVER_LOCATION_KEY = "SERVER_LOCATION"
 SERVER_LOCATION = getenv(SERVER_LOCATION_KEY, NOT_AVAILABLE)
 PYTHON_TIMESTAMP_LEN = 24
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
+LOG_LEVEL = getenv("LOG_LEVEL", "INFO")
 
 timestamp_pattern = "%A %d %B %Y at %I:%M %p"
 timezone_LN = timezone("Europe/London")
@@ -65,15 +66,7 @@ app = Flask(
 app.config.from_object('app.config.Config')
 
 # Logging -------------------------------------------------
-if app.debug:
-    log_level = logging.INFO
-    log_handler = logging.StreamHandler(stdout)
-else:
-    log_level = logging.WARNING
-    log_handler = AzureLogHandler(
-        connection_string=f"InstrumentationKey={INSTRUMENTATION_KEY}"
-    )
-
+log_level = getattr(logging, LOG_LEVEL)
 
 logging_instances = [
     [app.logger, log_level],
@@ -81,10 +74,6 @@ logging_instances = [
     [logging.getLogger('azure'), logging.WARNING],
     [logging.getLogger('homepage_server'), log_level],
 ]
-
-for log, level in logging_instances:
-    log.setLevel(level)
-    log.addHandler(log_handler)
 
 # ---------------------------------------------------------
 
@@ -154,14 +143,23 @@ def isnone(value):
 
 
 @app.errorhandler(404)
-def handle_404(e):
+def handle_404(err):
     app.logger.info(f"HTTP 404 response on <{request.url}>")
     return render_template("errors/404.html"), 404
 
 
 @app.errorhandler(Exception)
-def handle_500(e):
-    app.logger.exception(e)
+def handle_500(err):
+    app.logger.exception(
+        err,
+        extra={
+            'custom_dimensions': {
+                'website_timestamp': g.website_timestamp,
+                'latest_release': g.timestamp
+            }
+        }
+    )
+
     return render_template("errors/500.html"), 500
 
 
@@ -178,6 +176,14 @@ def inject_globals():
 
 @app.before_request
 def inject_timestamps():
+    handler = AzureLogHandler(
+        connection_string=f"InstrumentationKey={INSTRUMENTATION_KEY}"
+    )
+
+    for log, level in logging_instances:
+        log.addHandler(handler)
+        log.setLevel(level)
+
     g.data_db = CosmosDB(Collection.DATA)
     g.lookup_db = CosmosDB(Collection.LOOKUP)
     g.weekly_db = CosmosDB(Collection.WEEKLY)
@@ -188,11 +194,15 @@ def inject_timestamps():
     with StorageClient(**LATEST_PUBLISHED_TIMESTAMP) as client:
         g.timestamp = client.download().readall().decode()
 
+    g.log_handler = handler
+
     return None
 
 
 @app.teardown_appcontext
 def teardown_db(exception):
+    g.log_handler.flush()
+
     db_instances = [
         g.pop('data_db', None),
         g.pop('lookup_db', None),
@@ -226,13 +236,12 @@ def prepare_response(resp: Response):
 
 @app.route("/healthcheck", methods=("HEAD", "GET"))
 def health_check(**kwargs):
-    from .common.data.query_templates import HealthCheck
-    result = g.data_db.query(HealthCheck, params=list()).pop()
+    result = g.lookup_db.query(HealthCheck, params=list()).pop()
 
-    if result.endswith("Z"):
+    if len(result) > 0:
         return make_response("", 200)
 
-    raise make_response("", 500)
+    raise RuntimeError("Health check failed.")
 
 
 if __name__ == "__main__":
