@@ -258,8 +258,7 @@ ORDER BY
 
 
 HealthCheck = """\
-SELECT 
-    VALUE MAX(c.releaseTimestamp) 
-FROM c
-ORDER BY c.releaseTimestamp DESC\
+SELECT TOP 1 *
+FROM c 
+WHERE c.type = 'postcode'\
 """
