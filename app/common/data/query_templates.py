@@ -260,5 +260,5 @@ ORDER BY
 HealthCheck = """\
 SELECT TOP 1 *
 FROM c 
-WHERE c.type = 'postcode'\
+WHERE c.type = 'general'\
 """
