@@ -34,11 +34,10 @@ home_page = Blueprint('home_page', __name__)
 @home_page.route('/')
 @cache_client.cached(timeout=120)
 def index() -> render_template:
-
     data = get_main_data(g.timestamp)
     return render_template(
         "main.html",
-        changelog = get_notification_content(g.website_timestamp),
+        changelog=get_notification_content(g.website_timestamp),
         r_values=get_r_values(g.timestamp),
         cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
         deaths_rate=latest_rate_by_metric(g.timestamp, "newDeaths28DaysByDeathDate"),
