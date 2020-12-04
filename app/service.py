@@ -3,8 +3,9 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-import logging
 import re
+import logging
+from sys import stdout
 from os import getenv
 from datetime import datetime, timedelta
 from os.path import abspath, join as join_path, pardir
@@ -12,9 +13,10 @@ from typing import Union
 from functools import lru_cache
 
 # 3rd party:
-from flask import Flask, Response, g, render_template, make_response
+from flask import Flask, Response, g, render_template, make_response, request
 from flask_minify import minify
 from pytz import timezone
+from opencensus.ext.azure.log_exporter import AzureLogHandler
 
 # Internal:
 from app.postcode.views import postcode_page
@@ -22,7 +24,6 @@ from app.landing.views import home_page
 from app.common.data.variables import NationalAdjectives, IsImproving
 from app.common.caching import cache_client
 from app.common.utils import get_og_image_names
-
 from app.database import CosmosDB, Collection
 from app.storage import StorageClient
 
@@ -42,7 +43,7 @@ LATEST_PUBLISHED_TIMESTAMP = {
     "path": "info/latest_published"
 }
 NOT_AVAILABLE = "N/A"
-APP_INSIGHT_KEY = "APPINSIGHTS_INSTRUMENTATIONKEY"
+INSTRUMENTATION_KEY = getenv("APPINSIGHTS_INSTRUMENTATIONKEY", "")
 SERVER_LOCATION_KEY = "SERVER_LOCATION"
 SERVER_LOCATION = getenv(SERVER_LOCATION_KEY, NOT_AVAILABLE)
 PYTHON_TIMESTAMP_LEN = 24
@@ -50,7 +51,6 @@ HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
 timestamp_pattern = "%A %d %B %Y at %I:%M %p"
 timezone_LN = timezone("Europe/London")
-
 
 instance_path = abspath(join_path(abspath(__file__), pardir))
 
@@ -64,6 +64,29 @@ app = Flask(
 
 app.config.from_object('app.config.Config')
 
+# Logging -------------------------------------------------
+if app.debug:
+    log_level = logging.INFO
+    log_handler = logging.StreamHandler(stdout)
+else:
+    log_level = logging.WARNING
+    log_handler = AzureLogHandler(
+        connection_string=f"InstrumentationKey={INSTRUMENTATION_KEY}"
+    )
+
+
+logging_instances = [
+    [app.logger, log_level],
+    [logging.getLogger('werkzeug'), log_level],
+    [logging.getLogger('azure'), logging.WARNING],
+    [logging.getLogger('homepage_server'), log_level],
+]
+
+for log, level in logging_instances:
+    log.setLevel(level)
+    log.addHandler(log_handler)
+
+# ---------------------------------------------------------
 
 app.register_blueprint(home_page)
 app.register_blueprint(postcode_page)
@@ -132,12 +155,13 @@ def isnone(value):
 
 @app.errorhandler(404)
 def handle_404(e):
+    app.logger.info(f"HTTP 404 response on <{request.url}>")
     return render_template("errors/404.html"), 404
 
 
 @app.errorhandler(Exception)
 def handle_500(e):
-    logging.exception(e)
+    app.logger.exception(e)
     return render_template("errors/500.html"), 500
 
 
@@ -147,7 +171,7 @@ def inject_globals():
         DEBUG=app.debug,
         national_adjectives=NationalAdjectives,
         timestamp=g.website_timestamp,
-        app_insight_token=getenv(APP_INSIGHT_KEY, ""),
+        app_insight_token=INSTRUMENTATION_KEY,
         og_images=get_og_image_names(g.timestamp)
     )
 

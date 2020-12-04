@@ -12,11 +12,9 @@ Contributors:  Pouria Hadjibagheri
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-import logging
 from typing import Union, List, Iterable
 from os import getenv
 from hashlib import blake2b
-from sys import stdout
 
 # 3rd party:
 from azure.cosmos.cosmos_client import CosmosClient
@@ -30,16 +28,12 @@ from .dtypes import ParametersType, ItemType, ResponseType, PaginatedResponse
 
 
 DB_URL = getenv("AzureCosmosHost")
-
 DB_CREDENTIALS = {
     "masterKey": getenv("AzureCosmosKey")
 }
-
 DB_NAME = getenv("AzureCosmosDBName")
-
 UK_SOUTH = "UKS"
 UK_WEST = "UKW"
-
 SERVER_LOCATION = getenv("SERVER_LOCATION", f"{UK_SOUTH}_00")
 
 location = SERVER_LOCATION.split("_")[0]
@@ -54,14 +48,6 @@ else:
         "UK West",
         "UK South"
     ]
-
-
-logger = logging.getLogger('azure')
-logger.setLevel(logging.WARNING)
-
-# Configure a console output
-handler = logging.StreamHandler(stream=stdout)
-logger.addHandler(handler)
 
 
 class CosmosDB:

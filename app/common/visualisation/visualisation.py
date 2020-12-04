@@ -69,7 +69,7 @@ COLOURS = {
 }
 
 
-def get_colour(change, metric_name):
+def get_colour(change, metric_name) -> dict:
     change_value = float(change["value"] or 0)
     improving = IsImproving[metric_name](change_value)
 
