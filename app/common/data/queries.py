@@ -6,10 +6,12 @@
 import logging
 from datetime import datetime, timedelta
 from typing import Dict
+from json import dumps
+from functools import wraps
 
 # 3rd party:
 from flask import g
-from azure.cosmos.exceptions import CosmosResourceNotFoundError
+from azure.core.exceptions import AzureError
 
 # Internal:
 from . import query_templates as queries
@@ -89,6 +91,23 @@ def get_latest_value(metric: str, timestamp: str, area_name: str):
     return result[0]["value"]
 
 
+# def log_azure_exception(func):
+#     @wraps(func)
+#     def log_exception(*args, **kwargs):
+#         try:
+#             query, params, result = func(*args, **kwargs)
+#             return result
+#         except AzureError as err:
+#             logger.exception(err, extra={
+#                 "custom_dimensions": {
+#                     "query": query,
+#                     "query_params": dumps(params)
+#                 }
+#             })
+#             raise err
+#     return func
+
+
 @cache_client.memoize(60 * 60 * 12)
 def get_postcode_areas_from_db(postcode):
     query = queries.PostcodeLookup
@@ -99,11 +118,11 @@ def get_postcode_areas_from_db(postcode):
 
     try:
         return g.lookup_db.query(query, params=params).pop()
-    except CosmosResourceNotFoundError as err:
+    except AzureError as err:
         logger.exception(err, extra={
             "custom_dimensions": {
                 "query": query,
-                "query_params": params
+                "query_params": dumps(params)
             }
         })
         raise err
