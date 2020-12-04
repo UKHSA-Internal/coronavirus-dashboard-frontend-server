@@ -9,6 +9,7 @@ from typing import Dict
 
 # 3rd party:
 from flask import g
+from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
 # Internal:
 from . import query_templates as queries
@@ -96,7 +97,14 @@ def get_postcode_areas_from_db(postcode):
         {"name": "@postcode", "value": postcode.replace(" ", "").upper()},
     ]
 
-    return g.lookup_db.query(query, params=params).pop()
+    try:
+        return g.lookup_db.query(query, params=params).pop()
+    except CosmosResourceNotFoundError as err:
+        logger.exception(err, extra={
+            "query": query,
+            "query_params": params
+        })
+        raise err
 
 
 def get_postcode_areas(postcode) -> Dict[str, str]:
