@@ -12,6 +12,7 @@ Contributors:  Pouria Hadjibagheri
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+import logging
 from datetime import datetime
 from operator import itemgetter
 from typing import Dict
@@ -30,6 +31,8 @@ from ..storage import StorageClient
 
 get_value = itemgetter("value")
 get_area_type = itemgetter("areaType")
+
+logger = logging.getLogger('homepage_server')
 
 
 @cache_client.memoize(60 * 60 * 12)
