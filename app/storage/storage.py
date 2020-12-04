@@ -40,13 +40,6 @@ DEFAULT_CONTENT_TYPE = "application/json; charset=utf-8"
 DEFAULT_CACHE_CONTROL = "no-cache, max-age=0, stale-while-revalidate=300"
 CONTENT_LANGUAGE = 'en-GB'
 
-logger = logging.getLogger('azure')
-logger.setLevel(logging.WARNING)
-
-# Configure a console output
-handler = logging.StreamHandler(stream=stdout)
-logger.addHandler(handler)
-
 
 class StorageClient:
     """

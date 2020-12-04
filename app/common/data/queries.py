@@ -30,6 +30,9 @@ __all__ = [
 ]
 
 
+logger = logging.getLogger('homepage_server')
+
+
 def process_dates(date: str) -> dtypes.ProcessedDateType:
     result: dict = {
         'date': datetime.strptime(date, "%Y-%m-%d"),
@@ -129,7 +132,7 @@ def get_data_by_code(area, timestamp):
     try:
         location_data = result.pop()
     except IndexError as err:
-        logging.critical(f"Missing lookup value for {params}")
+        logger.critical(f"Missing lookup value for {params}")
         raise err
 
     results = dict()
