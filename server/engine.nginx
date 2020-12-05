@@ -16,24 +16,12 @@ server {
     listen             5000;
     server_name        coronavirus.data.gov.uk;
     keepalive_timeout  65s;
-    resolver_timeout   5s;
+    resolver_timeout   30s;
 
     charset            utf-8;
 
     access_log         /var/log/nginx/access.log  main;
     sendfile           on;
-
-    location /favicon.ico {
-
-        alias                  /app/static/images/favicon.ico;
-        access_log             off;
-        log_not_found          off;
-
-        limit_except GET HEAD {
-            deny    all;
-        }
-
-    }
 
     location / {
 
@@ -66,6 +54,31 @@ server {
         add_header             Content-Language          "en-GB";
 
         proxy_read_timeout     86400;
+
+        limit_except GET HEAD {
+            deny    all;
+        }
+
+    }
+
+    location ~ ^/(favicon.+)$ {
+
+        root                   /app/static/icon;
+        autoindex              on;
+        gzip_static            off;
+        sendfile               on;
+        tcp_nopush             on;
+        sendfile_max_chunk     1m;
+        tcp_nodelay            on;
+        try_files              $1 /$1 @app;
+
+        proxy_ignore_headers   X-Accel-Expires Expires Cache-Control;
+        proxy_cache_valid      any 86400s;
+        proxy_cache_lock       on;
+        proxy_cache_use_stale  updating;
+
+        access_log             off;
+        log_not_found          off;
 
         limit_except GET HEAD {
             deny    all;
