@@ -22,6 +22,7 @@ WORKDIR /app
 
 COPY --from=builder /app/static/dist ./static
 COPY ./app/static/images             ./static/images
+COPY ./app/static/icon               ./static/icon
 COPY ./app/static/govuk-frontend     ./static/govuk-frontend
 
 COPY server/base.nginx               ./nginx.conf
