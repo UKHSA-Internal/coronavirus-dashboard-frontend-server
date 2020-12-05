@@ -3,6 +3,7 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+import logging
 from operator import itemgetter
 from urllib.parse import quote
 
@@ -21,6 +22,9 @@ __all__ = [
     'get_colour',
     'svg_to_url'
 ]
+
+
+logger = logging.getLogger("homepage_server")
 
 
 TIMESERIES_LAYOUT = go.Layout(
@@ -75,7 +79,7 @@ def get_colour(change, metric_name) -> dict:
 
     trend_colour = COLOURS["neutral"]
 
-    if isinstance(improving, bool) and change_value != 0:
+    if isinstance(improving, bool):
         if improving:
             trend_colour = COLOURS["good"]
         else:

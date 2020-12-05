@@ -22,7 +22,7 @@ from json import loads
 
 # Internal:
 from .caching import cache_client
-from .visualisation import get_colour, plot_thumbnail
+from .visualisation import plot_thumbnail
 from .data.queries import get_last_fortnight, change_by_metric
 from .data.variables import DestinationMetrics
 from ..storage import StorageClient
@@ -52,12 +52,10 @@ def get_og_image_names(latest_timestamp: str) -> list:
 
 def get_card_data(latest_timestamp: str, metric_name: str, metric_data, graph=True):
     change = change_by_metric(latest_timestamp, metric_name, postcode=None)
-    colour = get_colour(change, metric_name)
 
     response = {
         "data": metric_data,
         "change": change,
-        "colour": colour,
         "latest_date": metric_data[0]["date"].strftime('%-d %B %Y')
     }
 

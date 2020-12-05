@@ -112,9 +112,14 @@ def as_datestamp(latest_timestamp: str) -> str:
 @app.context_processor
 def is_improving():
     def inner(metric, value):
+        if value == 0:
+            return None
+
         improving = IsImproving[metric](value)
-        if improving != 0 and value != 0:
+        if isinstance(improving, bool):
             return improving
+        # if improving != 0 and value != 0:
+        #     return improving
         return None
     return dict(is_improving=inner)
 

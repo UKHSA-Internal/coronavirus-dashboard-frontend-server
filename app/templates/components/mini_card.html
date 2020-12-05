@@ -3,13 +3,13 @@
 {% macro create_card(card, is_postcode=False) %}
 
 	{% set improving = is_improving(card.metric, card.change.value) %}
-	{% if improving %}
+	{% if improving == True %}
 		{% set image = "images/arrow-up-green.png" %}
 		{% set colour = 'good' %}
 	{% elif improving == None %}
 		{% set image = "images/arrow-up-grey.png" %}
 		{% set colour = 'neutral' %}
-	{% else %}
+	{% elif improving == False %}
 		{% set image = "images/arrow-up-red.png" %}
 		{% set colour = 'bad' %}
 	{% endif %}
