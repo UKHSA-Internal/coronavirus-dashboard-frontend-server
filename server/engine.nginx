@@ -113,6 +113,36 @@ server {
 
     }
 
+    location ~ ^/assets/govuk-frontend/(.+woff2?)$ {
+
+        root                   /app/static/govuk-frontend;
+        autoindex              on;
+        gzip_static            off;
+        sendfile               on;
+        tcp_nopush             on;
+        sendfile_max_chunk     1m;
+        tcp_nodelay            on;
+        try_files              $1 /$1 @app;
+
+        proxy_ignore_headers   X-Accel-Expires Expires Cache-Control;
+        proxy_cache_valid      any 86400s;
+        proxy_cache_lock       on;
+        proxy_cache_use_stale  updating;
+
+        add_header             Cache-Control                   "immutable, s-maxage=604800, max-age=86400";
+        add_header             x-phe-media-type                "PHE-COVID19.v1";
+        add_header             strict-transport-security       "max-age=31536000; includeSubDomains; preload";
+        add_header             Access-Control-Allow-Origin     "*";
+        add_header             Access-Control-Allow-Methods    "GET, HEAD";
+        add_header             Access-Control-Allow-Headers    "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range";
+        add_header             Access-Control-Expose-Headers   "Content-Length,Content-Range";
+
+        limit_except GET HEAD {
+            deny    all;
+        }
+
+    }
+
     location ~ ^/assets/govuk-frontend/(.+)$ {
 
         root                   /app/static/govuk-frontend;
