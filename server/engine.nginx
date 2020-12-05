@@ -103,7 +103,7 @@ server {
         proxy_cache_lock       on;
         proxy_cache_use_stale  updating;
 
-        add_header             Cache-Control             "s-maxage=86400, max-age=604800, stale-while-revalidate=300";
+        add_header             Cache-Control             "s-maxage=604800, max-age=86400, stale-while-revalidate=300";
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
 
@@ -129,7 +129,7 @@ server {
         proxy_cache_lock       on;
         proxy_cache_use_stale  updating;
 
-        add_header             Cache-Control             "immutable";
+        add_header             Cache-Control             "immutable, s-maxage=604800, max-age=86400";
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
 
