@@ -15,7 +15,7 @@ daemon off;
 
 events {
 
-    worker_connections 2047;
+    worker_connections 1024;
 
 }
 

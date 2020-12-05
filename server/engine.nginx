@@ -17,6 +17,7 @@ server {
     server_name        coronavirus.data.gov.uk;
     keepalive_timeout  65s;
     resolver_timeout   30s;
+    uwsgi_read_timeout 60s;
 
     charset            utf-8;
 
