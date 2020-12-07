@@ -243,10 +243,13 @@ def prepare_response(resp: Response):
     resp.headers['Expires'] = expires.strftime(HTTP_DATE_FORMAT)
     resp.headers['PHE-Server-Loc'] = SERVER_LOCATION
 
-    minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
-    data = str.join("", minified).encode()
+    try:
+        minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
+        data = str.join("", minified).encode()
+        resp.set_data(data)
+    except UnicodeDecodeError as e:
+        app.logger.warning(e)
 
-    resp.set_data(data)
     return resp
 
 
