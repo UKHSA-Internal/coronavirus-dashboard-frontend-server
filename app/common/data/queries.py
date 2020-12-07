@@ -290,19 +290,23 @@ def change_by_metric(timestamp, metric, postcode=None):
     latest_date = last_published.strftime("%Y-%m-%d")
 
     
-    if postcode != None:
+    if postcode is not None:
         area = get_postcode_areas(postcode)
 
-        if metric == const.DestinationMetrics["testing"]["metric"]:
-            area_type = 'nation'
-        elif metric != const.DestinationMetrics["healthcare"]["metric"]:
-            # Non-healthcare metrics use LTLA.
+        if metric == const.DestinationMetrics["deaths"]["metric"] and area['nation'][0].upper() in "ES":
+            # England and Scotland use LTLA for deaths.
             area_type = 'ltla'
-        elif area['nation'][0].upper() not in "SNW":
+
+        elif metric == const.DestinationMetrics["healthcare"]["metric"] and area['nation'][0].upper() in "E":
             # England uses NHS Region.
             area_type = 'nhsRegion'
+
+        elif metric == const.DestinationMetrics["cases"]["metric"]:
+            # cases are all LTLA
+            area_type = 'ltla'
+
         else:
-            # DAs don't have NHS Region - switch to nation.
+            # everything else is national.
             area_type = 'nation'
 
         area_code = area[area_type]
@@ -323,15 +327,14 @@ def change_by_metric(timestamp, metric, postcode=None):
             {"name": "@areaType", "value": 'overview'},
         ]
 
-    #logging.warning(f'Params: {params}  \n  Query: {query}')
 
     try:
         result = g.data_db.query(query, params=params)
         response = {
-            "value" : result[0]["change"],
-            "percentage" : result[0]["changePercentage"],
-            "trend" : result[0]["changeDirection"],
-            "total" : result[0]["rollingSum"]
+            "value": result[0]["change"],
+            "percentage": result[0]["changePercentage"],
+            "trend": result[0]["changeDirection"],
+            "total": result[0]["rollingSum"]
         }
         return response
 

@@ -118,5 +118,3 @@ def postcode_search() -> render_template:
         msoa=get_msoa_data(postcode, g.timestamp),
         **data
     )
-
-

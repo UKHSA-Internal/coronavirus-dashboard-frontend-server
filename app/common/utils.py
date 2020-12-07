@@ -57,7 +57,6 @@ def get_og_image_names(latest_timestamp: str) -> list:
     return og_names
 
 
-
 def get_card_data(latest_timestamp: str, metric_name: str, metric_data, graph=True):
     change = change_by_metric(latest_timestamp, metric_name, postcode=None)
     colour = get_colour(change, metric_name)
