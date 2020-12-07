@@ -15,7 +15,6 @@ Contributors:  Pouria Hadjibagheri
 from typing import Union, List, Iterable
 from os import getenv
 from hashlib import blake2b
-from json import loads
 
 # 3rd party:
 from azure.cosmos.cosmos_client import CosmosClient
@@ -33,7 +32,7 @@ DB_CREDENTIALS = {
     "masterKey": getenv("AzureCosmosKey")
 }
 DB_NAME = getenv("AzureCosmosDBName")
-PREFERRED_LOCATIONS = loads(getenv("AzureCosmosDBLocations", "[]"))
+PREFERRED_LOCATIONS = getenv("AzureCosmosDBLocations", "").split(",")
 
 
 class CosmosDB:
