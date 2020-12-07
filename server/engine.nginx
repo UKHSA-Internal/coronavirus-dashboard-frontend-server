@@ -49,10 +49,16 @@ server {
         proxy_set_header       Upgrade                   $http_upgrade;
         proxy_set_header       Connection                $connection_upgrade;
 
+        add_header             X-Content-Type-Options    "nosniff";
         add_header             Cache-Control             "s-maxage=60, max-age=90, stale-while-revalidate=30";
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
         add_header             Content-Language          "en-GB";
+        add_header             Content-Security-Policy   "default-src 'self'; font-src 'self'; img-src 'self' *.data.gov.uk data:; script-src 'unsafe-inline' *; connect-src 'self' *; style-src 'unsafe-inline' *;";
+        add_header             X-XSS-Protection          "1; mode=block";
+        add_header             X-Frame-Options           "SAMEORIGIN";
+        add_header             Referrer-Policy           "strict-origin";
+        add_header             Permissions-Policy        "geolocation=();notifications=();push=();sync-xhr=();vibrate=();fullscreen=(self);";
 
         proxy_read_timeout     86400;
 
