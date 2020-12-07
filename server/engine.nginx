@@ -54,7 +54,7 @@ server {
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
         add_header             Content-Language          "en-GB";
-        add_header             Content-Security-Policy   "default-src 'self'; font-src 'self'; img-src 'self' *.data.gov.uk data:; script-src 'unsafe-inline' *; connect-src 'self' *; style-src 'unsafe-inline' *;";
+        add_header             Content-Security-Policy   "default-src 'self'; font-src 'self'; img-src 'self' *.data.gov.uk *.google-analytics.com data:; script-src 'unsafe-inline' *; connect-src 'self' *; style-src 'unsafe-inline' *;";
         add_header             X-XSS-Protection          "1; mode=block";
         add_header             X-Frame-Options           "SAMEORIGIN";
         add_header             Referrer-Policy           "strict-origin";
@@ -140,8 +140,6 @@ server {
         add_header             strict-transport-security       "max-age=31536000; includeSubDomains; preload";
         add_header             Access-Control-Allow-Origin     "*";
         add_header             Access-Control-Allow-Methods    "GET, HEAD";
-        add_header             Access-Control-Allow-Headers    "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range";
-        add_header             Access-Control-Expose-Headers   "Content-Length,Content-Range";
 
         limit_except GET HEAD {
             deny    all;
