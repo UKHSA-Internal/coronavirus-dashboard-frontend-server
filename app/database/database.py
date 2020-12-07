@@ -15,6 +15,7 @@ Contributors:  Pouria Hadjibagheri
 from typing import Union, List, Iterable
 from os import getenv
 from hashlib import blake2b
+from json import loads
 
 # 3rd party:
 from azure.cosmos.cosmos_client import CosmosClient
@@ -32,22 +33,7 @@ DB_CREDENTIALS = {
     "masterKey": getenv("AzureCosmosKey")
 }
 DB_NAME = getenv("AzureCosmosDBName")
-UK_SOUTH = "UKS"
-UK_WEST = "UKW"
-SERVER_LOCATION = getenv("SERVER_LOCATION", f"{UK_SOUTH}_00")
-
-location = SERVER_LOCATION.split("_")[0]
-
-if location == UK_SOUTH:
-    PREFERRED_LOCATIONS = [
-        "UK South",
-        "UK West"
-    ]
-else:
-    PREFERRED_LOCATIONS = [
-        "UK West",
-        "UK South"
-    ]
+PREFERRED_LOCATIONS = loads(getenv("AzureCosmosDBLocations", "[]"))
 
 
 class CosmosDB:
