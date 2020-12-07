@@ -6,6 +6,13 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 from ..utils import website_timestamp, timestamp, calculate_change, get_date_min_max
 from app import app, inject_timestamps_tests
+from app.common.data import constants
+
+cases_metric = constants.DestinationMetrics["cases"]["metric"]
+deaths_metric = constants.DestinationMetrics["deaths"]["metric"]
+healthcare_metric = constants.DestinationMetrics["healthcare"]["metric"]
+testing_metric = constants.DestinationMetrics["testing"]["metric"]
+
 
 postcodes = [
     'CF101AE', 'AB101AU', 'BT11AA', 'CB12QX', 'TR210PP', 'TR96QP',
@@ -64,10 +71,10 @@ class TestPostcode(unittest.TestCase):
                 response = client.get(f'/search?postcode={postcode}')
             
             data = response.data
-            cases_change, cases_percentage_change = calculate_change("newCasesByPublishDate", "ltla", postcode)
-            deaths_change, deaths_percentage_change = calculate_change("newDeaths28DaysByPublishDate", "ltla", postcode)
-            admissions_change, admissions_percentage_change = calculate_change("newAdmissions", "nhsRegion", postcode)
-            tests_change, tests_percentage_change = calculate_change("newPCRTestsByPublishDate", "nation", postcode)
+            cases_change, cases_percentage_change = calculate_change(cases_metric, "ltla", postcode)
+            deaths_change, deaths_percentage_change = calculate_change(deaths_metric, "ltla", postcode)
+            admissions_change, admissions_percentage_change = calculate_change(healthcare_metric, "nhsRegion", postcode)
+            tests_change, tests_percentage_change = calculate_change(testing_metric, "nation", postcode)
 
             self.assertIn(cases_change.encode(), data)
             self.assertIn(deaths_change.encode(), data)
@@ -81,10 +88,10 @@ class TestPostcode(unittest.TestCase):
                 response = client.get(f'/search?postcode={postcode}')
             
             data = response.data
-            cases_change, cases_percentage_change = calculate_change("newCasesByPublishDate", "ltla", postcode)
-            deaths_change, deaths_percentage_change = calculate_change("newDeaths28DaysByPublishDate", "ltla", postcode)
-            admissions_change, admissions_percentage_change = calculate_change("newAdmissions", "nhsRegion", postcode)
-            tests_change, tests_percentage_change = calculate_change("newPCRTestsByPublishDate", "nation", postcode)
+            cases_change, cases_percentage_change = calculate_change(cases_metric, "ltla", postcode)
+            deaths_change, deaths_percentage_change = calculate_change(deaths_metric, "ltla", postcode)
+            admissions_change, admissions_percentage_change = calculate_change(healthcare_metric, "nhsRegion", postcode)
+            tests_change, tests_percentage_change = calculate_change(testing_metric, "nation", postcode)
 
             self.assertIn(cases_percentage_change.encode(), data)
             self.assertIn(deaths_percentage_change.encode(), data)
@@ -97,10 +104,10 @@ class TestPostcode(unittest.TestCase):
                 response = client.get(f'/search?postcode={postcode}')
 
             data = response.data
-            cases_latest_date, cases_current_week_date, cases_latest_week_ago_date, cases_date_fortnight_prior = get_date_min_max("newCasesByPublishDate", "ltla", postcode)
-            deaths_latest_date, deaths_current_week_date, deaths_latest_week_ago_date, deaths_date_fortnight_prior = get_date_min_max("newDeaths28DaysByPublishDate", "ltla", postcode)
-            admissions_latest_date, admissions_current_week_date, admissions_latest_week_ago_date, admissions_date_fortnight_prior = get_date_min_max("newAdmissions", "nhsRegion", postcode)
-            tests_latest_date, tests_current_week_date, tests_latest_week_ago_date, tests_date_fortnight_prior = get_date_min_max("newDeaths28DaysByPublishDate", "ltla", postcode)
+            cases_latest_date, cases_current_week_date, cases_latest_week_ago_date, cases_date_fortnight_prior = get_date_min_max(cases_metric, "ltla", postcode)
+            deaths_latest_date, deaths_current_week_date, deaths_latest_week_ago_date, deaths_date_fortnight_prior = get_date_min_max(deaths_metric, "ltla", postcode)
+            admissions_latest_date, admissions_current_week_date, admissions_latest_week_ago_date, admissions_date_fortnight_prior = get_date_min_max(healthcare_metric, "nhsRegion", postcode)
+            tests_latest_date, tests_current_week_date, tests_latest_week_ago_date, tests_date_fortnight_prior = get_date_min_max(deaths_metric, "ltla", postcode)
 
             self.assertIn(cases_latest_date.encode(), data), self.assertIn(cases_current_week_date.encode(), data), self.assertIn(cases_latest_week_ago_date.encode(), data), self.assertIn(cases_date_fortnight_prior.encode(), data)
             self.assertIn(deaths_latest_date.encode(), data), self.assertIn(deaths_current_week_date.encode(), data), self.assertIn(deaths_latest_week_ago_date.encode(), data), self.assertIn(deaths_date_fortnight_prior.encode(), data)

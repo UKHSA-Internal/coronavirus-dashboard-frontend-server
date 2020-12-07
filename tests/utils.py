@@ -1,4 +1,3 @@
-from inspect import getmembers
 import logging
 import unittest
 from flask import g
