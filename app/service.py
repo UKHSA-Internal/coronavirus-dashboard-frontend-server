@@ -42,6 +42,7 @@ __all__ = [
 
 WEB_STORAGE_CONN_STR = getenv("StaticFrontendStorage")
 MAIN_STORAGE_CONN_STR = getenv("DeploymentBlobStorage")
+SERVER_LOCATION = getenv("SERVER_LOCATION", "N/A")
 
 timestamp: str = str()
 website_timestamp: str = str()
@@ -112,6 +113,8 @@ def format_number(value: Union[int, float]) -> str:
         if value == "0-2":
             value = "0 &ndash; 2"
         return str(value)
+    except TypeError:
+        return "N/A"
 
     if value == value_int:
         return format(value_int, ',d')
@@ -206,15 +209,10 @@ def prepare_response(resp: Response):
 
     resp.headers['Last-Modified'] = last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT")
     resp.headers['Expires'] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    resp.headers['PHE-Server-Loc'] = SERVER_LOCATION
 
     minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
     data = str.join("", minified).encode()
-
-    # accept_encoding = request.headers.get("Accept-Encoding", "")
-    #
-    # if 'gzip' in accept_encoding:
-    #     data = compress(data)
-    #     resp.headers['Content-Encoding'] = "gzip"
 
     resp.set_data(data)
     return resp

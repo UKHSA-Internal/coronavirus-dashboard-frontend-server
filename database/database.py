@@ -37,6 +37,22 @@ DB_CREDENTIALS = {
 
 DB_NAME = getenv("AzureCosmosDBName")
 
+UK_SOUTH = "UKS"
+UK_WEST = "UKW"
+
+SERVER_LOCATION = getenv("SERVER_LOCATION", "UKS")
+
+if SERVER_LOCATION == UK_SOUTH:
+    PREFERRED_LOCATIONS = [
+        "UK South",
+        "UK West"
+    ]
+else:
+    PREFERRED_LOCATIONS = [
+        "UK West",
+        "UK South"
+    ]
+
 
 logger = logging.getLogger('azure')
 logger.setLevel(logging.WARNING)
@@ -53,7 +69,11 @@ class CosmosDB:
         if writer:
             credentials = Credentials.WRITER.value
 
-        self.cosmos_client = CosmosClient(url=DB_URL, credential=credentials)
+        self.cosmos_client = CosmosClient(
+            url=DB_URL,
+            credential=credentials,
+            preferred_locations=PREFERRED_LOCATIONS
+        )
         self.db_client: DatabaseProxy = self.cosmos_client.get_database_client(DB_NAME)
         self.client: ContainerProxy = self.db_client.get_container_client(collection.value)
 
