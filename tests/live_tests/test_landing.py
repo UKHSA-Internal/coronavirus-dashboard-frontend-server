@@ -6,12 +6,12 @@ load_dotenv(find_dotenv())
 
 from ..utils import website_timestamp, timestamp, calculate_change, get_date_min_max
 from app import app, inject_timestamps_tests
-from app.common.data import constants
+from app.common.data import variables
 
-cases_metric = constants.DestinationMetrics["cases"]["metric"]
-deaths_metric = constants.DestinationMetrics["deaths"]["metric"]
-healthcare_metric = constants.DestinationMetrics["healthcare"]["metric"]
-testing_metric = constants.DestinationMetrics["testing"]["metric"]
+cases_metric = variables.DestinationMetrics["cases"]["metric"]
+deaths_metric = variables.DestinationMetrics["deaths"]["metric"]
+healthcare_metric = variables.DestinationMetrics["healthcare"]["metric"]
+testing_metric = variables.DestinationMetrics["testing"]["metric"]
 
 
 class TestLanding(unittest.TestCase):
