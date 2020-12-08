@@ -15,31 +15,24 @@ Contributors:  Pouria Hadjibagheri
 import logging
 from datetime import datetime
 from operator import itemgetter
-from typing import List, Dict
+from typing import Dict
+from json import loads
 
 # 3rd party:
 
 # Internal:
 from .caching import cache_client
-from .visualisation import get_colour, plot_thumbnail
+from .visualisation import plot_thumbnail
 from .data.queries import get_last_fortnight, change_by_metric
-from .data.constants import DestinationMetrics
+from .data.variables import DestinationMetrics
+from ..storage import StorageClient
 
-try:
-    from __app__.database import CosmosDB
-except ImportError:
-    from database import CosmosDB
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Header
-__author__ = "Pouria Hadjibagheri"
-__copyright__ = "Copyright (c) 2020, Public Health England"
-__license__ = "MIT"
-__version__ = "0.0.1"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 get_value = itemgetter("value")
 get_area_type = itemgetter("areaType")
+
+logger = logging.getLogger('homepage_server')
 
 
 @cache_client.memoize(60 * 60 * 12)
@@ -59,12 +52,10 @@ def get_og_image_names(latest_timestamp: str) -> list:
 
 def get_card_data(latest_timestamp: str, metric_name: str, metric_data, graph=True):
     change = change_by_metric(latest_timestamp, metric_name, postcode=None)
-    colour = get_colour(change, metric_name)
 
     response = {
         "data": metric_data,
         "change": change,
-        "colour": colour,
         "latest_date": metric_data[0]["date"].strftime('%-d %B %Y')
     }
 
@@ -81,7 +72,7 @@ def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom")
     for item in DestinationMetrics.values():
         metric_name = item['metric']
         metric_data = get_last_fortnight(latest_timestamp, area_name, metric_name)
-        result[metric_name] = get_card_data(latest_timestamp, metric_name, metric_data, area_name)
+        result[metric_name] = get_card_data(latest_timestamp, metric_name, metric_data)
 
     return result
 
@@ -122,3 +113,29 @@ def get_by_smallest_areatype(items, areatype_getter):
             min_index = order_index
 
     return result
+
+
+@cache_client.memoize(300)
+def get_notification_data(timestamp):
+    with StorageClient("publicdata", "assets/cms/changeLog.json") as cli:
+        data = cli.download().readall().decode()
+
+    return loads(data)
+
+
+def get_notification_content(latest_timestamp):
+    ts_python_iso = latest_timestamp[:-1]
+    ts = datetime.fromisoformat(ts_python_iso)
+    timestamp_date = ts.strftime("%Y-%m-%d")
+    data = get_notification_data(latest_timestamp)
+
+    for item in data["changeLog"]:
+        if item["displayBanner"] is True and item["date"] >= timestamp_date:
+            response = {
+                "type": item["type"],
+                "headline": item["headline"],
+                "relativeUrl": item["relativeUrl"]
+            }
+            return response
+
+    return None

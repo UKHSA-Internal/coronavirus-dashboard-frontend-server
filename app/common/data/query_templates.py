@@ -41,6 +41,7 @@ ORDER BY c.releaseTimestamp DESC,
          c.areaNameLower    ASC\
 """)
 
+
 LatestData = Template("""\
 SELECT TOP 1
     VALUE {
@@ -213,8 +214,12 @@ SELECT TOP 1
         'value':             c.$metric,
         'change':            c.${metric}Change ?? null,
         'changePercentage':  c.${metric}ChangePercentage  ?? null,
-        'changeDirection':   c.${metric}Direction ?? null,
-        'rollingSum':        c.${metric}RollingSum ?? null
+        'rollingSum':        c.${metric}RollingSum ?? null,
+        'changeDirection':   c.${metric}Direction = 'UP' 
+                                 ? 0 
+                                 : c.${metric}Direction = 'DOWN' 
+                                 ? 180 
+                                 : 90
     }
 FROM    c 
 WHERE   
@@ -234,8 +239,12 @@ SELECT TOP 1
         'value':            c.$metric,
         'change':           c.${metric}Change ?? null,
         'changePercentage': c.${metric}ChangePercentage  ?? null,
-        'changeDirection':  c.${metric}Direction ?? null,
-        'rollingSum':       c.${metric}RollingSum ?? null
+        'rollingSum':       c.${metric}RollingSum ?? null,
+        'changeDirection':  c.${metric}Direction = 'UP' 
+                                ? 0 
+                                : c.${metric}Direction = 'DOWN' 
+                                ? 180 
+                                : 90
     }
 FROM    c 
 WHERE   
@@ -249,8 +258,7 @@ ORDER BY
 
 
 HealthCheck = """\
-SELECT 
-    VALUE MAX(c.releaseTimestamp) 
-FROM c
-ORDER BY c.releaseTimestamp DESC\
+SELECT TOP 1 *
+FROM c 
+WHERE c.type = 'general'\
 """

@@ -20,12 +20,6 @@ __all__ = [
 
 ENVIRONMENT = getenv("API_ENV", "PRODUCTION")
 
-server_location = {
-    "PRODUCTION": getenv("SERVER_LOCATION", "UKS"),
-    "STAGING": "UKS",
-    "DEVELOPMENT": "UKS",
-}
-
 
 cache_client = Cache(config={
     "CACHE_TYPE": "redis" if not Config.DEBUG else "null",
@@ -35,8 +29,8 @@ cache_client = Cache(config={
         "ssl": True,
         "ssl_ca_certs": certifi.where()
     },
-    "CACHE_REDIS_HOST": getenv(f"{server_location[ENVIRONMENT]}_REDIS_HOST"),
-    "CACHE_REDIS_PORT": int(getenv(f"{server_location[ENVIRONMENT]}_REDIS_PORT")),
-    "CACHE_REDIS_PASSWORD": getenv(f"{server_location[ENVIRONMENT]}_REDIS_PASSWORD"),
+    "CACHE_REDIS_HOST": getenv(f"AZURE_REDIS_HOST"),
+    "CACHE_REDIS_PORT": int(getenv(f"AZURE_REDIS_PORT")),
+    "CACHE_REDIS_PASSWORD": getenv(f"AZURE_REDIS_PASSWORD"),
     "CACHE_REDIS_DB": 0
 })

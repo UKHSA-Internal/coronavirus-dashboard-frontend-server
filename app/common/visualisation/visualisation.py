@@ -3,9 +3,9 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+import logging
 from operator import itemgetter
 from urllib.parse import quote
-from typing import Dict, Union, Callable
 
 # 3rd party:
 from plotly import graph_objects as go
@@ -13,6 +13,7 @@ from pandas import Series
 
 # Internal:
 from ..caching import cache_client
+from ..data.variables import IsImproving
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -21,6 +22,9 @@ __all__ = [
     'get_colour',
     'svg_to_url'
 ]
+
+
+logger = logging.getLogger("homepage_server")
 
 
 TIMESERIES_LAYOUT = go.Layout(
@@ -69,21 +73,13 @@ COLOURS = {
 }
 
 
-IsImproving: Dict[str, Callable[[Union[int, float]], bool]] = {
-    "newCasesByPublishDate": lambda x: x < 0,
-    "newDeaths28DaysByPublishDate": lambda x: x < 0,
-    "newVirusTests": lambda x: 0,
-    "newAdmissions": lambda x: x < 0,
-}
-
-
-def get_colour(change, metric_name):
+def get_colour(change, metric_name) -> dict:
     change_value = float(change["value"] or 0)
     improving = IsImproving[metric_name](change_value)
 
     trend_colour = COLOURS["neutral"]
 
-    if improving is not 0 and change_value != 0:
+    if isinstance(improving, bool):
         if improving:
             trend_colour = COLOURS["good"]
         else:

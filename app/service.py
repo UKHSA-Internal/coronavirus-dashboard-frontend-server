@@ -3,74 +3,80 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-import logging
 import re
+import logging
+from os import getenv
 from datetime import datetime, timedelta
 from os.path import abspath, join as join_path, pardir
-from os import getenv
 from typing import Union
 from functools import lru_cache
 
 # 3rd party:
-from flask import Flask, request, Response, g, appcontext_pushed, render_template
+from flask import Flask, Response, g, appcontext_pushed, render_template, make_response, request
 from contextlib import contextmanager
-from azure.functions import HttpRequest, HttpResponse, WsgiMiddleware, Context
 from flask_minify import minify
 from pytz import timezone
+from opencensus.ext.azure.log_exporter import AzureLogHandler
 
 # Internal:
-from .postcode.views import postcode_page
-from .landing.views import home_page
-from .common.data.constants import NationalAdjectives
-from .common.caching import cache_client
-from .common.utils import get_og_image_names
-
-try:
-    from __app__.database import CosmosDB, Collection
-    from __app__.storage import StorageClient
-except ImportError:
-    from database import CosmosDB, Collection
-    from storage import StorageClient
+from app.postcode.views import postcode_page
+from app.landing.views import home_page
+from app.common.data.variables import NationalAdjectives, IsImproving
+from app.common.caching import cache_client
+from app.common.utils import get_og_image_names
+from app.database import CosmosDB, Collection
+from app.storage import StorageClient
+from app.common.data.query_templates import HealthCheck
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'main',
     'app'
 ]
 
 
-WEB_STORAGE_CONN_STR = getenv("StaticFrontendStorage")
-MAIN_STORAGE_CONN_STR = getenv("DeploymentBlobStorage")
-SERVER_LOCATION = getenv("SERVER_LOCATION", "N/A")
+WEBSITE_TIMESTAMP = {
+    "container": "publicdata",
+    "path":  "assets/dispatch/website_timestamp"
+}
+LATEST_PUBLISHED_TIMESTAMP = {
+    "container": "pipeline",
+    "path": "info/latest_published"
+}
+NOT_AVAILABLE = "N/A"
+INSTRUMENTATION_KEY = getenv("APPINSIGHTS_INSTRUMENTATIONKEY", "")
+SERVER_LOCATION_KEY = "SERVER_LOCATION"
+SERVER_LOCATION = getenv(SERVER_LOCATION_KEY, NOT_AVAILABLE)
+PYTHON_TIMESTAMP_LEN = 24
+HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
+LOG_LEVEL = getenv("LOG_LEVEL", "INFO")
 
-timestamp: str = str()
-website_timestamp: str = str()
 timestamp_pattern = "%A %d %B %Y at %I:%M %p"
 timezone_LN = timezone("Europe/London")
 
-
 instance_path = abspath(join_path(abspath(__file__), pardir))
 
-app = Flask(__name__, instance_path=instance_path, static_folder="static")
+app = Flask(
+    __name__,
+    instance_path=instance_path,
+    static_folder="static",
+    static_url_path="/assets",
+    template_folder='templates'
+)
 
-try:
-    app.config.from_object('__app__.app.config.Config')
-except (ModuleNotFoundError, ImportError):
-    app.config.from_object('app.config.Config')
-    with StorageClient("publicdata", "assets/dispatch/website_timestamp",
-                       connection_string=MAIN_STORAGE_CONN_STR) as client:
-        website_timestamp = client.download().readall().decode()
+app.config.from_object('app.config.Config')
 
-    with StorageClient("pipeline", "info/latest_published",
-                       connection_string=MAIN_STORAGE_CONN_STR) as client:
-        timestamp = client.download().readall().decode()
+# Logging -------------------------------------------------
+log_level = getattr(logging, LOG_LEVEL)
 
-try:
-    app.config.from_object('__app__.app.config.Config')
-except ImportError:
-    app.config.from_object('app.config.Config')
+logging_instances = [
+    [app.logger, log_level],
+    [logging.getLogger('werkzeug'), log_level],
+    [logging.getLogger('azure'), logging.WARNING],
+    [logging.getLogger('homepage_server'), log_level],
+]
 
+# ---------------------------------------------------------
 
 app.register_blueprint(home_page)
 app.register_blueprint(postcode_page)
@@ -104,6 +110,21 @@ def as_datestamp(latest_timestamp: str) -> str:
     return datestamp
 
 
+@app.context_processor
+def is_improving():
+    def inner(metric, value):
+        if value == 0:
+            return None
+
+        improving = IsImproving[metric](value)
+        if isinstance(improving, bool):
+            return improving
+        # if improving != 0 and value != 0:
+        #     return improving
+        return None
+    return dict(is_improving=inner)
+
+
 @app.template_filter()
 @lru_cache(maxsize=256)
 def format_number(value: Union[int, float]) -> str:
@@ -114,7 +135,7 @@ def format_number(value: Union[int, float]) -> str:
             value = "0 &ndash; 2"
         return str(value)
     except TypeError:
-        return "N/A"
+        return NOT_AVAILABLE
 
     if value == value_int:
         return format(value_int, ',d')
@@ -137,26 +158,35 @@ def isnone(value):
     return value is None
 
 
-@app.template_filter()
-def get_rotation(value: str) -> int:
-    if value == "UP":
-        value = 0 
-    elif value == "DOWN":
-        value = 180 
-    else:
-        value = 90 
-
-    return value 
-
-
 @app.errorhandler(404)
-def handle_404(e):
+def handle_404(err):
+    app.logger.info(f"HTTP 404 response on <{request.url}>")
     return render_template("errors/404.html"), 404
 
 
 @app.errorhandler(Exception)
-def handle_500(e):
-    logging.exception(e)
+def handle_500(err):
+    app.logger.exception(
+        err,
+        extra={
+            'custom_dimensions': {
+                'website_timestamp': g.website_timestamp,
+                'latest_release': g.timestamp,
+                'db_host': getenv("AzureCosmosHost", NOT_AVAILABLE),
+                "API_environment": getenv("API_ENV", NOT_AVAILABLE),
+                "server_location": getenv("SERVER_LOCATION", NOT_AVAILABLE),
+                "is_dev": getenv("IS_DEV", NOT_AVAILABLE),
+                "redis": getenv("AZURE_REDIS_HOST", NOT_AVAILABLE),
+                "AzureCosmosDBName": getenv("AzureCosmosDBName", NOT_AVAILABLE),
+                "AzureCosmosCollection": getenv("AzureCosmosCollection", NOT_AVAILABLE),
+                "AzureCosmosDestinationsCollection": getenv(
+                    "AzureCosmosDestinationsCollection",
+                    NOT_AVAILABLE
+                ),
+            }
+        }
+    )
+
     return render_template("errors/500.html"), 500
 
 
@@ -166,27 +196,40 @@ def inject_globals():
         DEBUG=app.debug,
         national_adjectives=NationalAdjectives,
         timestamp=g.website_timestamp,
-        og_images=get_og_image_names(timestamp)
+        app_insight_token=INSTRUMENTATION_KEY,
+        og_images=get_og_image_names(g.timestamp)
     )
 
 
 @app.before_request
 def inject_timestamps():
-    global timestamp, website_timestamp, testing
+    handler = AzureLogHandler(
+        connection_string=f"InstrumentationKey={INSTRUMENTATION_KEY}"
+    )
 
-    if not testing:
-        g.timestamp = timestamp
-        g.website_timestamp = website_timestamp
+    for log, level in logging_instances:
+        log.addHandler(handler)
+        log.setLevel(level)
 
     g.data_db = CosmosDB(Collection.DATA)
     g.lookup_db = CosmosDB(Collection.LOOKUP)
     g.weekly_db = CosmosDB(Collection.WEEKLY)
+
+    with StorageClient(**WEBSITE_TIMESTAMP) as client:
+        g.website_timestamp = client.download().readall().decode()
+
+    with StorageClient(**LATEST_PUBLISHED_TIMESTAMP) as client:
+        g.timestamp = client.download().readall().decode()
+
+    g.log_handler = handler
 
     return None
 
 
 @app.teardown_appcontext
 def teardown_db(exception):
+    #g.log_handler.flush()
+
     db_instances = [
         g.pop('data_db', None),
         g.pop('lookup_db', None),
@@ -201,47 +244,37 @@ def teardown_db(exception):
 @app.after_request
 def prepare_response(resp: Response):
     last_modified = datetime.strptime(
-        g.timestamp[:24] + "Z",
+        g.timestamp[:PYTHON_TIMESTAMP_LEN] + "Z",
         "%Y-%m-%dT%H:%M:%S.%fZ"
     )
 
     expires = datetime.now() + timedelta(minutes=1, seconds=30)
 
-    resp.headers['Last-Modified'] = last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT")
-    resp.headers['Expires'] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    resp.headers['Last-Modified'] = last_modified.strftime(HTTP_DATE_FORMAT)
+    resp.headers['Expires'] = expires.strftime(HTTP_DATE_FORMAT)
     resp.headers['PHE-Server-Loc'] = SERVER_LOCATION
 
-    minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
-    data = str.join("", minified).encode()
+    try:
+        minified = [minifier.get_minified(item.decode(), 'html') for item in resp.response]
+        data = str.join("", minified).encode()
+        resp.set_data(data)
+    except UnicodeDecodeError as e:
+        app.logger.warning(e)
 
-    resp.set_data(data)
     return resp
 
 
 @app.route("/healthcheck", methods=("HEAD", "GET"))
 def health_check(**kwargs):
-    from .common.data.query_templates import HealthCheck
-    result = g.data_db.query(HealthCheck, params=list()).pop()
+    result = g.lookup_db.query(HealthCheck, params=list()).pop()
 
-    if result.endswith("Z"):
+    if len(result) > 0:
         return make_response("", 200)
 
-    raise make_response("", 500)
-
-
-def main(req: HttpRequest, context: Context, latestPublished: str,
-         websiteTimestamp: str) -> HttpResponse:
-    global timestamp, website_timestamp, testing
-    testing = False
-    timestamp = latestPublished
-    website_timestamp = websiteTimestamp
-    try:
-        application = WsgiMiddleware(app.wsgi_app)
-        return application.main(req, context)
-    except Exception as err:
-        logging.exception(err)
+    raise RuntimeError("Health check failed.")
 
 
 if __name__ == "__main__":
+    global testing
+    testing = False
     app.run(host='0.0.0.0', debug=False, port=5050)
-

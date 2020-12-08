@@ -1,4 +1,5 @@
 FROM node:14-buster-slim AS builder
+LABEL maintainer="Pouria Hadjibagheri <Pouria.Hadjibagheri@phe.gov.uk>"
 
 WORKDIR /app/static
 
@@ -12,31 +13,30 @@ RUN rm -rf node_modules
 
 
 FROM tiangolo/uwsgi-nginx-flask:python3.8
+LABEL maintainer="Pouria Hadjibagheri <Pouria.Hadjibagheri@phe.gov.uk>"
 
 ENV UWSGI_INI /app/uwsgi.ini
-ENV STATIC_URL /assets
-ENV STATIC_PATH /app/static
-ENV LISTEN_PORT 5000
-ENV NGINX_WORKER_PROCESSES auto
-ENV NGINX_WORKER_CONNECTIONS 1024
-ENV NGINX_WORKER_OPEN_FILES 1024
 
-ENV UWSGI_CHEAPER 50
-ENV UWSGI_PROCESSES 51
+ENV UWSGI_CHEAPER 30
+ENV UWSGI_PROCESSES 31
 
+# Standard set up Nginx
 WORKDIR /app
 
+RUN apt-get update && apt-get upgrade -y --no-install-recommends
+
 COPY --from=builder /app/static/dist ./static
-COPY ./app/static/images             ./static/images
-COPY ./app/static/govuk-frontend     ./static/govuk-frontend
+COPY app/static/images               ./static/images
+COPY app/static/icon                 ./static/icon
+COPY app/static/govuk-frontend       ./static/govuk-frontend
 
-COPY ./database          ./database
-COPY ./storage           ./storage
-COPY ./uwsgi.ini         ./uwsgi.ini
-COPY ./app               ./app
-COPY ./requirements.txt  ./requirements.txt
+COPY server/base.nginx               ./nginx.conf
+COPY server/upload.nginx              /etc/nginx/conf.d/upload.conf
+COPY server/engine.nginx              /etc/nginx/conf.d/engine.conf
 
-RUN apt-get update && apt-get install -y wget --no-install-recommends
+COPY ./uwsgi.ini                     ./uwsgi.ini
+COPY ./app                           ./app
+COPY ./requirements.txt              ./requirements.txt
 
 RUN python3 -m pip install --no-cache-dir -U pip                      && \
     python3 -m pip install --no-cache-dir setuptools                  && \

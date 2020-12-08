@@ -3,6 +3,7 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+from typing import Dict, Callable, Union
 
 # 3rd party:
 
@@ -54,4 +55,11 @@ NationalAdjectives = {
     "Wales": "Welsh",
     "Scotland": "Scottish",
     "Northern Ireland": "Northern Irish"
+}
+
+IsImproving: Dict[str, Callable[[Union[int, float]], bool]] = {
+    "newCasesByPublishDate": lambda x: x < 0,
+    "newDeaths28DaysByPublishDate": lambda x: x < 0,
+    "newVirusTests": lambda x: 0,
+    "newAdmissions": lambda x: x < 0,
 }

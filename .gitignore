@@ -143,3 +143,4 @@ proxies.json
 .env.staging
 .env.production
 .env.*
+host.json

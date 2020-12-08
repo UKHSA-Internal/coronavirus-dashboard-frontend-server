@@ -12,11 +12,9 @@ Contributors:  Pouria Hadjibagheri
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-import logging
 from typing import Union, List, Iterable
 from os import getenv
 from hashlib import blake2b
-from sys import stdout
 
 # 3rd party:
 from azure.cosmos.cosmos_client import CosmosClient
@@ -24,42 +22,17 @@ from azure.cosmos import ContainerProxy, DatabaseProxy
 
 # Internal:
 from .utils import Credentials, Collection
-from .types import ParametersType, ItemType, ResponseType, PaginatedResponse
+from .dtypes import ParametersType, ItemType, ResponseType, PaginatedResponse
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 DB_URL = getenv("AzureCosmosHost")
-
 DB_CREDENTIALS = {
     "masterKey": getenv("AzureCosmosKey")
 }
-
 DB_NAME = getenv("AzureCosmosDBName")
-
-UK_SOUTH = "UKS"
-UK_WEST = "UKW"
-
-SERVER_LOCATION = getenv("SERVER_LOCATION", "UKS")
-
-if SERVER_LOCATION == UK_SOUTH:
-    PREFERRED_LOCATIONS = [
-        "UK South",
-        "UK West"
-    ]
-else:
-    PREFERRED_LOCATIONS = [
-        "UK West",
-        "UK South"
-    ]
-
-
-logger = logging.getLogger('azure')
-logger.setLevel(logging.WARNING)
-
-# Configure a console output
-handler = logging.StreamHandler(stream=stdout)
-logger.addHandler(handler)
+PREFERRED_LOCATIONS = getenv("AzureCosmosDBLocations", "").split(",")
 
 
 class CosmosDB:

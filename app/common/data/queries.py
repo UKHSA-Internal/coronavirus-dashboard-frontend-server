@@ -6,18 +6,20 @@
 import logging
 from datetime import datetime, timedelta
 from typing import Dict
-from functools import lru_cache
+from json import dumps
+from functools import wraps
 
 # 3rd party:
 from flask import g
+from azure.core.exceptions import AzureError
 
 # Internal:
 from . import query_templates as queries
-from . import constants as const, types
+from . import variables as const, dtypes
 from ..caching import cache_client
 
 try:
-    from __app__.database import CosmosDB, Collection
+    from app.database import CosmosDB, Collection
 except ImportError:
     from database import CosmosDB, Collection
 
@@ -36,8 +38,10 @@ __all__ = [
 ]
 
 
-@lru_cache(maxsize=512)
-def process_dates(date: str) -> types.ProcessedDateType:
+logger = logging.getLogger('homepage_server')
+
+
+def process_dates(date: str) -> dtypes.ProcessedDateType:
     result: dict = {
         'date': datetime.strptime(date, "%Y-%m-%d"),
     }
@@ -48,7 +52,7 @@ def process_dates(date: str) -> types.ProcessedDateType:
 
 
 @cache_client.memoize(60 * 5)
-def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> types.DatabaseOutputType:
+def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> dtypes.DatabaseOutputType:
     """
     Retrieves the last fortnight worth of ``metric`` values
     for ``areaName`` as released on ``timestamp``.
@@ -92,6 +96,23 @@ def get_latest_value(metric: str, timestamp: str, area_name: str):
     return result[0]["value"]
 
 
+# def log_azure_exception(func):
+#     @wraps(func)
+#     def log_exception(*args, **kwargs):
+#         try:
+#             query, params, result = func(*args, **kwargs)
+#             return result
+#         except AzureError as err:
+#             logger.exception(err, extra={
+#                 "custom_dimensions": {
+#                     "query": query,
+#                     "query_params": dumps(params)
+#                 }
+#             })
+#             raise err
+#     return func
+
+
 @cache_client.memoize(60 * 60 * 12)
 def get_postcode_areas_from_db(postcode):
     query = queries.PostcodeLookup
@@ -100,10 +121,18 @@ def get_postcode_areas_from_db(postcode):
         {"name": "@postcode", "value": postcode.replace(" ", "").upper()},
     ]
 
-    return g.lookup_db.query(query, params=params).pop()
+    try:
+        return g.lookup_db.query(query, params=params).pop()
+    except AzureError as err:
+        logger.exception(err, extra={
+            "custom_dimensions": {
+                "query": query,
+                "query_params": dumps(params)
+            }
+        })
+        raise err
 
 
-@lru_cache(maxsize=256)
 def get_postcode_areas(postcode) -> Dict[str, str]:
     return get_postcode_areas_from_db(postcode)
 
@@ -126,17 +155,18 @@ def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Di
 
 @cache_client.memoize(60 * 60 * 12)
 def get_data_by_code(area, timestamp):
+    lower_tier_la = 'ltla'
     query = queries.LookupByAreaCode
 
     params = [
-        {"name": "@areaCode", "value": area['ltla']},
+        {"name": "@areaCode", "value": area[lower_tier_la]},
     ]
 
     result = g.lookup_db.query(query, params=params)
     try:
         location_data = result.pop()
     except IndexError as err:
-        logging.critical(f"Missing lookup value for {params}")
+        logger.critical(f"Missing lookup value for {params}")
         raise err
 
     results = dict()
@@ -206,13 +236,14 @@ def get_msoa_data(postcode, timestamp):
 
 @cache_client.memoize(60 * 60 * 6)
 def get_alert_level(postcode, timestamp):
+    lower_tier_la = 'ltla'
     area = get_postcode_areas(postcode)
-    area_code = area['ltla']
+    area_code = area[lower_tier_la]
 
     query = queries.AlertLevel
     params = [
         {"name": "@releaseTimestamp", "value": timestamp},
-        {"name": "@areaType", "value": "ltla"},
+        {"name": "@areaType", "value": lower_tier_la},
         {"name": "@areaCode", "value": area_code},
     ]
 
@@ -225,6 +256,9 @@ def get_alert_level(postcode, timestamp):
 
 @cache_client.memoize(60 * 60 * 6)
 def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=None):
+    lower_tier_la, nhs, nation = 'ltla', 'nhsRegion', 'nation'
+    england = 'E'
+
     last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
 
     offset = 5 if "admissions" not in metric.lower() else 0
@@ -233,16 +267,19 @@ def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=None):
 
     if ltla:
         area = get_postcode_areas(postcode)
+        nation_abbr = area[nation][0].upper()
 
         if metric != const.DestinationMetrics["healthcare"]["metric"]:
             # Non-healthcare metrics use LTLA.
-            area_type = 'ltla'
-        elif area['nation'][0].upper() not in "SNW":
+            area_type = lower_tier_la
+
+        elif nation_abbr == england:
             # England uses NHS Region.
-            area_type = 'nhsRegion'
+            area_type = nhs
+
         else:
             # DAs don't have NHS Region - switch to nation.
-            area_type = 'nation'
+            area_type = nation
 
         area_code = area[area_type]
         query = queries.SpecimenDateData.substitute(metric=metric)
@@ -289,25 +326,30 @@ def change_by_metric(timestamp, metric, postcode=None):
     last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
     latest_date = last_published.strftime("%Y-%m-%d")
 
-    
+    england = "E"
+    england_and_scotland = "ES"
+    lower_tier_la, nhs, nation = 'ltla', 'nhsRegion', 'nation'
+
     if postcode is not None:
         area = get_postcode_areas(postcode)
 
-        if metric == const.DestinationMetrics["deaths"]["metric"] and area['nation'][0].upper() in "ES":
-            # England and Scotland use LTLA for deaths.
-            area_type = 'ltla'
+        nation_abbr = area['nation'][0].upper()
 
-        elif metric == const.DestinationMetrics["healthcare"]["metric"] and area['nation'][0].upper() in "E":
+        if metric == const.DestinationMetrics["deaths"]["metric"] and nation_abbr in england_and_scotland:
+            # England and Scotland use LTLA for deaths.
+            area_type = lower_tier_la
+
+        elif metric == const.DestinationMetrics["healthcare"]["metric"] and nation_abbr in england:
             # England uses NHS Region.
-            area_type = 'nhsRegion'
+            area_type = nhs
 
         elif metric == const.DestinationMetrics["cases"]["metric"]:
             # cases are all LTLA
-            area_type = 'ltla'
+            area_type = lower_tier_la
 
         else:
             # everything else is national.
-            area_type = 'nation'
+            area_type = nation
 
         area_code = area[area_type]
         query = queries.LatestChangeData.substitute(metric=metric)

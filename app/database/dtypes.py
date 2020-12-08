@@ -11,6 +11,14 @@ from typing import Union, List, Dict, Iterable
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+__all__ = [
+    "ItemType",
+    "ParametersType",
+    "ResponseType",
+    "PaginatedResponse"
+]
+
+
 ItemType = Dict[
     str,
     Union[str, float, int, bool, list, dict]
