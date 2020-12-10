@@ -19,7 +19,9 @@ from pytz import timezone
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.ext.azure.trace_exporter import AzureExporter
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
-from opencensus.trace.samplers import ProbabilitySampler
+from opencensus.trace.samplers import ProbabilitySampler, AlwaysOnSampler
+from opencensus.trace import config_integration
+from opencensus.trace.tracer import Tracer
 
 # Internal:
 from app.postcode.views import postcode_page
@@ -85,6 +87,13 @@ logging_instances = [
     [logging.getLogger('azure'), logging.WARNING],
     [logging.getLogger('homepage_server'), log_level],
 ]
+
+config_integration.trace_integrations(['logging'])
+logging.basicConfig(
+    format='%(asctime)s traceId=%(traceId)s spanId=%(spanId)s %(message)s'
+)
+
+tracer = Tracer(sampler=AlwaysOnSampler())
 
 # ---------------------------------------------------------
 
@@ -166,26 +175,27 @@ def handle_404(err):
 
 @app.errorhandler(Exception)
 def handle_500(err):
-    app.logger.exception(
-        err,
-        extra={
-            'custom_dimensions': {
-                'website_timestamp': g.website_timestamp,
-                'latest_release': g.timestamp,
-                'db_host': getenv("AzureCosmosHost", NOT_AVAILABLE),
-                "API_environment": getenv("API_ENV", NOT_AVAILABLE),
-                "server_location": getenv("SERVER_LOCATION", NOT_AVAILABLE),
-                "is_dev": getenv("IS_DEV", NOT_AVAILABLE),
-                "redis": getenv("AZURE_REDIS_HOST", NOT_AVAILABLE),
-                "AzureCosmosDBName": getenv("AzureCosmosDBName", NOT_AVAILABLE),
-                "AzureCosmosCollection": getenv("AzureCosmosCollection", NOT_AVAILABLE),
-                "AzureCosmosDestinationsCollection": getenv(
-                    "AzureCosmosDestinationsCollection",
-                    NOT_AVAILABLE
-                ),
-            }
-        }
-    )
+    additional_info = {
+        'website_timestamp': g.website_timestamp,
+        'latest_release': g.timestamp,
+        'db_host': getenv("AzureCosmosHost", NOT_AVAILABLE),
+        "API_environment": getenv("API_ENV", NOT_AVAILABLE),
+        "server_location": getenv("SERVER_LOCATION", NOT_AVAILABLE),
+        "is_dev": getenv("IS_DEV", NOT_AVAILABLE),
+        "redis": getenv("AZURE_REDIS_HOST", NOT_AVAILABLE),
+        "AzureCosmosDBName": getenv("AzureCosmosDBName", NOT_AVAILABLE),
+        "AzureCosmosCollection": getenv("AzureCosmosCollection", NOT_AVAILABLE),
+        "AzureCosmosDestinationsCollection": getenv(
+            "AzureCosmosDestinationsCollection",
+            NOT_AVAILABLE
+        ),
+    }
+
+    with tracer.span():
+        app.logger.exception(
+            err,
+            extra={'custom_dimensions': additional_info}
+        )
 
     return render_template("errors/500.html"), 500
 
