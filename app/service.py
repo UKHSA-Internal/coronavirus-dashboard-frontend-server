@@ -258,7 +258,7 @@ def health_check(**kwargs):
     result = g.lookup_db.query(HealthCheck, params=list()).pop()
 
     if len(result) > 0:
-        return make_response("", 200)
+        return make_response("ALIVE", 200)
 
     raise RuntimeError("Health check failed.")
 
