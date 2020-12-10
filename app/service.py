@@ -47,7 +47,8 @@ LATEST_PUBLISHED_TIMESTAMP = {
     "path": "info/latest_published"
 }
 NOT_AVAILABLE = "N/A"
-INSTRUMENTATION_KEY = getenv("APPINSIGHTS_INSTRUMENTATIONKEY", "")
+INSTRUMENTATION_CODE = getenv("APPINSIGHTS_INSTRUMENTATIONKEY", "")
+AI_INSTRUMENTATION_KEY = f"InstrumentationKey={INSTRUMENTATION_CODE}"
 SERVER_LOCATION_KEY = "SERVER_LOCATION"
 SERVER_LOCATION = getenv(SERVER_LOCATION_KEY, NOT_AVAILABLE)
 PYTHON_TIMESTAMP_LEN = 24
@@ -69,7 +70,7 @@ app = Flask(
 
 middleware = FlaskMiddleware(
     app,
-    exporter=AzureExporter(),
+    exporter=AzureExporter(connection_string=AI_INSTRUMENTATION_KEY),
     sampler=ProbabilitySampler(rate=1.0),
 )
 
@@ -195,16 +196,14 @@ def inject_globals():
         DEBUG=app.debug,
         national_adjectives=NationalAdjectives,
         timestamp=g.website_timestamp,
-        app_insight_token=INSTRUMENTATION_KEY,
+        app_insight_token=INSTRUMENTATION_CODE,
         og_images=get_og_image_names(g.timestamp)
     )
 
 
 @app.before_request
 def inject_timestamps():
-    handler = AzureLogHandler(
-        connection_string=f"InstrumentationKey={INSTRUMENTATION_KEY}"
-    )
+    handler = AzureLogHandler(connection_string=AI_INSTRUMENTATION_KEY)
 
     for log, level in logging_instances:
         log.addHandler(handler)
