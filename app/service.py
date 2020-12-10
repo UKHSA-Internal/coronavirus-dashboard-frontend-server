@@ -15,7 +15,11 @@ from functools import lru_cache
 from flask import Flask, Response, g, render_template, make_response, request
 from flask_minify import minify
 from pytz import timezone
+
 from opencensus.ext.azure.log_exporter import AzureLogHandler
+from opencensus.ext.azure.trace_exporter import AzureExporter
+from opencensus.ext.flask.flask_middleware import FlaskMiddleware
+from opencensus.trace.samplers import ProbabilitySampler
 
 # Internal:
 from app.postcode.views import postcode_page
@@ -61,6 +65,12 @@ app = Flask(
     static_folder="static",
     static_url_path="/assets",
     template_folder='templates'
+)
+
+middleware = FlaskMiddleware(
+    app,
+    exporter=AzureExporter(),
+    sampler=ProbabilitySampler(rate=1.0),
 )
 
 app.config.from_object('app.config.Config')
