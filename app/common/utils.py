@@ -13,6 +13,7 @@ Contributors:  Pouria Hadjibagheri
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
 import logging
+from os import getenv
 from datetime import datetime
 from operator import itemgetter
 from typing import Dict
@@ -28,6 +29,8 @@ from .data.variables import DestinationMetrics
 from ..storage import StorageClient
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+CLOUD_ROLE_NAME = getenv("WEBSITE_SITE_NAME", "landing-page")
 
 get_value = itemgetter("value")
 get_area_type = itemgetter("areaType")
@@ -139,3 +142,8 @@ def get_notification_content(latest_timestamp):
             return response
 
     return None
+
+
+def add_cloud_role_name(envelope):
+    envelope.tags['ai.cloud.role'] = CLOUD_ROLE_NAME
+    return True

@@ -19,16 +19,16 @@ from pytz import timezone
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.ext.azure.trace_exporter import AzureExporter
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
-from opencensus.trace.samplers import ProbabilitySampler, AlwaysOnSampler
+from opencensus.trace.samplers import AlwaysOnSampler
 from opencensus.trace import config_integration
-from opencensus.trace.tracer import Tracer
+from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
 
 # Internal:
 from app.postcode.views import postcode_page
 from app.landing.views import home_page
 from app.common.data.variables import NationalAdjectives, IsImproving
 from app.common.caching import cache_client
-from app.common.utils import get_og_image_names
+from app.common.utils import get_og_image_names, add_cloud_role_name
 from app.database import CosmosDB, Collection
 from app.storage import StorageClient
 from app.common.data.query_templates import HealthCheck
@@ -70,10 +70,17 @@ app = Flask(
     template_folder='templates'
 )
 
+config_integration.trace_integrations(['requests'])
+config_integration.trace_integrations(['logging'])
+
+exporter = AzureExporter(connection_string=AI_INSTRUMENTATION_KEY)
+exporter.add_telemetry_processor(add_cloud_role_name)
+
 middleware = FlaskMiddleware(
-    app,
-    exporter=AzureExporter(connection_string=AI_INSTRUMENTATION_KEY),
-    sampler=ProbabilitySampler(rate=1.0),
+    app=app,
+    exporter=exporter,
+    sampler=AlwaysOnSampler(),
+    propagator=TraceContextPropagator()
 )
 
 app.config.from_object('app.config.Config')
@@ -87,13 +94,6 @@ logging_instances = [
     [logging.getLogger('azure'), logging.WARNING],
     [logging.getLogger('homepage_server'), log_level],
 ]
-
-config_integration.trace_integrations(['logging'])
-logging.basicConfig(
-    format='%(asctime)s traceId=%(traceId)s spanId=%(spanId)s %(message)s'
-)
-
-tracer = Tracer(sampler=AlwaysOnSampler())
 
 # ---------------------------------------------------------
 
@@ -191,11 +191,7 @@ def handle_500(err):
         ),
     }
 
-    with tracer.span():
-        app.logger.exception(
-            err,
-            extra={'custom_dimensions': additional_info}
-        )
+    app.logger.exception(err, extra={'custom_dimensions': additional_info})
 
     return render_template("errors/500.html"), 500
 
@@ -212,8 +208,9 @@ def inject_globals():
 
 
 @app.before_request
-def inject_timestamps():
+def prepare_context():
     handler = AzureLogHandler(connection_string=AI_INSTRUMENTATION_KEY)
+    handler.add_telemetry_processor(add_cloud_role_name)
 
     for log, level in logging_instances:
         log.addHandler(handler)
