@@ -279,5 +279,10 @@ def health_check(**kwargs):
     raise RuntimeError("Health check failed.")
 
 
+@app.route("/", methods=("OPTIONS",))
+def options(**kwargs):
+    return app.make_default_options_response()
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=False, port=5050)

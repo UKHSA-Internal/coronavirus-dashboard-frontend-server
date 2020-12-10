@@ -28,7 +28,7 @@ server {
 
         try_files              $uri @app;
 
-        limit_except GET HEAD {
+        limit_except GET HEAD OPTIONS {
             deny    all;
         }
 
@@ -62,7 +62,7 @@ server {
 
         proxy_read_timeout     86400;
 
-        limit_except GET HEAD {
+        limit_except GET HEAD OPTIONS {
             deny    all;
         }
 
