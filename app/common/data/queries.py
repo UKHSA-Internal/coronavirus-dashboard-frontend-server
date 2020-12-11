@@ -3,14 +3,13 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-import logging
 from datetime import datetime, timedelta
 from typing import Dict
 from json import dumps
 from functools import wraps
 
 # 3rd party:
-from flask import g
+from flask import g, current_app as app
 from azure.core.exceptions import AzureError
 
 # Internal:
@@ -31,9 +30,6 @@ __all__ = [
     'latest_rate_by_metric',
     'change_by_metric'
 ]
-
-
-logger = logging.getLogger('homepage_server')
 
 
 def process_dates(date: str) -> dtypes.ProcessedDateType:
@@ -119,7 +115,7 @@ def get_postcode_areas_from_db(postcode):
     try:
         return g.lookup_db.query(query, params=params).pop()
     except AzureError as err:
-        logger.exception(err, extra={
+        app.logger.exception(err, extra={
             "custom_dimensions": {
                 "query": query,
                 "query_params": dumps(params)
@@ -161,7 +157,7 @@ def get_data_by_code(area, timestamp):
     try:
         location_data = result.pop()
     except IndexError as err:
-        logger.critical(f"Missing lookup value for {params}")
+        app.logger.critical(f"Missing lookup value for {params}")
         raise err
 
     results = dict()

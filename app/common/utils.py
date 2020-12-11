@@ -12,7 +12,6 @@ Contributors:  Pouria Hadjibagheri
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-import logging
 from os import getenv
 from datetime import datetime
 from operator import itemgetter
@@ -20,6 +19,7 @@ from typing import Dict
 from json import loads
 
 # 3rd party:
+from flask import current_app as app
 
 # Internal:
 from .caching import cache_client
@@ -34,8 +34,6 @@ CLOUD_ROLE_NAME = getenv("WEBSITE_SITE_NAME", "landing-page")
 
 get_value = itemgetter("value")
 get_area_type = itemgetter("areaType")
-
-logger = logging.getLogger('homepage_server')
 
 
 @cache_client.memoize(60 * 60 * 12)

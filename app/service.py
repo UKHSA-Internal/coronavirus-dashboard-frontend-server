@@ -169,7 +169,7 @@ def isnone(value):
 
 @app.errorhandler(404)
 def handle_404(err):
-    app.logger.info(f"HTTP 404 response on <{request.url}>")
+    app.logger.info(f"404 - Not found", extra={'custom_dimensions': {"url": request.url}})
     return render_template("errors/404.html"), 404
 
 
@@ -215,6 +215,8 @@ def prepare_context():
     for log, level in logging_instances:
         log.addHandler(handler)
         log.setLevel(level)
+
+    app.logger.info(request.url)
 
     g.data_db = CosmosDB(Collection.DATA)
     g.lookup_db = CosmosDB(Collection.LOOKUP)

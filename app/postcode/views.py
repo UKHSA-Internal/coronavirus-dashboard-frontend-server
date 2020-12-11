@@ -7,7 +7,7 @@ import logging
 from operator import itemgetter
 
 # 3rd party:
-from flask import render_template, request, g, Blueprint
+from flask import render_template, request, g, Blueprint, current_app as app
 
 # Internal: 
 from ..common.data.queries import (
@@ -62,9 +62,15 @@ def postcode_search() -> render_template:
     data = get_main_data(g.timestamp)
 
     if postcode is None:
+        app.logger.info("Invalid postcode", extra={
+            'custom_dimensions': {
+                "query_string": request.query_string,
+                "validated": False
+            }
+        })
         return render_template(
             "main.html",
-            changelog = get_notification_content(g.website_timestamp),
+            changelog=get_notification_content(g.website_timestamp),
             invalid_postcode=True,
             r_values=get_r_values(g.timestamp),
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
@@ -72,6 +78,13 @@ def postcode_search() -> render_template:
             admissions_rate=latest_rate_by_metric(g.timestamp, "newAdmissions"),
             **data
         )
+
+    app.logger.info("Postcode search", extra={
+        'custom_dimensions': {
+            "postcode": postcode,
+            "validated": True
+        }
+    })
 
     try:
         response = {
@@ -82,10 +95,10 @@ def postcode_search() -> render_template:
             for category, values in get_data_by_postcode(postcode, g.timestamp).items()
         }
     except IndexError as err:
-        logging.exception(err)
+        app.logger.exception(err)
         return render_template(
             "main.html",
-            changelog = get_notification_content(g.website_timestamp),
+            changelog=get_notification_content(g.website_timestamp),
             invalid_postcode=True,
             r_values=get_r_values(g.timestamp),
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
@@ -102,7 +115,7 @@ def postcode_search() -> render_template:
 
     return render_template(
         "postcode_results.html",
-        changelog = get_notification_content(g.website_timestamp),
+        changelog=get_notification_content(g.website_timestamp),
         postcode_data=response,
         postcode=postcode.upper(),
         area_info=postcode_data,
