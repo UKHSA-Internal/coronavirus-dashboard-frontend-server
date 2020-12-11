@@ -17,7 +17,7 @@ from ..common.data.queries import (
 )
 
 from .utils import get_validated_postcode, get_card_data
-from ..common.utils import get_main_data, get_notification_content
+from ..common.utils import get_main_data
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -70,9 +70,7 @@ def postcode_search() -> render_template:
         })
         return render_template(
             "main.html",
-            changelog=get_notification_content(g.website_timestamp),
             invalid_postcode=True,
-            r_values=get_r_values(g.timestamp),
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
             deaths_rate=latest_rate_by_metric(g.timestamp, "newDeaths28DaysByDeathDate"),
             admissions_rate=latest_rate_by_metric(g.timestamp, "newAdmissions"),
@@ -98,7 +96,6 @@ def postcode_search() -> render_template:
         app.logger.exception(err)
         return render_template(
             "main.html",
-            changelog=get_notification_content(g.website_timestamp),
             invalid_postcode=True,
             r_values=get_r_values(g.timestamp),
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
@@ -115,7 +112,6 @@ def postcode_search() -> render_template:
 
     return render_template(
         "postcode_results.html",
-        changelog=get_notification_content(g.website_timestamp),
         postcode_data=response,
         postcode=postcode.upper(),
         area_info=postcode_data,

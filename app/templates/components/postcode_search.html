@@ -7,7 +7,7 @@
 				</label>
 				{% if invalid_postcode %}
 					<span id="passport-issued-error" class="govuk-error-message">
-			      <span class="govuk-visually-hidden">Error:</span> Invalid postcode &ndash; please
+			      <span class="govuk-visually-hidden">Error:</span> {{ message }} &ndash; please
 					enter a full and valid UK postcode.
 			    </span>
 				{% endif %}

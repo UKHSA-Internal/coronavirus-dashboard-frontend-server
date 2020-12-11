@@ -6,7 +6,6 @@
 from datetime import datetime, timedelta
 from typing import Dict
 from json import dumps
-from functools import wraps
 
 # 3rd party:
 from flask import g, current_app as app
@@ -16,6 +15,7 @@ from azure.core.exceptions import AzureError
 from . import query_templates as queries
 from . import variables as const, dtypes
 from ..caching import cache_client
+from ..exceptions import InvalidPostcode
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -114,6 +114,8 @@ def get_postcode_areas_from_db(postcode):
 
     try:
         return g.lookup_db.query(query, params=params).pop()
+    except IndexError:
+        raise InvalidPostcode(postcode)
     except AzureError as err:
         app.logger.exception(err, extra={
             "custom_dimensions": {

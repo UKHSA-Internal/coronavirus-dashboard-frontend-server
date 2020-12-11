@@ -14,12 +14,10 @@ Contributors:  Pouria Hadjibagheri
 # Python:
 
 # 3rd party:
-from flask import render_template, Blueprint, g
+from flask import render_template, Blueprint
 
 # Internal: 
 from ..common.caching import cache_client
-from ..common.utils import get_main_data, get_notification_content
-from ..common.data.queries import get_r_values, latest_rate_by_metric
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -34,13 +32,4 @@ home_page = Blueprint('home_page', __name__)
 @home_page.route('/')
 @cache_client.cached(timeout=120)
 def index() -> render_template:
-    data = get_main_data(g.timestamp)
-    return render_template(
-        "main.html",
-        changelog=get_notification_content(g.website_timestamp),
-        r_values=get_r_values(g.timestamp),
-        cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
-        deaths_rate=latest_rate_by_metric(g.timestamp, "newDeaths28DaysByDeathDate"),
-        admissions_rate=latest_rate_by_metric(g.timestamp, "newAdmissions"),
-        **data
-    )
+    return render_template("main.html")

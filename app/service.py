@@ -19,19 +19,21 @@ from pytz import timezone
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.ext.azure.trace_exporter import AzureExporter
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
-from opencensus.trace.samplers import AlwaysOnSampler
+from opencensus.trace.samplers import ProbabilitySampler
 from opencensus.trace import config_integration
 from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
 
 # Internal:
 from app.postcode.views import postcode_page
 from app.landing.views import home_page
+from app.landing.utils import get_landing_data
 from app.common.data.variables import NationalAdjectives, IsImproving
 from app.common.caching import cache_client
-from app.common.utils import get_og_image_names, add_cloud_role_name
+from app.common.utils import get_og_image_names, add_cloud_role_name, get_notification_content
 from app.database import CosmosDB, Collection
 from app.storage import StorageClient
 from app.common.data.query_templates import HealthCheck
+from app.common.exceptions import InvalidPostcode
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -79,7 +81,7 @@ exporter.add_telemetry_processor(add_cloud_role_name)
 middleware = FlaskMiddleware(
     app=app,
     exporter=exporter,
-    sampler=AlwaysOnSampler(),
+    sampler=ProbabilitySampler(rate=1.0),
     propagator=TraceContextPropagator()
 )
 
@@ -90,9 +92,7 @@ log_level = getattr(logging, LOG_LEVEL)
 
 logging_instances = [
     [app.logger, log_level],
-    [logging.getLogger('werkzeug'), log_level],
-    [logging.getLogger('azure'), logging.WARNING],
-    [logging.getLogger('homepage_server'), log_level],
+    [logging.getLogger('azure'), logging.WARNING]
 ]
 
 # ---------------------------------------------------------
@@ -173,6 +173,15 @@ def handle_404(err):
     return render_template("errors/404.html"), 404
 
 
+@app.errorhandler(InvalidPostcode)
+def handle_invalid_postcode(err):
+    return render_template(
+        "main.html",
+        invalid_postcode=True,
+        message=err.message
+    ), err.status_code
+
+
 @app.errorhandler(Exception)
 def handle_500(err):
     additional_info = {
@@ -200,23 +209,37 @@ def handle_500(err):
 def inject_globals():
     return dict(
         DEBUG=app.debug,
+        changelog=get_notification_content(g.website_timestamp),
         national_adjectives=NationalAdjectives,
         timestamp=g.website_timestamp,
         app_insight_token=INSTRUMENTATION_CODE,
-        og_images=get_og_image_names(g.timestamp)
+        og_images=get_og_image_names(g.timestamp),
+        **get_landing_data(g.timestamp)
     )
 
 
 @app.before_request
 def prepare_context():
-    handler = AzureLogHandler(connection_string=AI_INSTRUMENTATION_KEY)
+    handler = AzureLogHandler(
+        connection_string=AI_INSTRUMENTATION_KEY,
+        exporter=exporter
+    )
     handler.add_telemetry_processor(add_cloud_role_name)
 
     for log, level in logging_instances:
         log.addHandler(handler)
         log.setLevel(level)
 
-    app.logger.info(request.url)
+    custom_dims = dict(
+        custom_dimensions=dict(
+            is_healthcheck='healthcheck' in request.path.lower(),
+            url=str(request.url),
+            path=str(request.path),
+            query_string=str(request.query_string)
+        )
+    )
+
+    app.logger.info(request.url, extra=custom_dims)
 
     g.data_db = CosmosDB(Collection.DATA)
     g.lookup_db = CosmosDB(Collection.LOOKUP)
@@ -229,14 +252,11 @@ def prepare_context():
         g.timestamp = client.download().readall().decode()
 
     g.log_handler = handler
-
     return None
 
 
 @app.teardown_appcontext
 def teardown_db(exception):
-    g.log_handler.flush()
-
     db_instances = [
         g.pop('data_db', None),
         g.pop('lookup_db', None),
@@ -246,6 +266,8 @@ def teardown_db(exception):
     for db in db_instances:
         if db is not None:
             db.close()
+
+    g.log_handler.flush()
 
 
 @app.after_request
@@ -278,7 +300,7 @@ def health_check(**kwargs):
     if len(result) > 0:
         return make_response("ALIVE", 200)
 
-    raise RuntimeError("Health check failed.")
+    raise RuntimeError("Healthcheck failed.")
 
 
 @app.route("/", methods=("OPTIONS",))
