@@ -33,7 +33,7 @@ from app.common.utils import get_og_image_names, add_cloud_role_name, get_notifi
 from app.database import CosmosDB, Collection
 from app.storage import StorageClient
 from app.common.data.query_templates import HealthCheck
-from app.common.exceptions import InvalidPostcode
+from app.common.exceptions import InvalidPostcode, HandledException
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -169,21 +169,18 @@ def isnone(value):
 
 @app.errorhandler(404)
 def handle_404(err):
+    if isinstance(err, HandledException):
+        return err
+
     app.logger.info(f"404 - Not found", extra={'custom_dimensions': {"url": request.url}})
     return render_template("errors/404.html"), 404
 
 
-@app.errorhandler(InvalidPostcode)
-def handle_invalid_postcode(err):
-    return render_template(
-        "main.html",
-        invalid_postcode=True,
-        message=err.message
-    ), err.status_code
-
-
 @app.errorhandler(Exception)
 def handle_500(err):
+    if isinstance(err, HandledException):
+        return err
+
     additional_info = {
         'website_timestamp': g.website_timestamp,
         'latest_release': g.timestamp,
