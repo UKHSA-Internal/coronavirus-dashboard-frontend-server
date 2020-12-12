@@ -113,9 +113,13 @@ def get_postcode_areas_from_db(postcode):
     ]
 
     try:
-        return g.lookup_db.query(query, params=params).pop()
-    except IndexError:
-        raise InvalidPostcode(postcode)
+        result = g.lookup_db.query(query, params=params)
+
+        if not result:
+            raise InvalidPostcode(postcode)
+
+        return result.pop()
+
     except AzureError as err:
         app.logger.exception(err, extra={
             "custom_dimensions": {
