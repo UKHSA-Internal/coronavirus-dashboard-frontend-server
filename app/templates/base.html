@@ -75,5 +75,6 @@
 	{% include "components/footer.html" %}
 {%- endcache -%}
 <script type="application/javascript">document.querySelector("#mobile-menu-btn").onclick = function mobileMenu(){var ms = document.getElementById("mobile-navigation").style;ms.display = ms.display === "none" ? "inline-block" : "none";}</script>
+<script type="application/javascript">function trimCode(){console.log("boo");this['postcode'].value = this['postcode'].value.trim();}document.querySelector("form[name=postcode-search]").addEventListener("submit", trimCode);</script>
 </body>
 </html>
