@@ -229,7 +229,7 @@ def prep_service():
         log.addHandler(handler)
         log.setLevel(level)
 
-    g.log_handler = handler
+    # g.log_handler = handler
 
 
 @app.before_request
@@ -270,7 +270,7 @@ def teardown_db(exception):
         if db is not None:
             db.close()
 
-    g.log_handler.flush()
+    # g.log_handler.flush()
 
 
 @app.after_request
