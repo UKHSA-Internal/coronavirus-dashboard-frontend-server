@@ -19,7 +19,7 @@ from pytz import timezone
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.ext.azure.trace_exporter import AzureExporter
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
-from opencensus.trace.samplers import ProbabilitySampler
+from opencensus.trace.samplers import AlwaysOnSampler
 from opencensus.trace import config_integration
 from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
 
@@ -33,7 +33,7 @@ from app.common.utils import get_og_image_names, add_cloud_role_name, get_notifi
 from app.database import CosmosDB, Collection
 from app.storage import StorageClient
 from app.common.data.query_templates import HealthCheck
-from app.common.exceptions import InvalidPostcode, HandledException
+from app.common.exceptions import HandledException
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -42,6 +42,7 @@ __all__ = [
 ]
 
 
+HEALTHCHECK_PATH = "/healthcheck"
 WEBSITE_TIMESTAMP = {
     "container": "publicdata",
     "path":  "assets/dispatch/website_timestamp"
@@ -81,7 +82,7 @@ exporter.add_telemetry_processor(add_cloud_role_name)
 middleware = FlaskMiddleware(
     app=app,
     exporter=exporter,
-    sampler=ProbabilitySampler(rate=1.0),
+    sampler=AlwaysOnSampler(),
     propagator=TraceContextPropagator()
 )
 
@@ -92,6 +93,7 @@ log_level = getattr(logging, LOG_LEVEL)
 
 logging_instances = [
     [app.logger, log_level],
+    [logging.getLogger('werkzeug'), log_level],
     [logging.getLogger('azure'), logging.WARNING]
 ]
 
@@ -215,8 +217,8 @@ def inject_globals():
     )
 
 
-@app.before_request
-def prepare_context():
+@app.before_first_request
+def prep_service():
     handler = AzureLogHandler(
         connection_string=AI_INSTRUMENTATION_KEY,
         exporter=exporter
@@ -227,9 +229,14 @@ def prepare_context():
         log.addHandler(handler)
         log.setLevel(level)
 
+    g.log_handler = handler
+
+
+@app.before_request
+def prepare_context():
     custom_dims = dict(
         custom_dimensions=dict(
-            is_healthcheck='healthcheck' in request.path.lower(),
+            is_healthcheck=request.path == HEALTHCHECK_PATH,
             url=str(request.url),
             path=str(request.path),
             query_string=str(request.query_string)
@@ -248,7 +255,6 @@ def prepare_context():
     with StorageClient(**LATEST_PUBLISHED_TIMESTAMP) as client:
         g.timestamp = client.download().readall().decode()
 
-    g.log_handler = handler
     return None
 
 
@@ -290,7 +296,7 @@ def prepare_response(resp: Response):
     return resp
 
 
-@app.route("/healthcheck", methods=("HEAD", "GET"))
+@app.route(HEALTHCHECK_PATH, methods=("HEAD", "GET"))
 def health_check(**kwargs):
     result = g.lookup_db.query(HealthCheck, params=list()).pop()
 
