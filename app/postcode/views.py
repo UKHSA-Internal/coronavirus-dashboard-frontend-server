@@ -37,6 +37,7 @@ def get_by_smallest_areatype(items, areatype_getter):
         "ltla",
         "utla",
         "region",
+        "nhsTrust",
         "nhsRegion",
         "nation",
         "overview"
