@@ -253,7 +253,8 @@ def get_alert_level(postcode, timestamp):
 
 @cache_client.memoize(60 * 60 * 6)
 def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=None):
-    lower_tier_la, nhs, nation = 'ltla', 'nhsRegion', 'nation'
+    lower_tier_la, nation = 'ltla', 'nation'
+    nhs_region, nhs_trust = 'nhsRegion', 'nhsTrust'
     england = 'E'
 
     last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
@@ -272,10 +273,10 @@ def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=None):
 
         elif nation_abbr == england:
             # England uses NHS Region.
-            area_type = nhs
+            area_type = nhs_trust
 
         else:
-            # DAs don't have NHS Region - switch to nation.
+            # DAs don't have NHS Region / trust - switch to nation.
             area_type = nation
 
         area_code = area[area_type]
@@ -325,7 +326,8 @@ def change_by_metric(timestamp, metric, postcode=None):
 
     england = "E"
     england_and_scotland = "ES"
-    lower_tier_la, nhs, nation = 'ltla', 'nhsRegion', 'nation'
+    lower_tier_la, nation = 'ltla', 'nation'
+    nhs_region, nhs_trust = 'nhsRegion', 'nhsTrust'
 
     if postcode is not None:
         area = get_postcode_areas(postcode)
@@ -337,8 +339,8 @@ def change_by_metric(timestamp, metric, postcode=None):
             area_type = lower_tier_la
 
         elif metric == const.DestinationMetrics["healthcare"]["metric"] and nation_abbr in england:
-            # England uses NHS Region.
-            area_type = nhs
+            # England uses NHS Trust.
+            area_type = nhs_trust
 
         elif metric == const.DestinationMetrics["cases"]["metric"]:
             # cases are all LTLA
