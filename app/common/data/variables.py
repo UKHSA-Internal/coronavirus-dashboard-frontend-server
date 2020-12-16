@@ -36,6 +36,7 @@ DestinationMetrics = {
 
 AreaTypeNames = {
     "nhsRegion": "Healthcare Region",
+    "nhsTrust": "Healthcare Trust",
     "ltla": "Local Authority (Lower tier)",
     "utla": "Local Authority (Upper tier)",
     "region": "Region",
@@ -44,6 +45,7 @@ AreaTypeNames = {
 
 AreaTypeShortNames = {
     "nhsRegion": "Healthcare",
+    "nhsTrust" : "Healthcare",
     "ltla": "Local Authority",
     "utla": "Local Authority",
     "region": "Region",

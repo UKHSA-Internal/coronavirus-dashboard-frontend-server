@@ -267,11 +267,14 @@ def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=None):
         area = get_postcode_areas(postcode)
         nation_abbr = area[nation][0].upper()
 
-        if metric != const.DestinationMetrics["healthcare"]["metric"]:
+        if metric == const.DestinationMetrics["testing"]["metric"]:
+            area_type = nation
+    
+        elif metric != const.DestinationMetrics["healthcare"]["metric"]:
             # Non-healthcare metrics use LTLA.
             area_type = lower_tier_la
 
-        elif nation_abbr == england:
+        elif metric == const.DestinationMetrics["healthcare"]["metric"] and nation_abbr == england:
             # England uses NHS Region.
             area_type = nhs_trust
 
@@ -345,7 +348,7 @@ def change_by_metric(timestamp, metric, postcode=None):
         elif metric == const.DestinationMetrics["cases"]["metric"]:
             # cases are all LTLA
             area_type = lower_tier_la
-
+        
         else:
             # everything else is national.
             area_type = nation
