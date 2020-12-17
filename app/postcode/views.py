@@ -89,7 +89,7 @@ def postcode_search() -> render_template:
         response = {
             category: {
                 **values,
-                **get_card_data(g.timestamp, values["metric"], values['data'], False, postcode)
+                **get_card_data(g.timestamp, category, values['data'], False, postcode)
             }
             for category, values in get_data_by_postcode(postcode, g.timestamp).items()
         }
