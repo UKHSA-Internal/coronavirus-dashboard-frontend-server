@@ -119,6 +119,7 @@ WHERE   c.type     = 'general'
     AND (
       (c.areaType = 'ltla' AND c.parent.areaCode != @areaCode)
       OR c.areaType = 'utla'
+      OR c.areaTyoe = 'nhsTrust'
     )\
 """
 
