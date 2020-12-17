@@ -3,7 +3,6 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-import logging
 from operator import itemgetter
 from urllib.parse import quote
 
@@ -22,9 +21,6 @@ __all__ = [
     'get_colour',
     'svg_to_url'
 ]
-
-
-logger = logging.getLogger("homepage_server")
 
 
 TIMESERIES_LAYOUT = go.Layout(
