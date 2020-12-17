@@ -190,8 +190,8 @@ def get_data_by_code(area, timestamp, area_type=AreaType.lower_tier_la):
 
         area_type = destination['areaType']
 
-        if category == "testing":
-            area_type = "nation"
+        if category == "healthcare" and area["nation"][0].upper() == "E":
+            area_type = "nhsTrust"
 
         params = [
             {"name": "@seriesDate", "value": timestamp.split('T')[0]},
@@ -348,17 +348,18 @@ def get_destinations(area_code):
 @cache_client.memoize(60 * 60 * 6)
 def get_local_card_data(timestamp, category, postcode, change=False) -> dtypes.DatabaseOutputType:
     metric = const.DestinationMetrics[category]['metric']
-    latest_date = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
-
-    offset = const.DestinationMetrics[category].get("rate_offset", None)
-
-    latest_date -= timedelta(days=offset)
-    latest_date = latest_date.strftime("%Y-%m-%d")
+    latest_date = timestamp.split('T')[0]
 
     area = get_postcode_areas(postcode)
     area_type = const.DestinationMetrics[category]["postcode_destination"]
-    app.logger.warning(f"POSTCODE AREA: {area}")
+
+    if category == "healthcare" and area["nation"][0].upper() != "E":
+        area_type = "nation"
+    elif category == "deaths" and area["nation"][0].upper() == "W":
+        area_type = "nation"
+
     area_code = area[area_type]
+
     if change:
         query = queries.LatestChangeData.substitute(metric=metric)
     else:
@@ -373,10 +374,8 @@ def get_local_card_data(timestamp, category, postcode, change=False) -> dtypes.D
 
     try:
         result = g.data_db.query(query, params=params)
-        app.logger.warning(f"POSTCODE RESULTS: {result}")
         return result
-
-    except (KeyError, IndexError) as err:
+    except (KeyError, IndexError):
         return list()
 
 
@@ -411,7 +410,7 @@ def change_by_metric(timestamp, category, postcode=None):
             "trend": result[0]["changeDirection"],
             "total": result[0]["rollingSum"]
         }
-        app.logger.warning(f"{category} --> {response}")
+
         return response
 
     except (KeyError, IndexError):
