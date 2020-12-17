@@ -174,6 +174,10 @@ def get_data_by_code(area, timestamp):
         query = queries.DataByAreaCode.substitute(metric=metric_data["metric"])
 
         area_type = destination['areaType']
+
+        if category == "testing":
+            area_type = "nation"
+
         params = [
             {"name": "@seriesDate", "value": timestamp.split('T')[0]},
             {"name": "@releaseTimestamp", "value": timestamp},
