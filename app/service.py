@@ -165,6 +165,14 @@ def format_number(value: Union[int, float]) -> str:
 
 
 @app.template_filter()
+def trim_area_name(area_name):
+    pattern = re.compile(r"(nhs\b.*)", re.IGNORECASE)
+    name = pattern.sub("", area_name)
+
+    return name.strip()
+
+
+@app.template_filter()
 def isnone(value):
     return value is None
 
@@ -312,4 +320,4 @@ def options(**kwargs):
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=False, port=5050)
+    app.run(host='0.0.0.0', debug=False, port=5000)
