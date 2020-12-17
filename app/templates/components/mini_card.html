@@ -20,7 +20,7 @@
 			<span class="govuk-caption-m govuk-!-font-weight-regular">{{ card.caption }}</span>
 			{%- if is_postcode -%}
 				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
-					{{ card.heading }} in {{ card.areaName }}
+					{{ card.heading }} in {{ card.areaName | trim_area_name }}
 				</h4>
 			{%- else -%}
 				<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
@@ -112,8 +112,9 @@
 			{{ details(cases_rate, "by date of specimen as of") }}
 		{%- elif card.caption.lower() == "deaths" and not is_postcode -%}
 			{{ details(deaths_rate, "by date of death as of") }}
-		{%- elif card.caption.lower() == "healthcare" -%}
-			{{ details(admissions_rate, "as of") }}
+{# Currently not available #}
+{#		{%- elif card.caption.lower() == "healthcare" -%}#}
+{#			{{ details(admissions_rate, "as of") }}#}
 		{% else %}
 			<hr class="govuk-section-break bottom-aligned"/>
 		{%- endif -%}
@@ -130,7 +131,7 @@
 				<a href="/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ card.areaType.abbr | lower }}&areaName={{ card.areaName }}{% endif %}"
 				   class="govuk-link govuk-link--no-visited-state"
 				   style="text-decoration: none"
-				   rel="next"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ card.areaName }}{% endif %}</b></a>
+				   rel="next"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ card.areaName | trim_area_name }}{% endif %}</b></a>
 				</p>
 				{% if is_postcode %}
 					<p class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 body-small govuk-!-margin-top-3">
@@ -139,7 +140,7 @@
 						   lang="en-GB" style="text-decoration: none"
 						   type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 						   download="{{ card.areaName }}-{{ card.areaType.short | lower }}_{{ timestamp | as_datestamp }}">Easy-read
-							report for {{ card.areaName }}</a>
+							report for {{ card.areaName | trim_area_name }}</a>
 					</p>
 				{% endif %}
 		</div>
