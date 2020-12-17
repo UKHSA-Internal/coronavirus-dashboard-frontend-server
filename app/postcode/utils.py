@@ -48,7 +48,7 @@ def get_validated_postcode(params: dict) -> Union[str, None]:
 def get_card_data(timestamp: str, category: str, metric_data, graph=True, postcode=None):
     metric_name = DestinationMetrics[category]["metric"]
     change = change_by_metric(timestamp, category, postcode)
-    app.logger.warning(f"CHANGE =======> {timestamp} | {category} | {postcode} | {change}")
+
     colour = get_colour(change, metric_name)
 
     response = {
