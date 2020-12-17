@@ -4,7 +4,8 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
 from datetime import datetime, timedelta
-from typing import Dict
+from typing import Dict, NamedTuple, List
+from functools import lru_cache
 from json import dumps
 
 # 3rd party:
@@ -32,6 +33,17 @@ __all__ = [
 ]
 
 
+class AreaType(NamedTuple):
+    msoa = "msoa"
+    lower_tier_la = "ltla"
+    upper_tier_la = "utla"
+    region = "region"
+    nhs_region = "nhsRegion"
+    nhs_trust = "nhsTrust"
+    nation = "nation"
+    uk = "overview"
+
+
 def process_dates(date: str) -> dtypes.ProcessedDateType:
     result: dict = {
         'date': datetime.strptime(date, "%Y-%m-%d"),
@@ -43,11 +55,13 @@ def process_dates(date: str) -> dtypes.ProcessedDateType:
 
 
 @cache_client.memoize(60 * 5)
-def get_last_fortnight(timestamp: str, area_name: str, metric: str) -> dtypes.DatabaseOutputType:
+def get_last_fortnight(timestamp: str, area_name: str, category: str) -> dtypes.DatabaseOutputType:
     """
     Retrieves the last fortnight worth of ``metric`` values
     for ``areaName`` as released on ``timestamp``.
     """
+    metric = const.DestinationMetrics[category]["metric"]
+
     query = queries.DataSinceApril.substitute({
         "metric": metric,
         "areaName": area_name
@@ -130,6 +144,7 @@ def get_postcode_areas_from_db(postcode):
         raise err
 
 
+@lru_cache(maxsize=256)
 def get_postcode_areas(postcode) -> Dict[str, str]:
     return get_postcode_areas_from_db(postcode)
 
@@ -151,12 +166,12 @@ def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Di
 
 
 @cache_client.memoize(60 * 60 * 12)
-def get_data_by_code(area, timestamp):
-    lower_tier_la = 'ltla'
+def get_data_by_code(area, timestamp, area_type=AreaType.lower_tier_la):
+    # lower_tier_la = 'ltla'
     query = queries.LookupByAreaCode
 
     params = [
-        {"name": "@areaCode", "value": area[lower_tier_la]},
+        {"name": "@areaCode", "value": area[area_type]},
     ]
 
     result = g.lookup_db.query(query, params=params)
@@ -190,7 +205,7 @@ def get_data_by_code(area, timestamp):
             latest = data[0]
             area_type = latest.pop("areaType")
 
-            results[category.capitalize()] = {
+            results[category] = {
                 "value": latest["value"],
                 "areaType": {
                     "abbr": area_type,
@@ -236,15 +251,14 @@ def get_msoa_data(postcode, timestamp):
 
 
 @cache_client.memoize(60 * 60 * 6)
-def get_alert_level(postcode, timestamp):
-    lower_tier_la = 'ltla'
+def get_alert_level(postcode, timestamp, area_type=AreaType.lower_tier_la):
     area = get_postcode_areas(postcode)
-    area_code = area[lower_tier_la]
+    area_code = area[area_type]
 
     query = queries.AlertLevel
     params = [
         {"name": "@releaseTimestamp", "value": timestamp},
-        {"name": "@areaType", "value": lower_tier_la},
+        {"name": "@areaType", "value": area_type},
         {"name": "@areaCode", "value": area_code},
     ]
 
@@ -273,7 +287,7 @@ def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=None):
 
         if metric == const.DestinationMetrics["testing"]["metric"]:
             area_type = nation
-    
+
         elif metric != const.DestinationMetrics["healthcare"]["metric"]:
             # Non-healthcare metrics use LTLA.
             area_type = lower_tier_la
@@ -319,6 +333,53 @@ def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=None):
         return None
 
 
+@lru_cache(256)
+def get_destinations(area_code):
+    query = queries.LookupByAreaCode
+
+    params = [
+        {"name": "@areaCode", "value": area_code},
+    ]
+
+    destinations = g.lookup_db.query(query, params=params)
+    return destinations
+
+
+@cache_client.memoize(60 * 60 * 6)
+def get_local_card_data(timestamp, category, postcode, change=False) -> dtypes.DatabaseOutputType:
+    metric = const.DestinationMetrics[category]['metric']
+    latest_date = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
+
+    offset = const.DestinationMetrics[category].get("rate_offset", None)
+
+    latest_date -= timedelta(days=offset)
+    latest_date = latest_date.strftime("%Y-%m-%d")
+
+    area = get_postcode_areas(postcode)
+    area_type = const.DestinationMetrics[category]["postcode_destination"]
+    app.logger.warning(f"POSTCODE AREA: {area}")
+    area_code = area[area_type]
+    if change:
+        query = queries.LatestChangeData.substitute(metric=metric)
+    else:
+        query = queries.SpecimenDateData.substitute(metric=metric)
+
+    params = [
+        {"name": "@latestDate", "value": latest_date},
+        {"name": "@releaseTimestamp", "value": timestamp},
+        {"name": "@areaCode", "value": area_code},
+        {"name": "@areaType", "value": area_type},
+    ]
+
+    try:
+        result = g.data_db.query(query, params=params)
+        app.logger.warning(f"POSTCODE RESULTS: {result}")
+        return result
+
+    except (KeyError, IndexError) as err:
+        return list()
+
+
 def get_data_by_postcode(postcode, timestamp):
     # ToDo: Fail for invalid postcodes
     area = get_postcode_areas(postcode)
@@ -327,46 +388,12 @@ def get_data_by_postcode(postcode, timestamp):
 
 
 @cache_client.memoize(60 * 60 * 6)
-def change_by_metric(timestamp, metric, postcode=None):
-    last_published = datetime.strptime(timestamp.split('T')[0], "%Y-%m-%d")
-    latest_date = last_published.strftime("%Y-%m-%d")
-
-    england = "E"
-    england_and_scotland = "ES"
-    lower_tier_la, nation = 'ltla', 'nation'
-    nhs_region, nhs_trust = 'nhsRegion', 'nhsTrust'
-
+def change_by_metric(timestamp, category, postcode=None):
     if postcode is not None:
-        area = get_postcode_areas(postcode)
-
-        nation_abbr = area['nation'][0].upper()
-
-        if metric == const.DestinationMetrics["deaths"]["metric"] and nation_abbr in england_and_scotland:
-            # England and Scotland use LTLA for deaths.
-            area_type = lower_tier_la
-
-        elif metric == const.DestinationMetrics["healthcare"]["metric"] and nation_abbr in england:
-            # England uses NHS Trust.
-            area_type = nhs_trust
-
-        elif metric == const.DestinationMetrics["cases"]["metric"]:
-            # cases are all LTLA
-            area_type = lower_tier_la
-        
-        else:
-            # everything else is national.
-            area_type = nation
-
-        area_code = area[area_type]
-        query = queries.LatestChangeData.substitute(metric=metric)
-
-        params = [
-            {"name": "@latestDate", "value": latest_date},
-            {"name": "@releaseTimestamp", "value": timestamp},
-            {"name": "@areaCode", "value": area_code},
-            {"name": "@areaType", "value": area_type},
-        ]
+        result = get_local_card_data(timestamp, category, postcode, change=True)
     else:
+        latest_date = timestamp.split('T')[0]
+        metric = const.DestinationMetrics[category]['metric']
         query = queries.LatestChangeDataOverview.substitute(metric=metric)
 
         params = [
@@ -375,14 +402,16 @@ def change_by_metric(timestamp, metric, postcode=None):
             {"name": "@areaType", "value": 'overview'},
         ]
 
-    try:
         result = g.data_db.query(query, params=params)
+
+    try:
         response = {
             "value": result[0]["change"],
             "percentage": result[0]["changePercentage"],
             "trend": result[0]["changeDirection"],
             "total": result[0]["rollingSum"]
         }
+        app.logger.warning(f"{category} --> {response}")
         return response
 
     except (KeyError, IndexError):
