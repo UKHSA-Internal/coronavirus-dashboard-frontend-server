@@ -16,21 +16,28 @@ DestinationMetrics = {
         "metric": 'newCasesByPublishDate',
         "caption": "Cases",
         "heading": "People tested positive",
+        "postcode_destination": "ltla",
+        "rate_offset": 5  # days
     },
     'deaths': {
         "metric": 'newDeaths28DaysByPublishDate',
         "caption": "Deaths",
         "heading": "Deaths within 28 days of positive test",
+        "postcode_destination": "ltla",
+        "rate_offset": 5  # days
     },
     'healthcare': {
         "metric": 'newAdmissions',
         "caption": "Healthcare",
         "heading": "Patients admitted",
+        "postcode_destination": "nhsTrust",
+        "rate_offset": 0  # days
     },
     'testing': {
         "metric": 'newVirusTests',
         "caption": "Testing",
         "heading": "Virus tests conducted",
+        "postcode_destination": "nation"
     }
 }
 
