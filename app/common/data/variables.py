@@ -41,6 +41,7 @@ DestinationMetrics = {
     }
 }
 
+
 AreaTypeNames = {
     "nhsRegion": "Healthcare Region",
     "nhsTrust": "Healthcare Trust",
@@ -50,14 +51,16 @@ AreaTypeNames = {
     "nation": "Nation"
 }
 
+
 AreaTypeShortNames = {
     "nhsRegion": "Healthcare",
-    "nhsTrust" : "Healthcare",
+    "nhsTrust": "Healthcare",
     "ltla": "Local Authority",
     "utla": "Local Authority",
     "region": "Region",
     "nation": "Nation"
 }
+
 
 NationalAdjectives = {
     "England": "English",
@@ -65,6 +68,7 @@ NationalAdjectives = {
     "Scotland": "Scottish",
     "Northern Ireland": "Northern Irish"
 }
+
 
 IsImproving: Dict[str, Callable[[Union[int, float]], bool]] = {
     "newCasesByPublishDate": lambda x: x < 0,
