@@ -14,7 +14,7 @@ Contributors:  Pouria Hadjibagheri
 # Python:
 
 # 3rd party:
-from flask import render_template, Blueprint
+from flask import render_template, Blueprint, make_response, request
 
 # Internal: 
 from ..common.caching import cache_client
@@ -30,6 +30,8 @@ home_page = Blueprint('home_page', __name__)
 
 
 @home_page.route('/')
-@cache_client.cached(timeout=120)
-def index() -> render_template:
+def index_get() -> render_template:
+    if request.method == "HEAD":
+        return make_response("", 200)
+
     return render_template("main.html")

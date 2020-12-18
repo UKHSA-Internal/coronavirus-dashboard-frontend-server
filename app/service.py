@@ -204,7 +204,10 @@ def handle_500(err):
 
 @app.context_processor
 def inject_globals():
-    return dict(
+    if request.method == "HEAD":
+        return dict()
+
+    response = dict(
         DEBUG=app.debug,
         changelog=get_notification_content(g.website_timestamp),
         national_adjectives=NationalAdjectives,
@@ -213,6 +216,8 @@ def inject_globals():
         og_images=get_og_image_names(g.timestamp),
         **get_landing_data(g.timestamp)
     )
+
+    return response
 
 
 @app.before_first_request
