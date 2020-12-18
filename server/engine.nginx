@@ -50,7 +50,7 @@ server {
         proxy_set_header       Connection                $connection_upgrade;
 
         add_header             X-Content-Type-Options    "nosniff";
-        add_header             Cache-Control             "s-maxage=60, max-age=90, stale-while-revalidate=30";
+        add_header             Cache-Control             "s-maxage=90";
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
         add_header             Content-Language          "en-GB";
