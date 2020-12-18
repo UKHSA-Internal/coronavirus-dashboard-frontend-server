@@ -5,20 +5,19 @@
 		{% set invalidPostcode = "V" %}
 	{% endif %}
 
-	{%- cache 43200, 'lower-section-main', timestamp, invalidPostcode, header[:10] -%}
-		<h2 class="govuk-heading-l govuk-!-margin-top-4 govuk-!-margin-bottom-0">{{ header }}</h2>
-		<div class="card-container double-row">
-			<div class="mini-card">
-				<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
-					Search by postcode
-				</h3>
-				<p class="govuk-body">View data for a specific area within the UK.</p>
-				<p class="govuk-body">Not all data are available for every area &ndash; we will show the most
-					local information in each category for your selected area.
-				</p>
-				{% include "components/postcode_search.html" %}
-			</div>
-			{% include "components/msoa_slide.html" %}
+	<h2 class="govuk-heading-l govuk-!-margin-top-4 govuk-!-margin-bottom-0">{{ header }}</h2>
+	<div class="card-container double-row">
+		<div class="mini-card">
+			<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
+				Search by postcode
+			</h3>
+			<p class="govuk-body">View data for a specific area within the UK.</p>
+			<p class="govuk-body">Not all data are available for every area &ndash; we will show the most
+				local information in each category for your selected area.
+			</p>
+			{% include "components/postcode_search.html" %}
 		</div>
-	{% endcache %}
+
+		{% include "components/msoa_slide.html" %}
+	</div>
 {% endmacro %}
