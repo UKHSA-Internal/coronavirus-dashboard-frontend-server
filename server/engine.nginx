@@ -50,7 +50,7 @@ server {
         proxy_set_header       Connection                $connection_upgrade;
 
         add_header             X-Content-Type-Options    "nosniff";
-        add_header             Cache-Control             "s-maxage=90";
+        add_header             Cache-Control             "max-age=30, must-revalidate, s-maxage=90";
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
         add_header             Content-Language          "en-GB";
@@ -135,7 +135,7 @@ server {
         proxy_cache_lock       on;
         proxy_cache_use_stale  updating;
 
-        add_header             Cache-Control                   "immutable, s-maxage=604800, max-age=86400";
+        add_header             Cache-Control                   "immutable, s-maxage=604800, max-age=604800";
         add_header             x-phe-media-type                "PHE-COVID19.v1";
         add_header             strict-transport-security       "max-age=31536000; includeSubDomains; preload";
         add_header             Access-Control-Allow-Origin     "*";
@@ -165,7 +165,7 @@ server {
         proxy_cache_lock       on;
         proxy_cache_use_stale  updating;
 
-        add_header             Cache-Control             "immutable, s-maxage=604800, max-age=86400";
+        add_header             Cache-Control             "immutable, s-maxage=604800, max-age=604800";
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
 
