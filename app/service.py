@@ -76,16 +76,6 @@ app = Flask(
 config_integration.trace_integrations(['requests'])
 config_integration.trace_integrations(['logging'])
 
-exporter = AzureExporter(connection_string=AI_INSTRUMENTATION_KEY)
-exporter.add_telemetry_processor(add_cloud_role_name)
-
-middleware = FlaskMiddleware(
-    app=app,
-    exporter=exporter,
-    sampler=AlwaysOnSampler(),
-    propagator=TraceContextPropagator()
-)
-
 app.config.from_object('app.config.Config')
 
 # Logging -------------------------------------------------
@@ -227,10 +217,18 @@ def inject_globals():
 
 @app.before_first_request
 def prep_service():
-    handler = AzureLogHandler(
-        connection_string=AI_INSTRUMENTATION_KEY,
-        exporter=exporter
+    exporter = AzureExporter(connection_string=AI_INSTRUMENTATION_KEY)
+    exporter.add_telemetry_processor(add_cloud_role_name)
+
+    _ = FlaskMiddleware(
+        app=app,
+        exporter=exporter,
+        sampler=AlwaysOnSampler(),
+        propagator=TraceContextPropagator()
     )
+
+    handler = AzureLogHandler(connection_string=AI_INSTRUMENTATION_KEY)
+
     handler.add_telemetry_processor(add_cloud_role_name)
 
     for log, level in logging_instances:
