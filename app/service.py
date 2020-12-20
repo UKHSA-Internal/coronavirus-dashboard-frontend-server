@@ -33,6 +33,7 @@ from app.common.utils import get_og_image_names, add_cloud_role_name, get_notifi
 from app.storage import StorageClient
 from app.common.data.query_templates import HealthCheck
 from app.common.exceptions import HandledException
+from app.database import CosmosDB, Collection
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -61,6 +62,8 @@ LOG_LEVEL = getenv("LOG_LEVEL", "INFO")
 
 timestamp_pattern = "%A %d %B %Y at %I:%M %p"
 timezone_LN = timezone("Europe/London")
+
+lookup_db = CosmosDB(Collection.LOOKUP)
 
 instance_path = abspath(join_path(abspath(__file__), pardir))
 
@@ -277,7 +280,6 @@ def prepare_context():
 #     #         db.close()
 
 
-
 @app.after_request
 def prepare_response(resp: Response):
     last_modified = datetime.strptime(
@@ -305,7 +307,7 @@ def prepare_response(resp: Response):
 
 @app.route(HEALTHCHECK_PATH, methods=("HEAD", "GET"))
 def health_check(**kwargs):
-    result = g.lookup_db.query(HealthCheck, params=list()).pop()
+    result = lookup_db.query(HealthCheck, params=list()).pop()
 
     if len(result) > 0:
         return make_response("ALIVE", 200)
