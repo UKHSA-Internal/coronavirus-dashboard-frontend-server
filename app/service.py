@@ -30,7 +30,6 @@ from app.landing.utils import get_landing_data
 from app.common.data.variables import NationalAdjectives, IsImproving
 from app.common.caching import cache_client
 from app.common.utils import get_og_image_names, add_cloud_role_name, get_notification_content
-from app.database import CosmosDB, Collection
 from app.storage import StorageClient
 from app.common.data.query_templates import HealthCheck
 from app.common.exceptions import HandledException
@@ -240,7 +239,7 @@ def prep_service():
         log.addHandler(handler)
         log.setLevel(level)
 
-    # g.log_handler = handler
+    g.log_handler = handler
 
 
 @app.before_request
@@ -256,10 +255,6 @@ def prepare_context():
 
     app.logger.info(request.url, extra=custom_dims)
 
-    g.data_db = CosmosDB(Collection.DATA)
-    g.lookup_db = CosmosDB(Collection.LOOKUP)
-    g.weekly_db = CosmosDB(Collection.WEEKLY)
-
     with StorageClient(**WEBSITE_TIMESTAMP) as client:
         g.website_timestamp = client.download().readall().decode()
 
@@ -269,19 +264,18 @@ def prepare_context():
     return None
 
 
-@app.teardown_appcontext
-def teardown_db(exception):
-    db_instances = [
-        g.pop('data_db', None),
-        g.pop('lookup_db', None),
-        g.pop('weekly_db', None),
-    ]
+# @app.teardown_appcontext
+# def teardown_db(exception):
+#     # db_instances = [
+#     #     g.pop('data_db', None),
+#     #     g.pop('lookup_db', None),
+#     #     g.pop('weekly_db', None),
+#     # ]
+#     #
+#     # for db in db_instances:
+#     #     if db is not None:
+#     #         db.close()
 
-    for db in db_instances:
-        if db is not None:
-            db.close()
-
-    # g.log_handler.flush()
 
 
 @app.after_request
@@ -303,6 +297,8 @@ def prepare_response(resp: Response):
         resp.set_data(data)
     except UnicodeDecodeError as e:
         app.logger.warning(e)
+
+    g.log_handler.flush()
 
     return resp
 

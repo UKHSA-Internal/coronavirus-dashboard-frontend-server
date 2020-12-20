@@ -9,7 +9,7 @@ from functools import lru_cache
 from json import dumps
 
 # 3rd party:
-from flask import g, current_app as app
+from flask import current_app as app
 from azure.core.exceptions import AzureError
 
 # Internal:
@@ -17,6 +17,7 @@ from . import query_templates as queries
 from . import variables as const, dtypes
 from ..caching import cache_client
 from ..exceptions import InvalidPostcode
+from ...database import CosmosDB, Collection
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -31,6 +32,11 @@ __all__ = [
     'latest_rate_by_metric',
     'change_by_metric'
 ]
+
+
+data_db = CosmosDB(Collection.DATA)
+lookup_db = CosmosDB(Collection.LOOKUP)
+weekly_db = CosmosDB(Collection.WEEKLY)
 
 
 class AreaType(NamedTuple):
@@ -74,7 +80,7 @@ def get_last_fortnight(timestamp: str, area_name: str, category: str) -> dtypes.
 
     result = [
         {**row, **process_dates(row["date"])}
-        for row in g.data_db.query_iter(query, params=params)
+        for row in data_db.query_iter(query, params=params)
     ]
 
     return result
@@ -96,7 +102,7 @@ def get_latest_value(metric: str, timestamp: str, area_name: str):
         {"name": "@areaName", "value": area_name.lower()}
     ]
 
-    result = g.data_db.query(query, params=params)
+    result = data_db.query(query, params=params)
     
     return result[0]["value"]
 
@@ -127,7 +133,7 @@ def get_postcode_areas_from_db(postcode):
     ]
 
     try:
-        result = g.lookup_db.query(query, params=params)
+        result = lookup_db.query(query, params=params)
 
         if not result:
             raise InvalidPostcode(postcode)
@@ -158,7 +164,7 @@ def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Di
         {"name": "@areaName", "value": area_name.lower()}
     ]
 
-    result = g.data_db.query(query, params=params).pop()
+    result = data_db.query(query, params=params).pop()
 
     result['date'] = process_dates(result['date'])['formatted']
 
@@ -174,7 +180,7 @@ def get_data_by_code(area, timestamp, area_type=AreaType.lower_tier_la):
         {"name": "@areaCode", "value": area[area_type]},
     ]
 
-    result = g.lookup_db.query(query, params=params)
+    result = lookup_db.query(query, params=params)
     try:
         location_data = result.pop()
     except IndexError as err:
@@ -201,7 +207,7 @@ def get_data_by_code(area, timestamp, area_type=AreaType.lower_tier_la):
         ]
 
         try:
-            data = g.data_db.query(query, params=params)
+            data = data_db.query(query, params=params)
             latest = data[0]
             area_type = latest.pop("areaType")
 
@@ -234,7 +240,7 @@ def get_msoa_data(postcode, timestamp):
     ]
 
     try:
-        data: Dict[str, dict] = g.weekly_db.query(query, params=params).pop()
+        data: Dict[str, dict] = weekly_db.query(query, params=params).pop()
         cases_data: dict = data["latest"]["newCasesBySpecimenDate"]
 
         response = {
@@ -263,7 +269,7 @@ def get_alert_level(postcode, timestamp, area_type=AreaType.lower_tier_la):
     ]
 
     try:
-        response = g.data_db.query(query, params=params).pop()
+        response = data_db.query(query, params=params).pop()
         return response
     except (KeyError, IndexError):
         return None
@@ -319,7 +325,7 @@ def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=None):
         ]
 
     try:
-        result = g.data_db.query(query, params=params)
+        result = data_db.query(query, params=params)
         latest = max(result, key=lambda x: x['date'])
         response = {
             "date": process_dates(latest['date'])['formatted'],
@@ -341,7 +347,7 @@ def get_destinations(area_code):
         {"name": "@areaCode", "value": area_code},
     ]
 
-    destinations = g.lookup_db.query(query, params=params)
+    destinations = lookup_db.query(query, params=params)
     return destinations
 
 
@@ -373,7 +379,7 @@ def get_local_card_data(timestamp, category, postcode, change=False) -> dtypes.D
     ]
 
     try:
-        result = g.data_db.query(query, params=params)
+        result = data_db.query(query, params=params)
         return result
     except (KeyError, IndexError):
         return list()
@@ -401,7 +407,7 @@ def change_by_metric(timestamp, category, postcode=None):
             {"name": "@areaType", "value": 'overview'},
         ]
 
-        result = g.data_db.query(query, params=params)
+        result = data_db.query(query, params=params)
 
     try:
         response = {
