@@ -242,8 +242,6 @@ def prep_service():
         log.addHandler(handler)
         log.setLevel(level)
 
-    g.log_handler = handler
-
 
 @app.before_request
 def prepare_context():
@@ -300,7 +298,7 @@ def prepare_response(resp: Response):
     except UnicodeDecodeError as e:
         app.logger.warning(e)
 
-    g.log_handler.flush()
+    # g.log_handler.flush()
 
     return resp
 
