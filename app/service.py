@@ -29,6 +29,7 @@ from app.landing.views import home_page
 from app.landing.utils import get_landing_data
 from app.common.data.variables import NationalAdjectives, IsImproving
 from app.common.caching import cache_client
+from app.common.banner import get_banners
 from app.common.utils import get_og_image_names, add_cloud_role_name, get_notification_content
 from app.storage import StorageClient
 from app.common.data.query_templates import HealthCheck
@@ -85,7 +86,7 @@ log_level = getattr(logging, LOG_LEVEL)
 
 logging_instances = [
     [app.logger, log_level],
-    [logging.getLogger('werkzeug'), log_level],
+    [logging.getLogger('werkzeug'), logging.WARNING],
     [logging.getLogger('azure'), logging.WARNING]
 ]
 
@@ -204,22 +205,28 @@ def handle_500(err):
     return render_template("errors/500.html"), 500
 
 
+@cache_client.memoize(timeout=120)
+def get_globals(website_timestamp):
+    response = dict(
+        DEBUG=app.debug,
+        changelog=get_notification_content(website_timestamp),
+        national_adjectives=NationalAdjectives,
+        timestamp=website_timestamp,
+        app_insight_token=INSTRUMENTATION_CODE,
+        og_images=get_og_image_names(g.timestamp),
+        banners=get_banners,
+        **get_landing_data(g.timestamp)
+    )
+
+    return response
+
+
 @app.context_processor
 def inject_globals():
     if request.method == "HEAD":
         return dict()
 
-    response = dict(
-        DEBUG=app.debug,
-        changelog=get_notification_content(g.website_timestamp),
-        national_adjectives=NationalAdjectives,
-        timestamp=g.website_timestamp,
-        app_insight_token=INSTRUMENTATION_CODE,
-        og_images=get_og_image_names(g.timestamp),
-        **get_landing_data(g.timestamp)
-    )
-
-    return response
+    return get_globals(g.website_timestamp)
 
 
 @app.before_first_request
