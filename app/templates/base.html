@@ -39,11 +39,15 @@
 	{%- include "components/change_notification.html" -%}
 {%- endcache -%}
 
+{%- cache 300, 'banner', timestamp -%}
+	{%- include "components/banners.html" -%}
+{%- endcache -%}
+
 <div class="govuk-width-container">
 	{%- cache 600, 'timestamp', timestamp -%}
 		<div class="govuk-!-margin-top-5 govuk-!-margin-bottom-5" role="region" aria-labelledby="last-update">
 			<p class="govuk-body-s" id="last-update">
-				Last updated on&nbsp;<time datetime="2020-09-25T15:04:10.849311Z">{{ timestamp | format_timestamp }}</time>
+				Last updated on&nbsp;<time datetime="{{ timestamp }}">{{ timestamp | format_timestamp }}</time>
 			</p>
 		</div>
 	{%- endcache -%}
