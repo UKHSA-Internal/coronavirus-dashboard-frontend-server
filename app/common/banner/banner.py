@@ -27,8 +27,8 @@ BANNER_DATA = dict(
 
 
 def prep_data(item):
-    item['appearByUpdate'] = datetime.strptime(item['appearByUpdate'], "%Y-%m-%d").date()
-    item['disappearByUpdate'] = datetime.strptime(item['disappearByUpdate'], "%Y-%m-%d").date()
+    item['appearByUpdate'] = datetime.strptime(item['appearByUpdate'], "%Y-%m-%d")
+    item['disappearByUpdate'] = datetime.strptime(item['disappearByUpdate'], "%Y-%m-%d")
 
     return item
 
@@ -38,18 +38,16 @@ def get_banners(timestamp):
         full_data = loads(client.download().readall().decode())
 
     data = map(prep_data, full_data)
-    timestamp = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ").date()
+    timestamp = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
 
     banners = filter(
-        lambda item: item['appearByUpdate'] >= timestamp < item['disappearByUpdate'],
+        lambda item: item['appearByUpdate'] <= timestamp < item['disappearByUpdate'],
         data
     )
-    # app.logger.info(list(banners))
 
     for banner in banners:
-        app.logger.info(f">>> {banner}")
         yield {
-            "timestamp": banner["appearByUpdate"],
+            "timestamp": banner["appearByUpdate"].date(),
             "display_timestamp": banner["appearByUpdate"].strftime("%d %B %Y"),
             "body": markdown(banner["body"])
         }
