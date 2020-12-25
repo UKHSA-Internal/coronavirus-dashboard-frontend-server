@@ -4,6 +4,8 @@
   @extend .govuk-\!-padding-top-2 ;
   @extend .govuk-\!-padding-bottom-2;
   @extend .govuk-\!-margin-bottom-1;
+  margin-left: unset;
+  margin-right: unset;
 
   &>.content {
     @extend .govuk-grid-column-one-half;
