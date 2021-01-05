@@ -8,9 +8,9 @@ azure-cosmos==4.2.0
 PyYAML==5.3.1
 jinja2==2.11.2
 flask==1.1.2
-plotly==4.12.0
+plotly==4.14.1
 kaleido==0.0.3.post1
-pandas==1.1.4
+pandas==1.1.5
 flask-minify==0.29
 werkzeug==1.0.1
 redis==3.5.3
@@ -20,3 +20,7 @@ python-dotenv==0.14.0
 tqdm==4.51.0
 flask_cors==3.0.9
 opencensus-ext-azure==1.0.5
+opencensus-ext-flask==0.7.3
+opencensus-ext-logging==0.1.0
+opencensus-ext-requests==0.7.3
+Markdown==3.3.3

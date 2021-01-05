@@ -1,0 +1,10 @@
+{% for banner in banners(timestamp) %}
+	<div class="banner">
+		<div class="content">
+				<div class="timestamp">
+					<time datetime="{{ banner.timestamp }}">{{ banner.display_timestamp }}</time>
+				</div>
+				<div class="body">{{ banner.body | safe }}</div>
+		</div>
+	</div>
+{% endfor %}

@@ -16,17 +16,26 @@ from flask import Flask, Response, g, appcontext_pushed, render_template, make_r
 from contextlib import contextmanager
 from flask_minify import minify
 from pytz import timezone
+
 from opencensus.ext.azure.log_exporter import AzureLogHandler
+from opencensus.ext.azure.trace_exporter import AzureExporter
+from opencensus.ext.flask.flask_middleware import FlaskMiddleware
+from opencensus.trace.samplers import AlwaysOnSampler
+from opencensus.trace import config_integration
+from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
 
 # Internal:
 from app.postcode.views import postcode_page
 from app.landing.views import home_page
+from app.landing.utils import get_landing_data
 from app.common.data.variables import NationalAdjectives, IsImproving
 from app.common.caching import cache_client
-from app.common.utils import get_og_image_names
-from app.database import CosmosDB, Collection
+from app.common.banner import get_banners
+from app.common.utils import get_og_image_names, add_cloud_role_name, get_notification_content
 from app.storage import StorageClient
 from app.common.data.query_templates import HealthCheck
+from app.common.exceptions import HandledException
+from app.database import CosmosDB, Collection
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -35,6 +44,7 @@ __all__ = [
 ]
 
 
+HEALTHCHECK_PATH = "/healthcheck"
 WEBSITE_TIMESTAMP = {
     "container": "publicdata",
     "path":  "assets/dispatch/website_timestamp"
@@ -44,7 +54,8 @@ LATEST_PUBLISHED_TIMESTAMP = {
     "path": "info/latest_published"
 }
 NOT_AVAILABLE = "N/A"
-INSTRUMENTATION_KEY = getenv("APPINSIGHTS_INSTRUMENTATIONKEY", "")
+INSTRUMENTATION_CODE = getenv("APPINSIGHTS_INSTRUMENTATIONKEY", "")
+AI_INSTRUMENTATION_KEY = f"InstrumentationKey={INSTRUMENTATION_CODE}"
 SERVER_LOCATION_KEY = "SERVER_LOCATION"
 SERVER_LOCATION = getenv(SERVER_LOCATION_KEY, NOT_AVAILABLE)
 PYTHON_TIMESTAMP_LEN = 24
@@ -53,6 +64,8 @@ LOG_LEVEL = getenv("LOG_LEVEL", "INFO")
 
 timestamp_pattern = "%A %d %B %Y at %I:%M %p"
 timezone_LN = timezone("Europe/London")
+
+lookup_db = CosmosDB(Collection.LOOKUP)
 
 instance_path = abspath(join_path(abspath(__file__), pardir))
 
@@ -64,6 +77,9 @@ app = Flask(
     template_folder='templates'
 )
 
+config_integration.trace_integrations(['requests'])
+config_integration.trace_integrations(['logging'])
+
 app.config.from_object('app.config.Config')
 
 # Logging -------------------------------------------------
@@ -71,9 +87,8 @@ log_level = getattr(logging, LOG_LEVEL)
 
 logging_instances = [
     [app.logger, log_level],
-    [logging.getLogger('werkzeug'), log_level],
-    [logging.getLogger('azure'), logging.WARNING],
-    [logging.getLogger('homepage_server'), log_level],
+    [logging.getLogger('werkzeug'), logging.WARNING],
+    [logging.getLogger('azure'), logging.WARNING]
 ]
 
 # ---------------------------------------------------------
@@ -154,66 +169,110 @@ def inject_timestamps_tests(app, timestamp, website_timestamp):
         yield
 
 @app.template_filter()
+def trim_area_name(area_name):
+    pattern = re.compile(r"(nhs\b.*)", re.IGNORECASE)
+    name = pattern.sub("", area_name)
+
+    return name.strip()
+
+
+@app.template_filter()
 def isnone(value):
     return value is None
 
 
 @app.errorhandler(404)
 def handle_404(err):
-    app.logger.info(f"HTTP 404 response on <{request.url}>")
+    if isinstance(err, HandledException):
+        return err
+
+    app.logger.info(f"404 - Not found", extra={'custom_dimensions': {"url": request.url}})
     return render_template("errors/404.html"), 404
 
 
 @app.errorhandler(Exception)
 def handle_500(err):
-    app.logger.exception(
-        err,
-        extra={
-            'custom_dimensions': {
-                'website_timestamp': g.website_timestamp,
-                'latest_release': g.timestamp,
-                'db_host': getenv("AzureCosmosHost", NOT_AVAILABLE),
-                "API_environment": getenv("API_ENV", NOT_AVAILABLE),
-                "server_location": getenv("SERVER_LOCATION", NOT_AVAILABLE),
-                "is_dev": getenv("IS_DEV", NOT_AVAILABLE),
-                "redis": getenv("AZURE_REDIS_HOST", NOT_AVAILABLE),
-                "AzureCosmosDBName": getenv("AzureCosmosDBName", NOT_AVAILABLE),
-                "AzureCosmosCollection": getenv("AzureCosmosCollection", NOT_AVAILABLE),
-                "AzureCosmosDestinationsCollection": getenv(
-                    "AzureCosmosDestinationsCollection",
-                    NOT_AVAILABLE
-                ),
-            }
-        }
-    )
+    if isinstance(err, HandledException):
+        return err
+
+    additional_info = {
+        'website_timestamp': g.website_timestamp,
+        'latest_release': g.timestamp,
+        'db_host': getenv("AzureCosmosHost", NOT_AVAILABLE),
+        "API_environment": getenv("API_ENV", NOT_AVAILABLE),
+        "server_location": getenv("SERVER_LOCATION", NOT_AVAILABLE),
+        "is_dev": getenv("IS_DEV", NOT_AVAILABLE),
+        "redis": getenv("AZURE_REDIS_HOST", NOT_AVAILABLE),
+        "AzureCosmosDBName": getenv("AzureCosmosDBName", NOT_AVAILABLE),
+        "AzureCosmosCollection": getenv("AzureCosmosCollection", NOT_AVAILABLE),
+        "AzureCosmosDestinationsCollection": getenv(
+            "AzureCosmosDestinationsCollection",
+            NOT_AVAILABLE
+        ),
+    }
+
+    app.logger.exception(err, extra={'custom_dimensions': additional_info})
 
     return render_template("errors/500.html"), 500
 
 
+@cache_client.memoize(timeout=120)
+def get_globals(website_timestamp):
+    response = dict(
+        DEBUG=app.debug,
+        changelog=get_notification_content(website_timestamp),
+        national_adjectives=NationalAdjectives,
+        timestamp=website_timestamp,
+        app_insight_token=INSTRUMENTATION_CODE,
+        og_images=get_og_image_names(g.timestamp),
+        banners=get_banners,
+        **get_landing_data(g.timestamp)
+    )
+
+    return response
+
+
 @app.context_processor
 def inject_globals():
-    return dict(
-        DEBUG=app.debug,
-        national_adjectives=NationalAdjectives,
-        timestamp=g.website_timestamp,
-        app_insight_token=INSTRUMENTATION_KEY,
-        og_images=get_og_image_names(g.timestamp)
-    )
+    if request.method == "HEAD":
+        return dict()
+
+    return get_globals(g.website_timestamp)
 
 
-@app.before_request
-def inject_timestamps():
-    handler = AzureLogHandler(
-        connection_string=f"InstrumentationKey={INSTRUMENTATION_KEY}"
+@app.before_first_request
+def prep_service():
+    exporter = AzureExporter(connection_string=AI_INSTRUMENTATION_KEY)
+    exporter.add_telemetry_processor(add_cloud_role_name)
+
+    _ = FlaskMiddleware(
+        app=app,
+        exporter=exporter,
+        sampler=AlwaysOnSampler(),
+        propagator=TraceContextPropagator()
     )
+
+    handler = AzureLogHandler(connection_string=AI_INSTRUMENTATION_KEY)
+
+    handler.add_telemetry_processor(add_cloud_role_name)
 
     for log, level in logging_instances:
         log.addHandler(handler)
         log.setLevel(level)
 
-    g.data_db = CosmosDB(Collection.DATA)
-    g.lookup_db = CosmosDB(Collection.LOOKUP)
-    g.weekly_db = CosmosDB(Collection.WEEKLY)
+
+@app.before_request
+def prepare_context():
+    custom_dims = dict(
+        custom_dimensions=dict(
+            is_healthcheck=request.path == HEALTHCHECK_PATH,
+            url=str(request.url),
+            path=str(request.path),
+            query_string=str(request.query_string)
+        )
+    )
+
+    app.logger.info(request.url, extra=custom_dims)
 
     with StorageClient(**WEBSITE_TIMESTAMP) as client:
         g.website_timestamp = client.download().readall().decode()
@@ -221,24 +280,20 @@ def inject_timestamps():
     with StorageClient(**LATEST_PUBLISHED_TIMESTAMP) as client:
         g.timestamp = client.download().readall().decode()
 
-    g.log_handler = handler
-
     return None
 
 
-@app.teardown_appcontext
-def teardown_db(exception):
-    #g.log_handler.flush()
-
-    db_instances = [
-        g.pop('data_db', None),
-        g.pop('lookup_db', None),
-        g.pop('weekly_db', None),
-    ]
-
-    for db in db_instances:
-        if db is not None:
-            db.close()
+# @app.teardown_appcontext
+# def teardown_db(exception):
+#     # db_instances = [
+#     #     g.pop('data_db', None),
+#     #     g.pop('lookup_db', None),
+#     #     g.pop('weekly_db', None),
+#     # ]
+#     #
+#     # for db in db_instances:
+#     #     if db is not None:
+#     #         db.close()
 
 
 @app.after_request
@@ -261,17 +316,24 @@ def prepare_response(resp: Response):
     except UnicodeDecodeError as e:
         app.logger.warning(e)
 
+    # g.log_handler.flush()
+
     return resp
 
 
-@app.route("/healthcheck", methods=("HEAD", "GET"))
+@app.route(HEALTHCHECK_PATH, methods=("HEAD", "GET"))
 def health_check(**kwargs):
-    result = g.lookup_db.query(HealthCheck, params=list()).pop()
+    result = lookup_db.query(HealthCheck, params=list()).pop()
 
     if len(result) > 0:
-        return make_response("", 200)
+        return make_response("ALIVE", 200)
 
-    raise RuntimeError("Health check failed.")
+    raise RuntimeError("Healthcheck failed.")
+
+
+@app.route("/", methods=("OPTIONS",))
+def options(**kwargs):
+    return app.make_default_options_response()
 
 
 if __name__ == "__main__":

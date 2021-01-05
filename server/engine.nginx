@@ -28,7 +28,7 @@ server {
 
         try_files              $uri @app;
 
-        limit_except GET HEAD {
+        limit_except GET HEAD OPTIONS {
             deny    all;
         }
 
@@ -50,7 +50,7 @@ server {
         proxy_set_header       Connection                $connection_upgrade;
 
         add_header             X-Content-Type-Options    "nosniff";
-        add_header             Cache-Control             "s-maxage=60, max-age=90, stale-while-revalidate=30";
+        add_header             Cache-Control             "max-age=30, must-revalidate, s-maxage=90";
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
         add_header             Content-Language          "en-GB";
@@ -62,7 +62,7 @@ server {
 
         proxy_read_timeout     86400;
 
-        limit_except GET HEAD {
+        limit_except GET HEAD OPTIONS {
             deny    all;
         }
 
@@ -135,11 +135,13 @@ server {
         proxy_cache_lock       on;
         proxy_cache_use_stale  updating;
 
-        add_header             Cache-Control                   "immutable, s-maxage=604800, max-age=86400";
+        add_header             Cache-Control                   "immutable, s-maxage=604800, max-age=604800";
         add_header             x-phe-media-type                "PHE-COVID19.v1";
         add_header             strict-transport-security       "max-age=31536000; includeSubDomains; preload";
         add_header             Access-Control-Allow-Origin     "*";
         add_header             Access-Control-Allow-Methods    "GET, HEAD";
+        add_header             Access-Control-Allow-Headers    "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range";
+        add_header             Access-Control-Expose-Headers   "Content-Length,Content-Range";
 
         limit_except GET HEAD {
             deny    all;
@@ -163,7 +165,7 @@ server {
         proxy_cache_lock       on;
         proxy_cache_use_stale  updating;
 
-        add_header             Cache-Control             "immutable, s-maxage=604800, max-age=86400";
+        add_header             Cache-Control             "immutable, s-maxage=604800, max-age=604800";
         add_header             x-phe-media-type          "PHE-COVID19.v1";
         add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
 

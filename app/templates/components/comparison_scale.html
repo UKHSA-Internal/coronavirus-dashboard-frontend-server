@@ -1,4 +1,4 @@
-<h3 class="govuk-!-font-size-24 title-mobile govuk-!-margin-bottom-0">
+<h3 class="govuk-!-font-size-24 title-mobile govuk-!-margin-bottom-0 govuk-!-margin-top-0">
 	People tested positive by specimen date
 	<small class="govuk-caption-m govuk-!-font-size-19 govuk-!-font-weight-regular">
 		Seven days to {{ msoa.latestDate | default(cases_rate.date, true) }}
@@ -24,9 +24,11 @@
 	</strong>
 </p>
 
-<p class="govuk-caption-m govuk-!-font-weight-regular govuk-!-margin-bottom-1 govuk-!-margin-top-1">
-	How does this compare to {% if areaType == "msoa" %}{{ area_info.nationName }}{% else %}UK{% endif %} average?
-</p>
-<img src="https://coronavirus.data.gov.uk/public/assets/frontpage/scales/{{ areaType }}/{{ area_info[codeAttr] }}.svg"
-     style="max-width: min(400px, 100%); height: auto;"
-     alt="Scale showing the comparison of {{ postcode }} compared to national average."/>
+{% if msoa.latestSum or areaType != "msoa" %}
+	<p class="govuk-caption-m govuk-!-font-weight-regular govuk-!-margin-bottom-1 govuk-!-margin-top-1">
+		How does this compare to {% if areaType == "msoa" %}{{ area_info.nationName }}{% else %}UK{% endif %} average?
+	</p>
+	<img src="https://coronavirus.data.gov.uk/public/assets/frontpage/scales/{{ areaType }}/{{ area_info[codeAttr] }}.svg"
+	     style="max-width: min(400px, 100%); height: auto;"
+	     alt="Scale showing the comparison of {{ postcode }} relative to national median."/>
+{% endif %}

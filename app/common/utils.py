@@ -12,13 +12,14 @@ Contributors:  Pouria Hadjibagheri
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-import logging
+from os import getenv
 from datetime import datetime
 from operator import itemgetter
 from typing import Dict
 from json import loads
 
 # 3rd party:
+from flask import current_app as app
 
 # Internal:
 from .caching import cache_client
@@ -29,10 +30,10 @@ from ..storage import StorageClient
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+CLOUD_ROLE_NAME = getenv("WEBSITE_SITE_NAME", "landing-page")
+
 get_value = itemgetter("value")
 get_area_type = itemgetter("areaType")
-
-logger = logging.getLogger('homepage_server')
 
 
 @cache_client.memoize(60 * 60 * 12)
@@ -50,8 +51,10 @@ def get_og_image_names(latest_timestamp: str) -> list:
     return og_names
 
 
-def get_card_data(latest_timestamp: str, metric_name: str, metric_data, graph=True):
-    change = change_by_metric(latest_timestamp, metric_name, postcode=None)
+def get_card_data(latest_timestamp: str, category: str, metric_data, graph=True):
+    metric_name = DestinationMetrics[category]["metric"]
+
+    change = change_by_metric(latest_timestamp, category, postcode=None)
 
     response = {
         "data": metric_data,
@@ -69,10 +72,10 @@ def get_card_data(latest_timestamp: str, metric_name: str, metric_data, graph=Tr
 def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
     result = dict()
 
-    for item in DestinationMetrics.values():
-        metric_name = item['metric']
-        metric_data = get_last_fortnight(latest_timestamp, area_name, metric_name)
-        result[metric_name] = get_card_data(latest_timestamp, metric_name, metric_data)
+    for category, metadata in DestinationMetrics.items():
+        metric_name = metadata['metric']
+        metric_data = get_last_fortnight(latest_timestamp, area_name, category)
+        result[metric_name] = get_card_data(latest_timestamp, category, metric_data)
 
     return result
 
@@ -139,3 +142,8 @@ def get_notification_content(latest_timestamp):
             return response
 
     return None
+
+
+def add_cloud_role_name(envelope):
+    envelope.tags['ai.cloud.role'] = CLOUD_ROLE_NAME
+    return True

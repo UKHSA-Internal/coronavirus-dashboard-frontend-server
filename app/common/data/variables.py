@@ -16,39 +16,51 @@ DestinationMetrics = {
         "metric": 'newCasesByPublishDate',
         "caption": "Cases",
         "heading": "People tested positive",
+        "postcode_destination": "ltla",
+        "rate_offset": 5  # days
     },
     'deaths': {
         "metric": 'newDeaths28DaysByPublishDate',
         "caption": "Deaths",
         "heading": "Deaths within 28 days of positive test",
+        "postcode_destination": "ltla",
+        "rate_offset": 5  # days
     },
     'healthcare': {
         "metric": 'newAdmissions',
         "caption": "Healthcare",
         "heading": "Patients admitted",
+        "postcode_destination": "nhsTrust",
+        "rate_offset": 0  # days
     },
     'testing': {
         "metric": 'newVirusTests',
         "caption": "Testing",
         "heading": "Virus tests conducted",
+        "postcode_destination": "nation"
     }
 }
 
+
 AreaTypeNames = {
     "nhsRegion": "Healthcare Region",
+    "nhsTrust": "Healthcare Trust",
     "ltla": "Local Authority (Lower tier)",
     "utla": "Local Authority (Upper tier)",
     "region": "Region",
     "nation": "Nation"
 }
 
+
 AreaTypeShortNames = {
     "nhsRegion": "Healthcare",
+    "nhsTrust": "Healthcare",
     "ltla": "Local Authority",
     "utla": "Local Authority",
     "region": "Region",
     "nation": "Nation"
 }
+
 
 NationalAdjectives = {
     "England": "English",
@@ -56,6 +68,7 @@ NationalAdjectives = {
     "Scotland": "Scottish",
     "Northern Ireland": "Northern Irish"
 }
+
 
 IsImproving: Dict[str, Callable[[Union[int, float]], bool]] = {
     "newCasesByPublishDate": lambda x: x < 0,

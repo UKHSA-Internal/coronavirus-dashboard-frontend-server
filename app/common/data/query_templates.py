@@ -62,13 +62,11 @@ ORDER BY
 
 LatestTransmissionRate = """\
 SELECT TOP 1
-    VALUE {
-        'transmissionRateMin':           c.transmissionRateMin,
-        'transmissionRateMax':           c.transmissionRateMax,
-        'transmissionRateGrowthRateMin': c.transmissionRateGrowthRateMin,
-        'transmissionRateGrowthRateMax': c.transmissionRateGrowthRateMax,
-        'date': c.date
-    }
+    c.transmissionRateMin,
+    c.transmissionRateMax,
+    c.transmissionRateGrowthRateMin,
+    c.transmissionRateGrowthRateMax,
+    c.date
 FROM     c
 WHERE    c.releaseTimestamp = @releaseTimestamp
      AND c.areaNameLower    = @areaName
@@ -82,25 +80,7 @@ ORDER BY
 
 
 PostcodeLookup = """\
-SELECT TOP 1 
-    VALUE {
-        'postcode':        c.postcode, 
-        'trimmedPostcode': c.trimmedPostcode,
-        'lsoa':            c.lsoa, 
-        'lsoaName':        c.lsoaName, 
-        'msoa':            c.msoa,
-        'msoaName':        c.msoaName, 
-        'ltla':            c.ltla, 
-        'ltlaName':        c.ltlaName, 
-        'utla':            c.utla, 
-        'utlaName':        c.utlaName, 
-        'region':          c.region, 
-        'regionName':      c.regionName, 
-        'nhsRegion':       c.nhsRegion, 
-        'nhsRegionName':   c.nhsRegionName, 
-        'nation':          c.nation, 
-        'nationName':      c.nationName
-    }
+SELECT TOP 1 *
 FROM     c
 WHERE    c.type            = 'postcode'
      AND c.trimmedPostcode = @postcode\
@@ -108,15 +88,14 @@ WHERE    c.type            = 'postcode'
 
 
 LookupByAreaCode = """\
-SELECT TOP 1
-    c.areaName,
-    c.destinations
+SELECT TOP 1 c.areaName, c.destinations
 FROM c
 WHERE   c.type     = 'general'
     AND c.areaCode = @areaCode
     AND (
       (c.areaType = 'ltla' AND c.parent.areaCode != @areaCode)
       OR c.areaType = 'utla'
+      OR c.areaTyoe = 'nhsTrust'
     )\
 """
 
@@ -181,21 +160,14 @@ ORDER BY
 
 
 MsoaData = """\
-SELECT 
-    VALUE udf.cleanData(c) 
+SELECT VALUE udf.cleanData(c) 
 FROM c 
 WHERE c.id = @id\
 """
 
 
 AlertLevel = """\
-SELECT 
-    TOP 1
-    VALUE udf.processAlertLevel({
-        'date':       c.date, 
-        'alertLevel': c.alertLevel,
-        'areaCode':   c.areaCode
-    })
+SELECT TOP 1 VALUE udf.processAlertLevel(c)
 FROM c 
 WHERE 
       c.releaseTimestamp = @releaseTimestamp

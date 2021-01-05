@@ -17,8 +17,8 @@ LABEL maintainer="Pouria Hadjibagheri <Pouria.Hadjibagheri@phe.gov.uk>"
 
 ENV UWSGI_INI /app/uwsgi.ini
 
-ENV UWSGI_CHEAPER 30
-ENV UWSGI_PROCESSES 31
+ENV UWSGI_CHEAPER 15
+ENV UWSGI_PROCESSES 16
 
 # Standard set up Nginx
 WORKDIR /app
