@@ -61,7 +61,7 @@ class TestPostcode(unittest.TestCase):
             with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
                 response = client.get(f'/search?postcode={postcode}')
             data = response.data
-            invalid_check = b'Invalid postcode'
+            invalid_check = b'please enter a full and valid UK postcode'
             self.assertIn(invalid_check, data)
 
     def test_change(self):

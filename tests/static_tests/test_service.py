@@ -6,7 +6,6 @@ load_dotenv(find_dotenv())
 
 from app import app, inject_timestamps_tests
 from app.service import format_timestamp, as_datestamp
-from ..utils import website_timestamp, timestamp
 
 latest_timestamp = "2020-11-22T16:39:13.575774Z"
 
