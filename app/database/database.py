@@ -73,7 +73,7 @@ class CosmosDB:
         return list(self.query_iter(query, params, partition))
 
     def paginated_query(self, query: str, params: ParametersType,
-                        partition: Union[str, None] = None, limit: int = 1000,
+                        partition: Union[str, None] = None, limit: int = 10000,
                         page: Union[int, None] = None) -> PaginatedResponse:
         """
 
