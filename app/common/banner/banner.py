@@ -8,7 +8,7 @@ from datetime import datetime
 
 # 3rd party:
 from markdown import markdown
-from flask import current_app as app
+from flask import request, current_app as app
 
 # Internal:
 from ...storage import StorageClient
@@ -33,17 +33,28 @@ def prep_data(item):
     return item
 
 
+def filter_fn(timestamp):
+    path = request.path
+
+    def func(item):
+        is_published = item['appearByUpdate'] <= timestamp < item['disappearByUpdate']
+
+        display_uri = item.get("displayUri", list())
+
+        if len(display_uri) > 0:
+            return is_published and path.lower() in display_uri
+
+        return is_published
+
+    return func
+
 def get_banners(timestamp):
     with StorageClient(**BANNER_DATA) as client:
         full_data = loads(client.download().readall().decode())
 
     data = map(prep_data, full_data)
     timestamp = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
-
-    banners = filter(
-        lambda item: item['appearByUpdate'] <= timestamp < item['disappearByUpdate'],
-        data
-    )
+    banners = filter(filter_fn(timestamp), data)
 
     for banner in banners:
         yield {
