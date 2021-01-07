@@ -30,7 +30,8 @@ __all__ = [
     'get_alert_level',
     'get_postcode_areas',
     'latest_rate_by_metric',
-    'change_by_metric'
+    'change_by_metric',
+    'get_vaccinations'
 ]
 
 
@@ -155,9 +156,25 @@ def get_postcode_areas(postcode) -> Dict[str, str]:
     return get_postcode_areas_from_db(postcode)
 
 
-@cache_client.memoize(60 * 60 * 6)
+@cache_client.memoize(60 * 60 * 24)
 def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
     query = queries.LatestTransmissionRate
+
+    params = [
+        {"name": "@releaseTimestamp", "value": latest_timestamp},
+        {"name": "@areaName", "value": area_name.lower()}
+    ]
+
+    result = data_db.query(query, params=params).pop()
+
+    result['date'] = process_dates(result['date'])['formatted']
+
+    return result
+
+
+@cache_client.memoize(60 * 60 * 24)
+def get_vaccinations(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
+    query = queries.Vaccinations
 
     params = [
         {"name": "@releaseTimestamp", "value": latest_timestamp},

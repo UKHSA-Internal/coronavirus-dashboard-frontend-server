@@ -20,7 +20,8 @@ __all__ = [
     'AlertLevel',
     'SpecimenDateData',
     'LatestTransmissionRate',
-    "HealthCheck"
+    "HealthCheck",
+    "Vaccinations"
 ]
 
 
@@ -233,4 +234,18 @@ HealthCheck = """\
 SELECT TOP 1 *
 FROM c 
 WHERE c.type = 'general'\
+"""
+
+
+Vaccinations = """\
+SELECT TOP 1 
+    c.date,
+    c.cumPeopleReceivingFirstDose,
+    c.cumPeopleReceivingSecondDose
+FROM c 
+WHERE    c.releaseTimestamp = @releaseTimestamp
+     AND c.areaNameLower    = @areaName
+     AND IS_DEFINED(c.cumPeopleReceivingFirstDose)
+ORDER BY 
+    c.date DESC\
 """
