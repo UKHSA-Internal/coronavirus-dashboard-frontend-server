@@ -73,7 +73,7 @@ class TestPostcode(unittest.TestCase):
             data = response.data
             cases_change, cases_percentage_change = calculate_change(cases_metric, "ltla", postcode)
             deaths_change, deaths_percentage_change = calculate_change(deaths_metric, "ltla", postcode)
-            admissions_change, admissions_percentage_change = calculate_change(healthcare_metric, "nhsRegion", postcode)
+            admissions_change, admissions_percentage_change = calculate_change(healthcare_metric, "nhsTrust", postcode)
             tests_change, tests_percentage_change = calculate_change(testing_metric, "nation", postcode)
 
             self.assertIn(cases_change.encode(), data)
@@ -90,7 +90,7 @@ class TestPostcode(unittest.TestCase):
             data = response.data
             cases_change, cases_percentage_change = calculate_change(cases_metric, "ltla", postcode)
             deaths_change, deaths_percentage_change = calculate_change(deaths_metric, "ltla", postcode)
-            admissions_change, admissions_percentage_change = calculate_change(healthcare_metric, "nhsRegion", postcode)
+            admissions_change, admissions_percentage_change = calculate_change(healthcare_metric, "nhsTrust", postcode)
             tests_change, tests_percentage_change = calculate_change(testing_metric, "nation", postcode)
 
             self.assertIn(cases_percentage_change.encode(), data)
@@ -106,7 +106,7 @@ class TestPostcode(unittest.TestCase):
             data = response.data
             cases_latest_date, cases_current_week_date, cases_latest_week_ago_date, cases_date_fortnight_prior = get_date_min_max(cases_metric, "ltla", postcode)
             deaths_latest_date, deaths_current_week_date, deaths_latest_week_ago_date, deaths_date_fortnight_prior = get_date_min_max(deaths_metric, "ltla", postcode)
-            admissions_latest_date, admissions_current_week_date, admissions_latest_week_ago_date, admissions_date_fortnight_prior = get_date_min_max(healthcare_metric, "nhsRegion", postcode)
+            admissions_latest_date, admissions_current_week_date, admissions_latest_week_ago_date, admissions_date_fortnight_prior = get_date_min_max(healthcare_metric, "nhsTrust", postcode)
             tests_latest_date, tests_current_week_date, tests_latest_week_ago_date, tests_date_fortnight_prior = get_date_min_max(deaths_metric, "ltla", postcode)
 
             self.assertIn(cases_latest_date.encode(), data), self.assertIn(cases_current_week_date.encode(), data), self.assertIn(cases_latest_week_ago_date.encode(), data), self.assertIn(cases_date_fortnight_prior.encode(), data)

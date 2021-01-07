@@ -34,7 +34,7 @@ class TestUtils(unittest.TestCase):
 
     def test_get_card_data(self):
         # using same methods without DB calls
-        self.assertEqual(metric_data[0]["date"].strftime('%-d %B %Y'), "3 January 2021")
+        self.assertEqual(metric_data[0]["date"].strftime('%-d %B %Y'), "4 January 2021")
     
     def test_get_og_names(self):
         self.assertEqual(get_og_image_names(timestamp),['/downloads/og-images/og-summary_20210104.png', '/downloads/og-images/og-newCasesByPublishDate_20210104.png', '/downloads/og-images/og-newDeaths28DaysByPublishDate_20210104.png', '/downloads/og-images/og-newAdmissions_20210104.png', '/downloads/og-images/og-newVirusTests_20210104.png']

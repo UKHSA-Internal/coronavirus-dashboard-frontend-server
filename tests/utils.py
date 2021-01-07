@@ -12,7 +12,7 @@ load_dotenv(find_dotenv())
 
 http = urllib3.PoolManager()
 
-website_timestamp = http.request('GET', 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').data.decode('ascii')
+#website_timestamp = http.request('GET', 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').data.decode('ascii')
 
 # get release timestamp from file, if date is old fetch the latest from the API
 with open("../timefile.txt", 'r' ) as f:
@@ -41,10 +41,12 @@ def get_date_range(start_date: str, end_date: str) -> list:
 # return postcode area as specified
 def get_postcode_area_code(postcode : str, area_type : str):
     postcode_data = json.loads(http.request('GET', f'https://api.coronavirus.data.gov.uk/v1/code?category=postcode&search={postcode}').data.decode())
-    
     # if there's no area_type for the specified NHS region (E.g. areas outside of England) return nation instead
-    if postcode_data[area_type] == None and area_type == "nhsRegion":
+    if postcode_data["nhsTrust"] == None and area_type == "nhsTrust":
         return postcode_data["nation"]
+    # get trust code
+    elif area_type == "nhsTrust":
+        return postcode_data["nhsTrust"]
     else:
         return postcode_data[area_type]
 
@@ -57,11 +59,10 @@ def get_area_data(metric: str, area_type: str, postcode: str):
         if (area_code[:1] == 'W' or area_code[:1] == 'N') and metric == "newDeaths28DaysByPublishDate":
             area_code = get_postcode_area_code(postcode, "nation")
             area_type = "nation"
-        # if the area code isn't England use national data instead of nhsRegions
-        elif area_code[:1] != 'E' and area_type == "nhsRegion":
+        # if the area code isn't England use national data instead of nhsTrusts
+        elif area_code[:1] != 'E' and area_type == "nhsTrust" and len(area_code) > 3:
             area_type = "nation"
         data = json.loads(http.request('GET', f'https://api.coronavirus.data.gov.uk/v1/data?filters=areaType={area_type};areaCode={area_code}&structure=%7B%22{metric}%22:%22{metric}%22,%22date%22:%22date%22%7D').data.decode())
-
     return data
 
 

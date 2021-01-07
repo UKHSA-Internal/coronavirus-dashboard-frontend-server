@@ -21,23 +21,22 @@ def generate_fortnight_and_metric_data(selection=None):
         metric_data = str(metric_data)
         metric_data = metric_data.strip('[]')
         metric_data = metric_data.replace('}, ', '}\n')
-        print(metric_data)
         with open('met_data.txt', 'w') as datafile:
             datafile.write(metric_data)
     
     elif selection == "fortnight":
         with open('fort_data', 'w') as datafile:
-            datafile.write(fortnight_data)
+            datafile.write(str(fortnight_data))
 
     else:
         metric_data = str(metric_data)
         metric_data = metric_data.strip('[]')
         metric_data = metric_data.replace('},', '}\n')
-        print(metric_data)
         with open('met_data.txt', 'w') as datafile:
             datafile.write(metric_data)
         
         with open('fort_data', 'w') as datafile:
-            datafile.write(fortnight_data)
+            datafile.write(str(fortnight_data))
 
-#generate_fortnight_and_metric_data("metric")
+
+#generate_fortnight_and_metric_data()
