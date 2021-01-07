@@ -351,3 +351,28 @@ main {
     color: #383F43;
   }
 }
+
+.stand-alone-metric {
+  border-left: 8px solid #b1b4b6;
+  @extend .govuk-\!-padding-left-2;
+  @extend .govuk-\!-padding-top-1;
+  @extend .govuk-\!-padding-bottom-1;
+  @extend .govuk-\!-margin-bottom-2;
+
+  &>.sam-heading {
+    @extend .govuk-heading-s;
+    @extend .govuk-\!-margin-bottom-1;
+    @extend .govuk-\!-margin-top-0;
+  }
+
+  &>.sam-body {
+    @extend .govuk-body;
+    @extend .govuk-\!-margin-bottom-1;
+    @extend .govuk-\!-margin-top-0;
+
+    &:last-child {
+      @extend .govuk-\!-margin-bottom-0;
+    }
+  }
+
+}
