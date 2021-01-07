@@ -4,10 +4,11 @@
 {% set urlHash = "#card-people_who_have_received_vaccinations" %}
 <div class="stand-alone-metric">
 	<h3 class="sam-heading">
-		Total 1st dose vaccines delivered
-		{% if area_info is defined -%}
-			in {{ area_info.nationName }}
-		{%- endif %}
+		People vaccinated
+		{%- if area_info is defined -%}
+			&nbsp;in {{ area_info.nationName }}
+		{%- endif -%}
+		&nbsp;&mdash; 1st&nbsp;dose
 	</h3>
 	<p class="sam-body">
 		{{ firstDose|format_number }} as of {{ vaccinations.date }}.
