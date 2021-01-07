@@ -48,6 +48,7 @@ def filter_fn(timestamp):
 
     return func
 
+
 def get_banners(timestamp):
     with StorageClient(**BANNER_DATA) as client:
         full_data = loads(client.download().readall().decode())
