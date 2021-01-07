@@ -11,9 +11,8 @@ from flask import render_template, request, g, Blueprint, current_app as app
 
 # Internal: 
 from ..common.data.queries import (
-    get_data_by_postcode,
-    get_msoa_data, get_r_values, get_alert_level,
-    get_postcode_areas, latest_rate_by_metric
+    get_data_by_postcode, get_msoa_data, get_r_values, get_alert_level,
+    get_postcode_areas, latest_rate_by_metric, get_vaccinations
 )
 
 from .utils import get_validated_postcode, get_card_data
@@ -99,6 +98,7 @@ def postcode_search() -> render_template:
             "main.html",
             invalid_postcode=True,
             r_values=get_r_values(g.timestamp),
+            vaccinations=get_vaccinations(g.timestamp),
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
             deaths_rate=latest_rate_by_metric(g.timestamp, "newDeaths28DaysByDeathDate"),
             admissions_rate=latest_rate_by_metric(g.timestamp, "newAdmissions"),
@@ -108,8 +108,9 @@ def postcode_search() -> render_template:
     postcode_data = get_postcode_areas(postcode)
 
     healthcare_region = postcode_data['nhsRegionName']
+    nation = postcode_data['nationName']
     if healthcare_region is None:
-        healthcare_region = postcode_data['nationName']
+        healthcare_region = nation
 
     return render_template(
         "postcode_results.html",
@@ -119,6 +120,7 @@ def postcode_search() -> render_template:
         cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate", True, postcode),
         admissions_rate=latest_rate_by_metric(g.timestamp, "newAdmissions", True, postcode),
         r_values=get_r_values(g.timestamp, healthcare_region),
+        vaccinations=get_vaccinations(g.timestamp, nation),
         smallest_area=get_by_smallest_areatype(list(response.values()), get_area_type),
         alert_level=get_alert_level(postcode, g.timestamp),
         msoa=get_msoa_data(postcode, g.timestamp),
