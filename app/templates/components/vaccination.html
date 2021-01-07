@@ -1,0 +1,19 @@
+{% set firstDose  = vaccinations.cumPeopleReceivingFirstDose  | default(None) %}
+{% set secondDose = vaccinations.cumPeopleReceivingSecondDose | default(None) %}
+{% set urlPath = "/details/healthcare" %}
+{% set urlHash = "#card-people_who_have_received_vaccinations_by_nation" %}
+<div class="stand-alone-metric">
+	<h3 class="sam-heading">
+		Total 1st dose vaccines delivered
+		{% if area_info is defined -%}
+			in {{ area_info.nationName }}
+		{%- endif %}
+	</h3>
+	<p class="sam-body">
+		{{ firstDose|format_number }} as of {{ vaccinations.date }}.
+		<a class="govuk-link govuk-link--no-visited-state"
+		   href="{{ urlPath }}{% if area_info is defined %}?areaType=nation&areaName={{ area_info.nationName }}{% endif %}{{ urlHash }}">
+			View vaccination data
+		</a>
+	</p>
+</div>
