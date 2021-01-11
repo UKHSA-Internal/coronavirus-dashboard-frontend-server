@@ -71,7 +71,7 @@ SELECT TOP 1
 FROM     c
 WHERE    c.releaseTimestamp = @releaseTimestamp
      AND c.areaNameLower    = @areaName
-     AND IS_DEFINED(c.transmissionRateMin)
+     AND IS_DEFINED(c.transmissionRateMax)
 ORDER BY 
     c.releaseTimestamp DESC,
     c.date             DESC,
@@ -240,13 +240,13 @@ WHERE c.type = 'general'\
 Vaccinations = """\
 SELECT TOP 1 VALUE {
         'date': c.date,
-        'cumPeopleReceivingFirstDose': c.newPeopleVaccinatedFirstDoseByPublishDate,
-        'cumPeopleReceivingSecondDose': c.newPeopleVaccinatedSecondDoseByPublishDate
+        'cumPeopleReceivingFirstDose': c.cumPeopleVaccinatedFirstDoseByPublishDate,
+        'cumPeopleReceivingSecondDose': c.cumPeopleVaccinatedSecondDoseByPublishDate
     }
 FROM c 
 WHERE    c.releaseTimestamp = @releaseTimestamp
      AND c.areaNameLower    = @areaName
-     AND IS_DEFINED(c.newPeopleVaccinatedFirstDoseByPublishDate)
+     AND IS_DEFINED(c.cumPeopleVaccinatedFirstDoseByPublishDate)
 ORDER BY 
     c.date DESC\
 """
