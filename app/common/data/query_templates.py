@@ -238,14 +238,15 @@ WHERE c.type = 'general'\
 
 
 Vaccinations = """\
-SELECT TOP 1 
-    c.date,
-    c.cumPeopleReceivingFirstDose,
-    c.cumPeopleReceivingSecondDose
+SELECT TOP 1 VALUE {
+        'date': c.date,
+        'cumPeopleReceivingFirstDose': c.cumPeopleVaccinatedFirstDoseByVaccinationDate,
+        'cumPeopleReceivingSecondDose': c.cumPeopleVaccinatedSecondDoseByVaccinationDate
+    }
 FROM c 
 WHERE    c.releaseTimestamp = @releaseTimestamp
      AND c.areaNameLower    = @areaName
-     AND IS_DEFINED(c.cumPeopleReceivingFirstDose)
+     AND IS_DEFINED(c.cumPeopleVaccinatedFirstDoseByVaccinationDate)
 ORDER BY 
     c.date DESC\
 """
