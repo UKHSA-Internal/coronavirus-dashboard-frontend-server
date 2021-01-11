@@ -12,7 +12,7 @@ load_dotenv(find_dotenv())
 
 http = urllib3.PoolManager()
 
-#website_timestamp = http.request('GET', 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').data.decode('ascii')
+website_timestamp = http.request('GET', 'https://coronavirus.data.gov.uk/public/assets/dispatch/website_timestamp').data.decode('ascii')
 
 # get release timestamp from file, if date is old fetch the latest from the API
 with open("../timefile.txt", 'r' ) as f:
@@ -23,7 +23,7 @@ timestamp_obj = datetime.datetime.strptime(timestamp[:10], "%Y-%m-%d")
 if datetime.datetime.now().replace(hour=0, minute= 0, second=0, microsecond=0) - datetime.timedelta(days=1) > timestamp_obj:
     json_timestamp = json.loads(http.request('GET','https://api.coronavirus.data.gov.uk/v2/data?areaType=overview&metric=releaseTimestamp').data.decode())
     timestamp = json_timestamp["body"][0]["releaseTimestamp"]
-    with open("timefile.txt", "w") as f:
+    with open("../timefile.txt", "w") as f:
         f.write(timestamp)
 
 
