@@ -53,6 +53,9 @@ def get_banners(timestamp):
     with StorageClient(**BANNER_DATA) as client:
         full_data = loads(client.download().readall().decode())
 
+    if full_data is None:
+        full_data = list()
+
     data = map(prep_data, full_data)
     timestamp = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
     banners = filter(filter_fn(timestamp), data)
