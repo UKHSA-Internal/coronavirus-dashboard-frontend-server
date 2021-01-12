@@ -24,13 +24,13 @@ class PostcodeMappingCheck(unittest.TestCase):
             response = client.get('/search?postcode=DA144HA')
 
         data = response.data
-        self.assertIn(b'Sidcup West', data)
+        self.assertIn(b'Sidcup East', data)
 
         with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
             response = client.get('/search?postcode=DA157HD')
 
         data = response.data
-        self.assertIn(b'Sidcup East', data)
+        self.assertIn(b'Sidcup West', data)
 
     def test_LTLA_names(self):
         with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
@@ -49,7 +49,7 @@ class PostcodeMappingCheck(unittest.TestCase):
             response = client.get('/search?postcode=BB186JH')
 
         data = response.data
-        self.assertIn(b'Craven', data)
+        self.assertIn(b'Pendle', data)
 
         with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
             response = client.get('/search?postcode=GL73HA')

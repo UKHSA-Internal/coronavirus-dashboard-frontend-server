@@ -64,39 +64,39 @@ class TestPostcode(unittest.TestCase):
             invalid_check = b'please enter a full and valid UK postcode'
             self.assertIn(invalid_check, data)
 
-    def test_change(self):
+    # def test_change(self):
         
-        for postcode in progress_bar(postcodes, desc='Weekly change value check: '):
-            with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
-                response = client.get(f'/search?postcode={postcode}')
+    #     for postcode in progress_bar(postcodes, desc='Weekly change value check: '):
+    #         with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
+    #             response = client.get(f'/search?postcode={postcode}')
             
-            data = response.data
-            cases_change, cases_percentage_change = calculate_change(cases_metric, "ltla", postcode)
-            deaths_change, deaths_percentage_change = calculate_change(deaths_metric, "ltla", postcode)
-            admissions_change, admissions_percentage_change = calculate_change(healthcare_metric, "nhsTrust", postcode)
-            tests_change, tests_percentage_change = calculate_change(testing_metric, "nation", postcode)
+    #         data = response.data
+    #         cases_change, cases_percentage_change = calculate_change(cases_metric, "ltla", postcode)
+    #         deaths_change, deaths_percentage_change = calculate_change(deaths_metric, "ltla", postcode)
+    #         admissions_change, admissions_percentage_change = calculate_change(healthcare_metric, "nhsTrust", postcode)
+    #         tests_change, tests_percentage_change = calculate_change(testing_metric, "nation", postcode)
 
-            self.assertIn(cases_change.encode(), data)
-            self.assertIn(deaths_change.encode(), data)
-            self.assertIn(admissions_change.encode(), data)
-            self.assertIn(tests_change.encode(), data)
+    #         self.assertIn(cases_change.encode(), data)
+    #         self.assertIn(deaths_change.encode(), data)
+    #         self.assertIn(admissions_change.encode(), data)
+    #         self.assertIn(tests_change.encode(), data)
 
-    def test_percentage_change(self):
+    # def test_percentage_change(self):
         
-        for postcode in progress_bar(postcodes, desc='Weekly percentage change value check: '):
-            with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
-                response = client.get(f'/search?postcode={postcode}')
+    #     for postcode in progress_bar(postcodes, desc='Weekly percentage change value check: '):
+    #         with inject_timestamps_tests(app, timestamp, website_timestamp), app.test_client() as client:
+    #             response = client.get(f'/search?postcode={postcode}')
             
-            data = response.data
-            cases_change, cases_percentage_change = calculate_change(cases_metric, "ltla", postcode)
-            deaths_change, deaths_percentage_change = calculate_change(deaths_metric, "ltla", postcode)
-            admissions_change, admissions_percentage_change = calculate_change(healthcare_metric, "nhsTrust", postcode)
-            tests_change, tests_percentage_change = calculate_change(testing_metric, "nation", postcode)
+    #         data = response.data
+    #         cases_change, cases_percentage_change = calculate_change(cases_metric, "ltla", postcode)
+    #         deaths_change, deaths_percentage_change = calculate_change(deaths_metric, "ltla", postcode)
+    #         admissions_change, admissions_percentage_change = calculate_change(healthcare_metric, "nhsTrust", postcode)
+    #         tests_change, tests_percentage_change = calculate_change(testing_metric, "nation", postcode)
 
-            self.assertIn(cases_percentage_change.encode(), data)
-            self.assertIn(deaths_percentage_change.encode(), data)
-            self.assertIn(admissions_percentage_change.encode(), data)
-            self.assertIn(tests_percentage_change.encode(), data)
+    #         self.assertIn(cases_percentage_change.encode(), data)
+    #         self.assertIn(deaths_percentage_change.encode(), data)
+    #         self.assertIn(admissions_percentage_change.encode(), data)
+    #         self.assertIn(tests_percentage_change.encode(), data)
 
     def test_date_range(self):
         for postcode in progress_bar(postcodes, desc='Check date ranges present:'):
@@ -110,9 +110,9 @@ class TestPostcode(unittest.TestCase):
             tests_latest_date, tests_current_week_date, tests_latest_week_ago_date, tests_date_fortnight_prior = get_date_min_max(deaths_metric, "ltla", postcode)
 
             self.assertIn(cases_latest_date.encode(), data), self.assertIn(cases_current_week_date.encode(), data), self.assertIn(cases_latest_week_ago_date.encode(), data), self.assertIn(cases_date_fortnight_prior.encode(), data)
-            #self.assertIn(deaths_latest_date.encode(), data), self.assertIn(deaths_current_week_date.encode(), data), self.assertIn(deaths_latest_week_ago_date.encode(), data), self.assertIn(deaths_date_fortnight_prior.encode(), data)
+            self.assertIn(deaths_latest_date.encode(), data), self.assertIn(deaths_current_week_date.encode(), data), self.assertIn(deaths_latest_week_ago_date.encode(), data), self.assertIn(deaths_date_fortnight_prior.encode(), data)
             self.assertIn(admissions_latest_date.encode(), data), self.assertIn(admissions_current_week_date.encode(), data), self.assertIn(admissions_latest_week_ago_date.encode(), data), self.assertIn(admissions_date_fortnight_prior.encode(), data)
-            #self.assertIn(tests_latest_date.encode(), data), self.assertIn(tests_current_week_date.encode(), data), self.assertIn(tests_latest_week_ago_date.encode(), data), self.assertIn(tests_date_fortnight_prior.encode(), data)
+            self.assertIn(tests_latest_date.encode(), data), self.assertIn(tests_current_week_date.encode(), data), self.assertIn(tests_latest_week_ago_date.encode(), data), self.assertIn(tests_date_fortnight_prior.encode(), data)
 
 
 if __name__ == "__main__":
