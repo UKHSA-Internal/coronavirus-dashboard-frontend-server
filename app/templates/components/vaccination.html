@@ -12,7 +12,7 @@
 		&nbsp;&mdash; 1st&nbsp;dose
 	</h3>
 	<p class="sam-body">
-		{{ firstDose|format_number }} as of {{ vaccinations.date }}.
+		{{ firstDose|format_number }} up to and including {{ vaccinations.date }}.
 		<a class="govuk-link govuk-link--no-visited-state"
 		   href="{{ urlPath }}{% if area_info is defined %}?areaType=nation&areaName={{ area_info.nationName }}{% endif %}{{ urlHash }}">
 			View vaccination data
