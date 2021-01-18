@@ -227,4 +227,10 @@ server {
 
     }
 
+    location = /sitemap.xml {
+
+        proxy_pass             https://coronavirus.data.gov.uk/public/assets/supplements/sitemap.xml;
+
+    }
+
 }
