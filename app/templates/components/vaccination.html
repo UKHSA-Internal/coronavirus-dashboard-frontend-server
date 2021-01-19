@@ -1,7 +1,6 @@
 {% set firstDose  = vaccinations.cumPeopleReceivingFirstDose  | default(None) %}
 {% set secondDose = vaccinations.cumPeopleReceivingSecondDose | default(None) %}
-{% set urlPath = "/details/healthcare" %}
-{% set urlHash = "#card-people_who_have_received_vaccinations_by_report_date_daily" %}
+{% set urlPath = "/details/vaccinations" %}
 
 <div class="stand-alone-metric">
 	<h3 class="sam-heading">
@@ -14,7 +13,7 @@
 	<p class="sam-body">
 		{{ firstDose|format_number }} up to and including {{ vaccinations.date }}.
 		<a class="govuk-link govuk-link--no-visited-state"
-		   href="{{ urlPath }}{% if area_info is defined %}?areaType=nation&areaName={{ area_info.nationName }}{% endif %}{{ urlHash }}">
+		   href="{{ urlPath }}{% if area_info is defined %}?areaType=nation&areaName={{ area_info.nationName }}{% endif %}">
 			View vaccination data
 		</a>
 	</p>
