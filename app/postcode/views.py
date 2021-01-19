@@ -5,6 +5,7 @@
 # Python:
 import logging
 from operator import itemgetter
+from functools import wraps
 
 # 3rd party:
 from flask import render_template, request, g, Blueprint, current_app as app
@@ -17,6 +18,7 @@ from ..common.data.queries import (
 
 from .utils import get_validated_postcode, get_card_data
 from ..common.utils import get_main_data
+from ..landing.utils import get_landing_data
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -55,7 +57,21 @@ def get_by_smallest_areatype(items, areatype_getter):
     return result
 
 
+def with_globals(view_fn):
+    @wraps(view_fn)
+    def injector(*args, **kwargs):
+        landing_page_kwargs = get_landing_data(g.timestamp)
+        response_kws = {
+            **view_fn(*args, **kwargs),
+            **landing_page_kwargs
+        }
+        return render_template(**response_kws)
+
+    return injector
+
+
 @postcode_page.route('/search')
+@with_globals
 def postcode_search() -> render_template:
     postcode = get_validated_postcode(request.args)
 
@@ -68,8 +84,8 @@ def postcode_search() -> render_template:
                 "validated": False
             }
         })
-        return render_template(
-            "main.html",
+        return dict(
+            template_name_or_list="main.html",
             invalid_postcode=True,
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
             deaths_rate=latest_rate_by_metric(g.timestamp, "newDeaths28DaysByDeathDate"),
@@ -94,8 +110,8 @@ def postcode_search() -> render_template:
         }
     except IndexError as err:
         app.logger.exception(err)
-        return render_template(
-            "main.html",
+        return dict(
+            template_name_or_list="main.html",
             invalid_postcode=True,
             r_values=get_r_values(g.timestamp),
             vaccinations=get_vaccinations(g.timestamp),
@@ -112,8 +128,8 @@ def postcode_search() -> render_template:
     if healthcare_region is None:
         healthcare_region = nation
 
-    return render_template(
-        "postcode_results.html",
+    return dict(
+        template_name_or_list="postcode_results.html",
         postcode_data=response,
         postcode=postcode.upper(),
         area_info=postcode_data,
