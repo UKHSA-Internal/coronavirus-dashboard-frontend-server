@@ -74,7 +74,7 @@ app = Flask(
     static_url_path="/assets",
     template_folder='templates'
 )
-
+app.url_map.strict_slashes = False
 config_integration.trace_integrations(['requests'])
 config_integration.trace_integrations(['logging'])
 
