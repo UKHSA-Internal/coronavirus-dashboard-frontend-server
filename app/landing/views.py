@@ -14,10 +14,10 @@ Contributors:  Pouria Hadjibagheri
 # Python:
 
 # 3rd party:
-from flask import render_template, Blueprint, make_response, request
+from flask import render_template, g, Blueprint, make_response, request
 
 # Internal: 
-from ..common.caching import cache_client
+from .utils import get_landing_data
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -34,4 +34,4 @@ def index_get() -> render_template:
     if request.method == "HEAD":
         return make_response("", 200)
 
-    return render_template("main.html")
+    return render_template("main.html", **get_landing_data(g.timestamp))
