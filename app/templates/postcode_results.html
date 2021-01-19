@@ -54,6 +54,11 @@
 		only available at nation level.
 	</p>
 
+	<p class="govuk-body-m govuk-!-margin-bottom-3">
+		See the <a class="govuk-link govuk-link--no-visited-state"
+		           href="/easy_read?postcode={{ postcode }}" rel="next">easy read summary</a> for
+		{{ area_info[nameAttr] }}{% if nameAttr == "msoaName" %}, {{ area_info.utlaName }}{% endif %}.
+	</p>
 	{% include "components/vaccination.html" %}
 	{% include "components/r_number.html" %}
 
