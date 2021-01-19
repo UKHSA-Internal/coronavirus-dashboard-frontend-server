@@ -133,16 +133,6 @@
 				   style="text-decoration: none"
 				   rel="next"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ card.areaName | trim_area_name }}{% endif %}</b></a>
 				</p>
-				{% if is_postcode %}
-					<p class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 body-small govuk-!-margin-top-3">
-						<a href="/downloads/easy_read/{{ card.areaType.abbr }}/{{ card.areaName }}.docx"
-						   class="govuk-link govuk-link--no-visited-state"
-						   lang="en-GB" style="text-decoration: none"
-						   type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-						   download="{{ card.areaName }}-{{ card.areaType.short | lower }}_{{ timestamp | as_datestamp }}">Easy-read
-							report for {{ card.areaName | trim_area_name }}</a>
-					</p>
-				{% endif %}
 		</div>
 
 	</div>
