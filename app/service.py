@@ -60,7 +60,7 @@ PYTHON_TIMESTAMP_LEN = 24
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 LOG_LEVEL = getenv("LOG_LEVEL", "INFO")
 
-timestamp_pattern = "%A %d %B %Y at %I:%M %p"
+timestamp_pattern = "%A %d %B %Y at %-I:%M %p"
 timezone_LN = timezone("Europe/London")
 
 lookup_db = CosmosDB(Collection.LOOKUP)
