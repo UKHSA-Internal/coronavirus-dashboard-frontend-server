@@ -62,8 +62,8 @@ def with_globals(view_fn):
     def injector(*args, **kwargs):
         landing_page_kwargs = get_landing_data(g.timestamp)
         response_kws = {
-            **view_fn(*args, **kwargs),
-            **landing_page_kwargs
+            **landing_page_kwargs,
+            **view_fn(*args, **kwargs)
         }
         return render_template(**response_kws)
 
@@ -85,12 +85,12 @@ def postcode_search() -> render_template:
             }
         })
         return dict(
+            **data,
             template_name_or_list="main.html",
             invalid_postcode=True,
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
             deaths_rate=latest_rate_by_metric(g.timestamp, "newDeaths28DaysByDeathDate"),
             admissions_rate=latest_rate_by_metric(g.timestamp, "newAdmissions"),
-            **data
         )
 
     app.logger.info("Postcode search", extra={
@@ -111,6 +111,7 @@ def postcode_search() -> render_template:
     except IndexError as err:
         app.logger.exception(err)
         return dict(
+            **data,
             template_name_or_list="main.html",
             invalid_postcode=True,
             r_values=get_r_values(g.timestamp),
@@ -118,7 +119,6 @@ def postcode_search() -> render_template:
             cases_rate=latest_rate_by_metric(g.timestamp, "newCasesBySpecimenDate"),
             deaths_rate=latest_rate_by_metric(g.timestamp, "newDeaths28DaysByDeathDate"),
             admissions_rate=latest_rate_by_metric(g.timestamp, "newAdmissions"),
-            **data
         )
 
     postcode_data = get_postcode_areas(postcode)
