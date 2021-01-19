@@ -26,7 +26,6 @@ from opencensus.trace.propagation.trace_context_http_header_format import TraceC
 # Internal:
 from app.postcode.views import postcode_page
 from app.landing.views import home_page
-from app.landing.utils import get_landing_data
 from app.common.data.variables import NationalAdjectives, IsImproving
 from app.common.caching import cache_client
 from app.common.banner import get_banners
@@ -166,6 +165,41 @@ def trim_area_name(area_name):
 
 
 @app.template_filter()
+def cards_to_easy_read(cards):
+    cards_dict = {
+        item["caption"].lower(): item
+        for item in cards
+    }
+
+    return cards_dict
+
+
+@app.template_filter()
+def pluralise(number, singular, plural, null=str()):
+    if abs(number) > 1:
+        return plural
+
+    if abs(number) == 1:
+        return singular
+
+    if number == 0 and not len(null) :
+        return plural
+
+    return null
+
+
+@app.template_filter()
+def comparison_verb(number, greater, smaller, same):
+    if number > 0:
+        return greater
+
+    if number < 0:
+        return smaller
+
+    return same
+
+
+@app.template_filter()
 def isnone(value):
     return value is None
 
@@ -214,8 +248,7 @@ def get_globals(website_timestamp):
         timestamp=website_timestamp,
         app_insight_token=INSTRUMENTATION_CODE,
         og_images=get_og_image_names(g.timestamp),
-        banners=get_banners,
-        **get_landing_data(g.timestamp)
+        banners=get_banners
     )
 
     return response
