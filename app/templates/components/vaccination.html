@@ -3,15 +3,16 @@
 {% set urlPath = "/details/vaccinations" %}
 
 <div class="stand-alone-metric">
-	<h3 class="sam-heading">
-		People vaccinated
-		{%- if area_info is defined -%}
-			&nbsp;in {{ area_info.nationName }}
-		{%- endif -%}
-		&nbsp;&mdash; 1st&nbsp;dose
-	</h3>
+	{% if area_info is undefined -%}
+		<h3 class="sam-heading">People vaccinated up to and including {{ vaccinations.date }}</h3>
+	{% else %}
+		<h4 class="sam-heading">
+			People vaccinated up to and including {{ vaccinations.date }}&nbsp;in {{ area_info.nationName }}
+		</h4>
+	{%- endif %}
+	<p class="sam-body govuk-!-margin-bottom-1">First dose: {{ firstDose|format_number }}</p>
+	<p class="sam-body">Second dose (fully vaccinated): {{ secondDose|format_number }}</p>
 	<p class="sam-body">
-		{{ firstDose|format_number }} up to and including {{ vaccinations.date }}.
 		<a class="govuk-link govuk-link--no-visited-state"
 		   href="{{ urlPath }}{% if area_info is defined %}?areaType=nation&areaName={{ area_info.nationName }}{% endif %}">
 			View vaccination data
