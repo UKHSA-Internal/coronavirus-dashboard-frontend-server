@@ -11,7 +11,7 @@
 		</h4>
 	{%- endif %}
 	<p class="sam-body govuk-!-margin-bottom-1">First dose: {{ firstDose|format_number }}</p>
-	<p class="sam-body">Second dose (fully vaccinated): {{ secondDose|format_number }}</p>
+	<p class="sam-body">Second dose: {{ secondDose|format_number }}</p>
 	<p class="sam-body">
 		<a class="govuk-link govuk-link--no-visited-state"
 		   href="{{ urlPath }}{% if area_info is defined %}?areaType=nation&areaName={{ area_info.nationName }}{% endif %}">
