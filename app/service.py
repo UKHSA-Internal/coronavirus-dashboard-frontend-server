@@ -320,15 +320,18 @@ def prepare_context():
 
 @app.after_request
 def prepare_response(resp: Response):
-    last_modified = datetime.strptime(
-        g.timestamp[:PYTHON_TIMESTAMP_LEN] + "Z",
-        "%Y-%m-%dT%H:%M:%S.%fZ"
-    )
+    last_modified = datetime.now()
+    # (
+    #     g.timestamp[:PYTHON_TIMESTAMP_LEN] + "Z",
+    #     "%Y-%m-%dT%H:%M:%S.%fZ"
+    # )
 
-    expires = datetime.now() + timedelta(minutes=1, seconds=30)
-
-    resp.headers['Last-Modified'] = last_modified.strftime(HTTP_DATE_FORMAT)
-    resp.headers['Expires'] = expires.strftime(HTTP_DATE_FORMAT)
+    resp.last_modified = last_modified
+    resp.expires = datetime.now() + timedelta(minutes=1, seconds=30)
+    resp.cache_control.max_age = 30
+    resp.cache_control.public = True
+    resp.cache_control.s_maxage = 90
+    resp.cache_control.must_revalidate = True
     resp.headers['PHE-Server-Loc'] = SERVER_LOCATION
 
     try:
