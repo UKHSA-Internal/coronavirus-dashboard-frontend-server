@@ -33,6 +33,11 @@
         @extend .govuk-\!-font-weight-bold
       }
 
+      &>p {
+        width: max-content;
+        margin: auto auto;
+      }
+
       &>p:last-of-type {
         @extend .govuk-\!-margin-bottom-0;
       }
