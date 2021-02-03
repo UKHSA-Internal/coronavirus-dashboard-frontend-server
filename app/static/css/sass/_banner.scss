@@ -27,6 +27,7 @@
       @extend .govuk-\!-padding-right-2;
       @extend .govuk-body-s;
       @extend .govuk-\!-margin-bottom-0;
+      display: grid;
 
       a {
         @extend .govuk-link;
@@ -34,8 +35,8 @@
       }
 
       &>p {
-        width: max-content;
-        margin: auto auto;
+        width: fit-content;
+        justify-self: center;
       }
 
       &>p:last-of-type {
