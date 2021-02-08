@@ -47,7 +47,7 @@ def get_whats_new_banners(timestamp: str):
     for banner in filtered_data:
         app.logger.info(banner)
         banner['anchor'] = special_chars_pattern.sub("", banner["headline"].lower())
-        banner['anchor'] = special_chars_pattern.sub("_", banner["anchor"])
+        banner['anchor'] = to_underscore_pattern.sub("_", banner["anchor"])
         banner['formatted_date'] = f"{datetime.strptime(banner['date'], '%Y-%m-%d'):%-d %B %Y}"
 
         yield banner
