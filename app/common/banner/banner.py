@@ -63,6 +63,6 @@ def get_banners(timestamp):
     for banner in banners:
         yield {
             "timestamp": banner["appearByUpdate"].date(),
-            "display_timestamp": banner["appearByUpdate"].strftime("%d %B %Y"),
+            "display_timestamp": banner["appearByUpdate"].strftime("%-d %B %Y"),
             "body": markdown(banner["body"])
         }
