@@ -120,9 +120,14 @@
 		{%- endif -%}
 
 		{%- if not is_postcode -%}
-			<figure class="graph mini-card-figure bottom-aligned">
-				<img src="{{ card.graph }}" alt="Graph">
-			</figure>
+			<a href="/details/{{ card.caption | lower }}"
+				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
+				   style="text-decoration: none;"
+				   rel="next">
+				<figure class="graph mini-card-figure">
+					<img src="{{ card.graph }}" alt="Graph - click for more details">
+				</figure>
+			</a>
 		{% endif %}
 
 		<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>
