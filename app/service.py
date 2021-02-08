@@ -29,6 +29,7 @@ from app.landing.views import home_page
 from app.common.data.variables import NationalAdjectives, IsImproving
 from app.common.caching import cache_client
 from app.common.banner import get_banners
+from app.common.whats_new import get_whats_new_banners
 from app.common.utils import get_og_image_names, add_cloud_role_name, get_notification_content
 from app.storage import StorageClient
 from app.common.data.query_templates import HealthCheck
@@ -248,7 +249,8 @@ def get_globals(website_timestamp):
         timestamp=website_timestamp,
         app_insight_token=INSTRUMENTATION_CODE,
         og_images=get_og_image_names(g.timestamp),
-        banners=get_banners
+        banners=get_banners,
+        whatsnew_banners=get_whats_new_banners
     )
 
     return response
