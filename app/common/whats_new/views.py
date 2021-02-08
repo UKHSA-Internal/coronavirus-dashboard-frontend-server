@@ -38,9 +38,13 @@ def get_whats_new_banners(timestamp: str):
         full_data = dict()
 
     data = full_data.get("changeLog", list())
+    filtered_data = filter(
+        lambda b: b["date"] == datestamp and b.get("displayBanner", False),
+        data
+    )
     datestamp = timestamp.split("T")[0]
 
-    for banner in filter(lambda b: b["date"] == datestamp, data):
+    for banner in filtered_data:
         app.logger.info(banner)
         banner['anchor'] = special_chars_pattern.sub("", banner["headline"].lower())
         banner['anchor'] = special_chars_pattern.sub("_", banner["anchor"])
