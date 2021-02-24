@@ -3,7 +3,7 @@ LABEL maintainer="Pouria Hadjibagheri <Pouria.Hadjibagheri@phe.gov.uk>"
 
 WORKDIR /app/static
 
-COPY ./app/static  /app/static
+COPY ./app/static                     /app/static
 
 RUN rm -rf node_modules
 RUN npm install
@@ -12,35 +12,62 @@ RUN npm run build /app/static
 RUN rm -rf node_modules
 
 
-FROM tiangolo/uwsgi-nginx-flask:python3.8
+
+
+FROM python:3.9.2-buster
 LABEL maintainer="Pouria Hadjibagheri <Pouria.Hadjibagheri@phe.gov.uk>"
 
-ENV UWSGI_INI /app/uwsgi.ini
+# Gunicorn binding port
+ENV PORT 5200
 
-ENV UWSGI_CHEAPER 15
-ENV UWSGI_PROCESSES 16
+COPY server/install-nginx.sh          /install-nginx.sh
 
-# Standard set up Nginx
-WORKDIR /app
+RUN bash /install-nginx.sh
+RUN rm /etc/nginx/conf.d/default.conf
 
-RUN apt-get update && apt-get upgrade -y --no-install-recommends
 
-COPY --from=builder /app/static/dist ./static
-COPY app/static/images               ./static/images
-COPY app/static/icon                 ./static/icon
-COPY app/static/govuk-frontend       ./static/govuk-frontend
+# Install Supervisord
+RUN apt-get update                             && \
+    apt-get upgrade -y --no-install-recommends && \
+    apt-get install -y supervisor              && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY server/base.nginx               ./nginx.conf
 COPY server/upload.nginx              /etc/nginx/conf.d/upload.conf
 COPY server/engine.nginx              /etc/nginx/conf.d/engine.conf
 
-COPY ./uwsgi.ini                     ./uwsgi.ini
-COPY ./app                           ./app
-COPY ./requirements.txt              ./requirements.txt
 
 RUN python3 -m pip install --no-cache-dir -U pip                      && \
     python3 -m pip install --no-cache-dir setuptools                  && \
-    python3 -m pip install -U --no-cache-dir -r ./requirements.txt    && \
+    python3 -m pip install --no-cache-dir "uvicorn[standard]" gunicorn
+
+# Gunicorn config
+COPY server/gunicorn_conf.py          /gunicorn_conf.py
+
+# Gunicorn entrypoint - used by supervisord
+COPY server/start-gunicorn.sh         /start-gunicorn.sh
+RUN chmod +x /start-gunicorn.sh
+
+# Custom Supervisord config
+COPY server/supervisord.conf          /etc/supervisor/conf.d/supervisord.conf
+
+# Main service entrypoint - launches supervisord
+COPY server/entrypoint.sh             /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+
+WORKDIR /app
+
+COPY --from=builder /app/static/dist ./static
+COPY app/static/images               ./static/images
+COPY app/static/icon                 ./static/icon
+COPY app/static/govuk-frontend       ./static/govuk-frontend
+COPY ./app                           ./app
+COPY ./requirements.txt              ./requirements.txt
+
+RUN python3 -m pip install -U --no-cache-dir -r ./requirements.txt    && \
     rm ./requirements.txt
 
 EXPOSE 5000
+
+ENTRYPOINT ["/entrypoint.sh"]
