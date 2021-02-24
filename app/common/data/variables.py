@@ -14,6 +14,7 @@ from typing import Dict, Callable, Union
 DestinationMetrics = {
     'cases': {
         "metric": 'newCasesByPublishDate',
+        "rate": "newCasesBySpecimenDateRollingRate",
         "caption": "Cases",
         "heading": "People tested positive",
         "postcode_destination": "ltla",
@@ -21,6 +22,7 @@ DestinationMetrics = {
     },
     'deaths': {
         "metric": 'newDeaths28DaysByPublishDate',
+        "rate": "newDeaths28DaysByDeathDateRollingRate",
         "caption": "Deaths",
         "heading": "Deaths within 28 days of positive test",
         "postcode_destination": "ltla",
@@ -28,6 +30,7 @@ DestinationMetrics = {
     },
     'healthcare': {
         "metric": 'newAdmissions',
+        "rate": "newAdmissions",
         "caption": "Healthcare",
         "heading": "Patients admitted",
         "postcode_destination": "nhsTrust",
@@ -35,6 +38,7 @@ DestinationMetrics = {
     },
     'testing': {
         "metric": 'newVirusTests',
+        "rate": None,
         "caption": "Testing",
         "heading": "Virus tests conducted",
         "postcode_destination": "nation"
