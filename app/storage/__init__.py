@@ -21,7 +21,7 @@ Contributors:  Pouria Hadjibagheri
 # 3rd party:
 
 # Internal:
-from .storage import StorageClient
+from .storage import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Header

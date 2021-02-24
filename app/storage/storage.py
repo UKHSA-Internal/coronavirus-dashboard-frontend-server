@@ -6,7 +6,7 @@
 import logging
 from os import getenv
 from sys import stdout
-from typing import Union, NoReturn
+from typing import Union, NoReturn, Any, Coroutine
 from gzip import compress
 
 # 3rd party:
@@ -298,7 +298,7 @@ class AsyncStorageClient:
         return await upload
 
     async def download(self) -> AsyncStorageStreamDownloader:
-        data = self.client.download_blob()
+        data = await self.client.download_blob()
         logging.info(f"Downloaded blob '{self._container_name}/{self.path}'")
         return data
 
