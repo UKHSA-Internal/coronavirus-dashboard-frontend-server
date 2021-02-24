@@ -1,0 +1,54 @@
+{
+  "local_data": {
+    "column_names": [
+      "areaCode",
+      "postcode",
+      "areaType",
+      "areaName",
+      "date",
+      "metric",
+      "value",
+      "rank"
+    ],
+    "msoa_metric": "newCasesBySpecimenDate",
+    "getter_metrics": [
+      "value",
+      "date",
+      "areaName",
+      "areaType",
+      "areaCode"
+    ],
+    "metrics": [
+      "newAdmissions",
+      "newAdmissionsChange",
+      "newAdmissionsChangePercentage",
+      "newAdmissionsRollingSum",
+      "newAdmissionsDirection",
+      "cumPeopleVaccinatedFirstDoseByPublishDate",
+      "cumPeopleVaccinatedSecondDoseByPublishDate",
+      "newDeaths28DaysByPublishDate",
+      "newDeaths28DaysByPublishDateChange",
+      "newDeaths28DaysByPublishDateChangePercentage",
+      "newDeaths28DaysByPublishDateRollingSum",
+      "newDeaths28DaysByPublishDateDirection",
+      "newDeaths28DaysByDeathDateRollingRate",
+      "newCasesBySpecimenDateRollingSum",
+      "newCasesBySpecimenDateRollingRate",
+      "newCasesByPublishDate",
+      "newCasesByPublishDateChange",
+      "newCasesByPublishDateChangePercentage",
+      "newCasesByPublishDateRollingSum",
+      "newCasesByPublishDateDirection",
+      "alertLevel",
+      "newVirusTests",
+      "newVirusTestsChange",
+      "newVirusTestsChangePercentage",
+      "newVirusTestsRollingSum",
+      "newVirusTestsDirection",
+      "transmissionRateMin",
+      "transmissionRateMax",
+      "transmissionRateGrowthRateMin",
+      "transmissionRateGrowthRateMax"
+    ]
+  }
+}

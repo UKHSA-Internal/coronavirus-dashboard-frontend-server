@@ -1,0 +1,72 @@
+{
+    "E": {
+        "1": {
+            "value": "Medium",
+            "url": "https://www.gov.uk/guidance/tier-1-medium-alert",
+            "level": 1
+        },
+        "2": {
+            "value": "Medium / High",
+            "url": "https://www.gov.uk/guidance/tier-2-high-alert",
+            "level": 1.5
+        },
+        "3": {
+            "value": "High",
+            "url": "https://www.gov.uk/guidance/tier-2-high-alert",
+            "level": 2
+        },
+        "4": {
+            "value": "Very High",
+            "url": "https://www.gov.uk/guidance/tier-3-very-high-alert",
+            "level": 3
+        },
+        "5": {
+            "value": "Stay at Home",
+            "url": "https://www.gov.uk/guidance/tier-4-stay-at-home",
+            "level": 4
+        },
+        "-99": {
+            "value": "National Restrictions",
+            "url": "https://www.gov.uk/guidance/new-national-restrictions-from-5-november",
+            "level": -99
+        },
+        "-99|2021-01-03": {
+            "value": "National Restrictions",
+            "url": "https://www.gov.uk/guidance/national-lockdown-stay-at-home",
+            "level": -99
+        }
+    },
+    "S": {
+        "0": {
+            "value": "Protection Level 0",
+            "url": "https://www.gov.scot/publications/coronavirus-covid-19-protection-levels/pages/protection-level-0/",
+            "level": 0
+        },
+        "1": {
+            "value": "Protection Level 1",
+            "url": "https://www.gov.scot/publications/coronavirus-covid-19-protection-levels/pages/protection-level-1/",
+            "level": 1
+        },
+        "2": {
+            "value": "Protection Level 2",
+            "url": "https://www.gov.scot/publications/coronavirus-covid-19-protection-levels/pages/protection-level-2/",
+            "level": 2
+        },
+        "3": {
+            "value": "Protection Level 3",
+            "url": "https://www.gov.scot/publications/coronavirus-covid-19-protection-levels/pages/protection-level-3/",
+            "level": 3
+        },
+        "4": {
+            "value": "Protection Level 4",
+            "url": "https://www.gov.scot/publications/coronavirus-covid-19-protection-levels/pages/protection-level-4/",
+            "level": 4
+        },
+        "5": {
+            "value": "Stay at Home",
+            "url": "https://www.gov.scot/publications/coronavirus-covid-19-stay-at-home-guidance/",
+            "level": 5
+        }
+    },
+    "default": {}
+}
