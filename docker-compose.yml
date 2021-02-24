@@ -6,6 +6,7 @@ services:
     restart: always
     volumes:
       - ./app/:/app/app/
+      - ./server/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
       - ./app/static/dist/application.css:/app/static/application.css
       - ./app/static/images:/app/static/images
       - ./app/static/govuk-frontend:/app/static/govuk-frontend
