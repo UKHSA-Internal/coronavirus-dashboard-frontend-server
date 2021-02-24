@@ -13,11 +13,11 @@ from flask import current_app as app
 from azure.core.exceptions import AzureError
 
 # Internal:
-from . import query_templates as queries
+# from . import query_templates as queries
 from . import variables as const, dtypes
-from ..caching import cache_client
+# from ..caching import cache_client
 from ..exceptions import InvalidPostcode
-from ...database import CosmosDB, Collection
+# from ...database import CosmosDB, Collection
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -33,11 +33,6 @@ __all__ = [
     'change_by_metric',
     'get_vaccinations'
 ]
-
-
-data_db = CosmosDB(Collection.DATA)
-lookup_db = CosmosDB(Collection.LOOKUP)
-weekly_db = CosmosDB(Collection.WEEKLY)
 
 
 class AreaType(NamedTuple):
@@ -61,7 +56,7 @@ def process_dates(date: str) -> dtypes.ProcessedDateType:
     return result
 
 
-@cache_client.memoize(60 * 5)
+# @cache_client.memoize(60 * 5)
 def get_last_fortnight(timestamp: str, area_name: str, category: str) -> dtypes.DatabaseOutputType:
     """
     Retrieves the last fortnight worth of ``metric`` values
@@ -87,7 +82,7 @@ def get_last_fortnight(timestamp: str, area_name: str, category: str) -> dtypes.
     return result
 
 
-@cache_client.memoize(60 * 60 * 12)
+# @cache_client.memoize(60 * 60 * 12)
 def get_latest_value(metric: str, timestamp: str, area_name: str):
     """
     Retrieves the latest ``metric`` value
@@ -125,7 +120,7 @@ def get_latest_value(metric: str, timestamp: str, area_name: str):
 #     return func
 
 
-@cache_client.memoize(60 * 60 * 12)
+# @cache_client.memoize(60 * 60 * 12)
 def get_postcode_areas_from_db(postcode):
     query = queries.PostcodeLookup
 
@@ -156,7 +151,7 @@ def get_postcode_areas(postcode) -> Dict[str, str]:
     return get_postcode_areas_from_db(postcode)
 
 
-@cache_client.memoize(60 * 60 * 24)
+# @cache_client.memoize(60 * 60 * 24)
 def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
     query = queries.LatestTransmissionRate
 
@@ -172,7 +167,7 @@ def get_r_values(latest_timestamp: str, area_name: str = "United Kingdom") -> Di
     return result
 
 
-@cache_client.memoize(60 * 60 * 24)
+# @cache_client.memoize(60 * 60 * 24)
 def get_vaccinations(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
     query = queries.Vaccinations
 
@@ -188,7 +183,7 @@ def get_vaccinations(latest_timestamp: str, area_name: str = "United Kingdom") -
     return result
 
 
-@cache_client.memoize(60 * 60 * 12)
+# @cache_client.memoize(60 * 60 * 12)
 def get_data_by_code(area, timestamp, area_type=AreaType.lower_tier_la):
     # lower_tier_la = 'ltla'
     query = queries.LookupByAreaCode
@@ -245,7 +240,7 @@ def get_data_by_code(area, timestamp, area_type=AreaType.lower_tier_la):
     return results
 
 
-@cache_client.memoize(60 * 60 * 6)
+# @cache_client.memoize(60 * 60 * 6)
 def get_msoa_data(postcode, timestamp):
     query = queries.MsoaData
     area = get_postcode_areas(postcode)
@@ -273,7 +268,7 @@ def get_msoa_data(postcode, timestamp):
         return None
 
 
-@cache_client.memoize(60 * 60 * 6)
+# @cache_client.memoize(60 * 60 * 6)
 def get_alert_level(postcode, timestamp, area_type=AreaType.lower_tier_la):
     area = get_postcode_areas(postcode)
     area_code = area[area_type]
@@ -292,7 +287,7 @@ def get_alert_level(postcode, timestamp, area_type=AreaType.lower_tier_la):
         return None
 
 
-@cache_client.memoize(60 * 60 * 6)
+# @cache_client.memoize(60 * 60 * 6)
 def latest_rate_by_metric(timestamp, metric, ltla=False, postcode=None):
     lower_tier_la, nation = 'ltla', 'nation'
     nhs_region, nhs_trust = 'nhsRegion', 'nhsTrust'
@@ -368,7 +363,7 @@ def get_destinations(area_code):
     return destinations
 
 
-@cache_client.memoize(60 * 60 * 6)
+# @cache_client.memoize(60 * 60 * 6)
 def get_local_card_data(timestamp, category, postcode, change=False) -> dtypes.DatabaseOutputType:
     metric = const.DestinationMetrics[category]['metric']
     latest_date = timestamp.split('T')[0]
@@ -409,7 +404,7 @@ def get_data_by_postcode(postcode, timestamp):
     return get_data_by_code(area, timestamp)
 
 
-@cache_client.memoize(60 * 60 * 6)
+# @cache_client.memoize(60 * 60 * 6)
 def change_by_metric(timestamp, category, postcode=None):
     if postcode is not None:
         result = get_local_card_data(timestamp, category, postcode, change=True)
