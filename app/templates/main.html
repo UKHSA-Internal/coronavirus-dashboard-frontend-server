@@ -5,7 +5,7 @@
 {%- block page_title -%}Daily update{% endblock %}
 
 {% block head %}
-	{% cache 43200, 'head-home', timestamp, "main-summary" -%}
+{#	{% cache 43200, 'head-home', timestamp, "main-summary" -%}#}
 		<title>Daily summary | Coronavirus in the UK</title>
 		<meta property="og:title" content="Official UK Coronavirus Dashboard">
 		<meta property="og:description" content="Daily summary | Coronavirus in the UK">
@@ -19,11 +19,11 @@
 			{%- endif -%}
 				<meta property="og:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
 			{%- endfor -%}
-		{% endcache -%}
+{#		{% endcache -%}#}
 {% endblock %}
 
 {%- block main -%}
-	{% cache 43200, 'main-body', timestamp, "uk-summary" -%}
+{#	{% cache 43200, 'main-body', timestamp, "uk-summary" -%}#}
 		<div>
 			<div class="govuk-grid-row">
 				<div class="govuk-grid-column-full ">
@@ -36,6 +36,8 @@
 						See the <a class="govuk-link govuk-link--no-visited-state"
 						           href="/easy_read" rel="next">easy read summary</a> for the UK.
 					</p>
+{#					booo#}
+{#					{{ data("newCasesByPublishDate") }}#}
 
 					{% include "components/vaccination.html" %}
 					{% include "components/r_number.html" %}
@@ -45,10 +47,10 @@
 
 		<div class="card-container">
 			{% for card in cards %}
-				{{ create_card(card, False) }}
+				{{ create_card(cards[card], False) }}
 			{% endfor %}
 		</div>
-	{% endcache %}
+{#	{% endcache %}#}
 {%- endblock -%}
 
 {% block lower_section %}

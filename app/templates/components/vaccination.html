@@ -1,20 +1,20 @@
-{% set firstDose  = vaccinations.cumPeopleReceivingFirstDose  | default(None) %}
-{% set secondDose = vaccinations.cumPeopleReceivingSecondDose | default(None) %}
 {% set urlPath = "/details/vaccinations" %}
+{% set firstDose = "cumPeopleVaccinatedFirstDoseByPublishDate" | get_data(data) %}
+{% set secondDose = "cumPeopleVaccinatedSecondDoseByPublishDate" | get_data(data) %}
 
 <div class="stand-alone-metric">
-	{% if area_info is undefined -%}
-		<h3 class="sam-heading">People vaccinated up to and including {{ vaccinations.date }}</h3>
+	{% if postcode is undefined -%}
+		<h3 class="sam-heading">People vaccinated up to and including {{ firstDose.date }}</h3>
 	{% else %}
 		<h4 class="sam-heading">
-			People vaccinated up to and including {{ vaccinations.date }}&nbsp;in {{ area_info.nationName }}
+			People vaccinated up to and including {{ firstDose.date }}&nbsp;in {{ firstDose.areaName }}
 		</h4>
 	{%- endif %}
-	<p class="sam-body govuk-!-margin-bottom-1">First dose: {{ firstDose|format_number }}</p>
-	<p class="sam-body">Second dose: {{ secondDose|format_number }}</p>
+	<p class="sam-body govuk-!-margin-bottom-1">First dose: {{ firstDose.value }}</p>
+	<p class="sam-body">Second dose: {{ secondDose.value }}</p>
 	<p class="sam-body">
 		<a class="govuk-link govuk-link--no-visited-state"
-		   href="{{ urlPath }}{% if area_info is defined %}?areaType=nation&areaName={{ area_info.nationName }}{% endif %}">
+		   href="{{ urlPath }}{% if firstDose.areaName != "overview" %}?areaType=nation&areaName={{ firstDose.areaName }}{% endif %}">
 			View vaccination data
 		</a>
 	</p>

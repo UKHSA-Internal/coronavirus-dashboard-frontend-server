@@ -2,7 +2,9 @@
 
 {% macro create_card(card, is_postcode=False) %}
 
-	{% set improving = is_improving(card.metric, card.change.value) %}
+	{% set main = card.metric | get_data(data) %}
+
+	{% set improving = is_improving(card.metric, ((card.metric + "Change") | get_data(data)).raw) %}
 	{% if improving == True %}
 		{% set image = "images/arrow-up-green.png" %}
 		{% set colour = 'good' %}
@@ -20,7 +22,7 @@
 			<span class="govuk-caption-m govuk-!-font-weight-regular">{{ card.caption }}</span>
 			{%- if is_postcode -%}
 				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
-					{{ card.heading }} in {{ card.areaName | trim_area_name }}
+					{{ card.heading }} in {{ main.areaName }}
 				</h4>
 			{%- else -%}
 				<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
@@ -32,9 +34,9 @@
 		<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-0 govuk-!-margin-top-0">
 			Latest data
 			{% if is_postcode %}
-				at <strong>{{ card.areaType.formatted | lower }}</strong> level
+				at <strong>{{ main.areaType | lower }}</strong> level
 			{% endif %}
-			provided on&nbsp;<span style="white-space: nowrap">{{ card.latest_date }}</span>
+			provided on&nbsp;<span style="white-space: nowrap">{{ main.date }}</span>
 		</p>
 
 		<div class="govuk-grid-row bottom-aligned">
@@ -47,9 +49,9 @@
 								<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 									<a href="#"
 									   class="govuk-link--no-visited-state number-link number">
-										{{ card.data[0].value | format_number }}
+										{{ main.value }}
 										<span class="tooltiptext govuk-!-font-size-16">
-											Daily number of {{ card.heading | lower }} reported on {{ card.data[0].formatted }}
+											Daily number of {{ card.heading | lower }} reported on {{ main.date }}
 									</span>
 									</a>
 								</div>
@@ -69,10 +71,13 @@
 							<div class="float tooltip">
 								<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 									<a href="#" class="govuk-link--no-visited-state number-link"
-									   onclick="showHelp()">{{ card.change.total | format_number }}
+									   onclick="showHelp()">
+										{{ ((card.metric + "RollingSum") | get_data(data)).value }}
 										<span class="tooltiptext govuk-!-font-size-16">
 										Total number of {{ card.heading | lower }} reported in the
-										last 7 days ({{ card.data[6].formatted }} &ndash; {{ card.data[0].formatted }})</span></a>
+										last 7 days
+{#											({{ card.data[6].formatted }} &ndash; {{ card.data[0].formatted }})#}
+										</span></a>
 								</div>
 							</div>
 						</div>
@@ -84,19 +89,21 @@
 								<a href="#"
 								   class="govuk-link--no-visited-state number-link-red" style="border: none">
 									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1 change-box {{ colour }}">
-										{%- if card.change.value != 0 -%}
-											<img src="{{ url_for("static", filename=image) }}"
+									{% set change = ((card.metric + "Change") | get_data(data)).value %}
+										{%- if change != 0 -%}
+											<img src="{{ url_for("static", path=image) }}"
 											     width="12px"
 											     alt="arrow"
-											     style="transform: rotate({{ card.change.trend }}deg)">
-											{{ card.change.value | format_number }}
-											<span class="govuk-!-font-weight-regular">({{ card.change.percentage }}%)</span>
+											     style="transform: rotate({{ ((card.metric + "Direction")| get_data(data)).raw }}deg)">
+											{{ change }}
+											<span class="govuk-!-font-weight-regular">({{ ((card.metric + "ChangePercentage") | get_data(data)).value }}%)</span>
 										{%- else -%}
 											<span>No change</span>
 										{%- endif -%}
 									</strong>
 									<span class="tooltiptext govuk-!-font-size-16">
-											Change from previous 7 days ({{ card.data[13].formatted }} &ndash; {{ card.data[7].formatted }})
+											Change from previous 7 days
+{#										({{ card.data[13].formatted }} &ndash; {{ card.data[7].formatted }})#}
 									</span>
 								</a>
 							</div>
@@ -109,9 +116,9 @@
 		</div>
 
 		{%- if card.caption.lower() == "cases" -%}
-			{{ details(cases_rate, "by date of specimen as of") }}
+			{{ details(card.rate | get_data(data), "by date of specimen as of") }}
 		{%- elif card.caption.lower() == "deaths" and not is_postcode -%}
-			{{ details(deaths_rate, "by date of death as of") }}
+			{{ details(card.rate | get_data(data), "by date of death as of") }}
 {# Currently not available #}
 {#		{%- elif card.caption.lower() == "healthcare" -%}#}
 {#			{{ details(admissions_rate, "as of") }}#}
@@ -125,18 +132,19 @@
 				   style="text-decoration: none;"
 				   rel="next">
 				<figure class="graph mini-card-figure">
-					<img src="{{ card.graph }}" alt="Graph - click for more details">
+					<img src="{{ plots[card.metric] }}" alt="Graph - click for more details">
 				</figure>
+{#			{{ plots[card.rate }}#}
 			</a>
 		{% endif %}
 
 		<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>
 		<div class="additional-info bottom-aligned" style="margin-top: 5px">
 				<p class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 body-small">
-				<a href="/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ card.areaType.abbr | lower }}&areaName={{ card.areaName }}{% endif %}"
+				<a href="/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"
 				   class="govuk-link govuk-link--no-visited-state"
 				   style="text-decoration: none"
-				   rel="next"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ card.areaName | trim_area_name }}{% endif %}</b></a>
+				   rel="next"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ main.areaName }}{% endif %}</b></a>
 				</p>
 		</div>
 

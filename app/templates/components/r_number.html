@@ -1,40 +1,43 @@
-{% set R_growth_min = r_values.transmissionRateGrowthRateMin | default(None) %}
-{% set R_growth_max = r_values.transmissionRateGrowthRateMax | default(None) %}
+{% set R_growth_min = "transmissionRateGrowthRateMin" | get_data(data) %}
+{% set R_growth_max = "transmissionRateGrowthRateMax" | get_data(data) %}
+{% set transmissionRateMin = "transmissionRateMin" | get_data(data) %}
+{% set transmissionRateMax = "transmissionRateMax" | get_data(data) %}
+
 <div class="stand-alone-metric">
-	{% if area_info is undefined -%}
+	{% if R_growth_max.areaName[0] == "U" -%}
 		<h3 class="sam-heading">Estimated R number</h3>
 	{% else %}
 		<h4 class="sam-heading">
 			Estimated R number for
-			{% if area_info["ltla"][0] not in "NSW" -%}
+			{% if R_growth_max.areaName[0] not in "NSW" -%}
 				the healthcare region of
 			{%- endif %}
-			{{ area_info["nhsRegionName"] | default(area_info['nationName'], true) }}
+			{{ R_growth_max.areaName }}
 		</h4>
 	{% endif %}
 	<p class="sam-body">
-		{{ r_values.transmissionRateMin }}&nbsp;to&nbsp;{{ r_values.transmissionRateMax }}&nbsp;with
+		{{ transmissionRateMin.value }}&nbsp;to&nbsp;{{ transmissionRateMax.value }}&nbsp;with
 		a daily infection growth rate range
 		of&nbsp;
-			{%- if R_growth_max|isnone %}
+			{%- if R_growth_max is undefined %}
 				N/A
-			{%- elif R_growth_min > 0 -%}
-				+{{ R_growth_min }}%
-			{%- elif R_growth_min < 0 -%}
-				{{ R_growth_min }}%
+			{%- elif R_growth_min.raw > 0 -%}
+				+{{ R_growth_min.value }}%
+			{%- elif R_growth_min.raw < 0 -%}
+				{{ R_growth_min.value }}%
 			{%- else -%}
 				0%
 			{%- endif -%}
 			&nbsp;to&nbsp;
-			{%- if R_growth_max|isnone -%}
+			{%- if R_growth_max is undefined -%}
 				N/A
-			{%- elif R_growth_max > 0 -%}
-				+{{ R_growth_max }}%
-			{%- elif R_growth_max < 0 -%}
-				{{ R_growth_max }}%
+			{%- elif R_growth_max.raw > 0 -%}
+				+{{ R_growth_max.value }}%
+			{%- elif R_growth_max.raw < 0 -%}
+				{{ R_growth_max.value }}%
 			{%- else -%}
 				0%
 			{%- endif -%}
-		&nbsp;as of {{ r_values.date }}.
+		&nbsp;as of {{ transmissionRateMax.date }}.
 	</p>
 </div>
