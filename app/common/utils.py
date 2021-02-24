@@ -22,11 +22,11 @@ from json import loads
 from flask import current_app as app
 
 # Internal:
-from .caching import cache_client
+# from .caching import cache_client
 from .visualisation import plot_thumbnail
 from .data.queries import get_last_fortnight, change_by_metric
 from .data.variables import DestinationMetrics
-from ..storage import StorageClient
+from ..storage import StorageClient, AsyncStorageClient
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -36,7 +36,7 @@ get_value = itemgetter("value")
 get_area_type = itemgetter("areaType")
 
 
-@cache_client.memoize(60 * 60 * 12)
+# @cache_client.memoize(60 * 60 * 12)
 def get_og_image_names(latest_timestamp: str) -> list:
     ts_python_iso = latest_timestamp[:-2]
     ts = datetime.fromisoformat(ts_python_iso)
@@ -68,7 +68,7 @@ def get_card_data(latest_timestamp: str, category: str, metric_data, graph=True)
     return response
 
 
-@cache_client.memoize(60 * 60 * 6)
+# @cache_client.memoize(60 * 60 * 6)
 def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom") -> Dict[str, dict]:
     result = dict()
 
@@ -80,7 +80,7 @@ def get_fortnight_data(latest_timestamp: str, area_name: str = "United Kingdom")
     return result
 
 
-@cache_client.memoize(60 * 60 * 6)
+# @cache_client.memoize(60 * 60 * 6)
 def get_main_data(latest_timestamp: str):
     # ToDo: Integrate this with postcode data.
     data = get_fortnight_data(latest_timestamp)
@@ -118,7 +118,7 @@ def get_by_smallest_areatype(items, areatype_getter):
     return result
 
 
-@cache_client.memoize(300)
+# @cache_client.memoize(300)
 def get_notification_data(timestamp):
     with StorageClient("publicdata", "assets/cms/changeLog.json") as cli:
         data = cli.download().readall().decode()
@@ -147,3 +147,16 @@ def get_notification_content(latest_timestamp):
 def add_cloud_role_name(envelope):
     envelope.tags['ai.cloud.role'] = CLOUD_ROLE_NAME
     return True
+
+
+async def get_release_timestamp():
+    latest_published_timestamp = {
+        "container": "pipeline",
+        "path": "info/latest_published"
+    }
+
+    async with AsyncStorageClient(**latest_published_timestamp) as client:
+        data = await client.download()
+        timestamp = await data.readall()
+
+    return timestamp.decode()
