@@ -9,11 +9,19 @@ map $http_upgrade $connection_upgrade {
 }
 
 
+upstream application {
+
+    server             0.0.0.0:5200;
+
+}
+
+
 server {
 
     gzip               off;
     server_tokens      off;
     listen             5000;
+    listen             [::]:5000 ipv6only=on default_server;
     server_name        coronavirus.data.gov.uk;
     keepalive_timeout  65s;
     resolver_timeout   30s;
@@ -36,8 +44,7 @@ server {
 
     location @app {
 
-        include                uwsgi_params;
-        uwsgi_pass             unix:///tmp/uwsgi.sock;
+        proxy_pass             http://application;
 
         proxy_set_header       Host                      $host;
         proxy_set_header       X-Real-IP                 $remote_addr;
