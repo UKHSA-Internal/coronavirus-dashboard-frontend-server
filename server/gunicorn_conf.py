@@ -40,7 +40,7 @@ if max_workers_str:
 web_concurrency_str = getenv("WEB_CONCURRENCY", None)
 
 host = getenv("HOST", "0.0.0.0")
-port = getenv("PORT", "5200")
+port = getenv("GUNICORN_PORT", "5200")
 
 use_bind = getenv("BIND", f"{host}:{port}")
 use_loglevel = getenv("LOG_LEVEL", "info")

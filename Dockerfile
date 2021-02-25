@@ -18,7 +18,7 @@ FROM python:3.9.2-buster
 LABEL maintainer="Pouria Hadjibagheri <Pouria.Hadjibagheri@phe.gov.uk>"
 
 # Gunicorn binding port
-ENV PORT 5200
+ENV GUNICORN_PORT 5200
 
 COPY server/install-nginx.sh          /install-nginx.sh
 
