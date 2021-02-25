@@ -15,6 +15,8 @@ from starlette.applications import Starlette
 from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 from starlette.middleware import Middleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 # from flask_minify import minify
@@ -83,7 +85,8 @@ routes = [
 ]
 
 middleware = [
-    Middleware(ProxyHeadersMiddleware, trusted_hosts=SERVICE_DOMAIN)
+    Middleware(ProxyHeadersMiddleware, trusted_hosts=SERVICE_DOMAIN),
+    Middleware(TrustedHostMiddleware, allowed_hosts=[SERVICE_DOMAIN, f'*.{SERVICE_DOMAIN}'])
 ]
 
 app = Starlette(debug=Settings.DEBUG, routes=routes, middleware=middleware)
