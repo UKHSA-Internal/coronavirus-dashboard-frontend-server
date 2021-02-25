@@ -177,7 +177,6 @@ def get_area_data(df: DataFrame) -> DataFrame:
 templates.env.filters['get_data'] = get_data
 
 
-# @postcode_page.route('/search')
 async def postcode_page(request) -> templates.TemplateResponse:
     timestamp = await get_release_timestamp()
 
