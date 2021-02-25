@@ -7,8 +7,7 @@ JOIN covid19.metric_reference  AS mr ON mr.id = metric_id
 JOIN covid19.area_reference    AS ar ON ar.id = main.area_id
 WHERE
       partition_id = $1
-  AND timestamp = $2
   AND area_type = 'overview'
   AND date >= '2020-04-01'
-  AND metric = $3
+  AND metric = $2
 ORDER BY date DESC;
