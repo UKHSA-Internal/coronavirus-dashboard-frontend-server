@@ -41,6 +41,6 @@ async def get_timeseries(conn, timestamp):
     change_query = latest_change_data_query.format(partition=partition)
 
     for metric in metrics:
-        values = conn.fetch(values_query, partition_id, ts, metric)
+        values = conn.fetch(values_query, partition_id, metric)
         change = conn.fetchrow(change_query, partition_id, ts, metric + "Change")
         yield metric, plot_thumbnail(values, metric_name=metric, change=change)
