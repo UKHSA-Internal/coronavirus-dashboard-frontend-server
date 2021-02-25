@@ -79,11 +79,6 @@ server {
 
     location ~ ^/(favicon.+)$ {
 
-        proxy_set_header       X-Forwarded-For           $proxy_add_x_forwarded_for;
-        proxy_set_header       X-Forwarded-Proto         $scheme;
-        proxy_set_header       Host                      $host;
-        proxy_set_header       X-Real-IP                 $http_host;
-
         root                   /app/static/icon;
         autoindex              on;
         gzip_static            off;
@@ -108,11 +103,6 @@ server {
     }
 
     location ~ ^/assets/images/(.+)$ {
-
-        proxy_set_header       X-Forwarded-For           $proxy_add_x_forwarded_for;
-        proxy_set_header       X-Forwarded-Proto         $scheme;
-        proxy_set_header       Host                      $host;
-        proxy_set_header       X-Real-IP                 $http_host;
 
         root                   /app/static/images;
         autoindex              on;
@@ -139,11 +129,6 @@ server {
     }
 
     location ~ ^/assets/govuk-frontend/(.+woff2?)$ {
-
-        proxy_set_header       X-Forwarded-For           $proxy_add_x_forwarded_for;
-        proxy_set_header       X-Forwarded-Proto         $scheme;
-        proxy_set_header       Host                      $host;
-        proxy_set_header       X-Real-IP                 $http_host;
 
         root                   /app/static/govuk-frontend;
         autoindex              on;
@@ -175,11 +160,6 @@ server {
 
     location ~ ^/assets/govuk-frontend/(.+)$ {
 
-        proxy_set_header       X-Forwarded-For           $proxy_add_x_forwarded_for;
-        proxy_set_header       X-Forwarded-Proto         $scheme;
-        proxy_set_header       Host                      $host;
-        proxy_set_header       X-Real-IP                 $http_host;
-
         root                   /app/static/govuk-frontend;
         autoindex              on;
         gzip_static            off;
@@ -206,11 +186,6 @@ server {
 
     location ~ ^/assets/(.+\.css)$ {
 
-        proxy_set_header       X-Forwarded-For           $proxy_add_x_forwarded_for;
-        proxy_set_header       X-Forwarded-Proto         $scheme;
-        proxy_set_header       Host                      $host;
-        proxy_set_header       X-Real-IP                 $http_host;
-
         root                   /app/static;
         autoindex              on;
         gzip_static            off;
@@ -236,11 +211,6 @@ server {
     }
 
     location ~ ^/assets/(.+)$ {
-
-        proxy_set_header       X-Forwarded-For           $proxy_add_x_forwarded_for;
-        proxy_set_header       X-Forwarded-Proto         $scheme;
-        proxy_set_header       Host                      $host;
-        proxy_set_header       X-Real-IP                 $http_host;
 
         root                   /app/static;
         autoindex              on;
