@@ -62,6 +62,8 @@ NOT_AVAILABLE = "N/A"
 INSTRUMENTATION_CODE = getenv("APPINSIGHTS_INSTRUMENTATIONKEY", "")
 AI_INSTRUMENTATION_KEY = f"InstrumentationKey={INSTRUMENTATION_CODE}"
 SERVER_LOCATION_KEY = "SERVER_LOCATION"
+DOMAIN_NAME_KEY = 'URL_LOCATION'
+SERVICE_DOMAIN = getenv(DOMAIN_NAME_KEY, str())
 SERVER_LOCATION = getenv(SERVER_LOCATION_KEY, NOT_AVAILABLE)
 PYTHON_TIMESTAMP_LEN = 24
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
@@ -81,7 +83,7 @@ routes = [
 ]
 
 middleware = [
-    Middleware(ProxyHeadersMiddleware)
+    Middleware(ProxyHeadersMiddleware, trusted_hosts=SERVICE_DOMAIN)
 ]
 
 app = Starlette(debug=Settings.DEBUG, routes=routes, middleware=middleware)
