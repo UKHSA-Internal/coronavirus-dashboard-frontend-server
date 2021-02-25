@@ -14,6 +14,8 @@ from functools import lru_cache
 from starlette.applications import Starlette
 from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
+from starlette.middleware import Middleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 # from flask_minify import minify
 from pytz import timezone
@@ -78,7 +80,11 @@ routes = [
     Mount("/assets", StaticFiles(directory="static"), name="static")
 ]
 
-app = Starlette(debug=Settings.DEBUG, routes=routes)
+middleware = [
+    Middleware(ProxyHeadersMiddleware)
+]
+
+app = Starlette(debug=Settings.DEBUG, routes=routes, middleware=middleware)
 
 
 # app.include_router(home_page, default_response_class=HTMLResponse)
