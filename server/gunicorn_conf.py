@@ -79,6 +79,10 @@ accesslog = use_accesslog
 graceful_timeout = int(graceful_timeout_str)
 timeout = int(timeout_str)
 keepalive = int(keepalive_str)
+proxy_protocol = True
+secure_scheme_headers = {
+    'X-FORWARDED-PROTO': 'https'
+}
 
 
 # For debugging and testing
@@ -94,6 +98,8 @@ log_data = {
     # Additional, non-gunicorn variables
     "workers_per_core": workers_per_core,
     "use_max_workers": use_max_workers,
+    "secure_scheme_headers": secure_scheme_headers,
+    "proxy_protocol": proxy_protocol,
     "host": host,
     "port": port,
 }
