@@ -23,7 +23,11 @@
 			<link rel="apple-touch-icon" href="https://coronavirus.data.gov.uk/favicon.png">
 			<link rel="icon" href="https://coronavirus.data.gov.uk/favicon.ico">
 			<link rel="manifest" href="https://coronavirus.data.gov.uk/manifest.json">
+			{% if DEBUG -%}
 			<link rel="stylesheet" type="text/css" href="{{ url_for("static", path="dist/application.css") }}?tm={{ timestamp }}">
+			{%- else -%}
+			<link rel="stylesheet" type="text/css" href="{{ url_for("static", path="application.css") }}?tm={{ timestamp }}">
+			{%- endif -%}
 {#		{% endcache %}#}
 		{% block head %}{% endblock %}
 		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-161400643-2"></script>
@@ -81,5 +85,4 @@
 <script type="application/javascript">document.querySelector("#mobile-menu-btn").onclick = function mobileMenu(){var ms = document.getElementById("mobile-navigation").style;ms.display = ms.display === "none" ? "inline-block" : "none";}</script>
 <script type="application/javascript">function trimCode(){this['postcode'].value = this['postcode'].value.trim();}document.querySelector("form[name=postcode-search]").addEventListener("submit", trimCode);</script>
 </body>
-<!--{{ request.headers }}-->
 </html>
