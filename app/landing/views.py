@@ -162,6 +162,7 @@ async def home_page(request):
             "data": data,
             "cards": DestinationMetrics,
             "plots": time_series,
-            "is_improving": is_improving
+            "is_improving": is_improving,
+            "DEBUG": Settings.DEBUG
         }
     )

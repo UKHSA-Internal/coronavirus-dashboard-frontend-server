@@ -195,6 +195,7 @@ async def postcode_page(request) -> templates.TemplateResponse:
             "data": data,
             "area_data": get_area_data(data),
             "is_improving": is_improving,
-            "process_alert": alert_level
+            "process_alert": alert_level,
+            "DEBUG": Settings.DEBUG
         }
     )
