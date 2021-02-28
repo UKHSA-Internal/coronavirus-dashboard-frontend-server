@@ -118,32 +118,6 @@ def get_by_smallest_areatype(items, areatype_getter):
     return result
 
 
-# @cache_client.memoize(300)
-def get_notification_data(timestamp):
-    with StorageClient("publicdata", "assets/cms/changeLog.json") as cli:
-        data = cli.download().readall().decode()
-
-    return loads(data)
-
-
-def get_notification_content(latest_timestamp):
-    ts_python_iso = latest_timestamp[:-1]
-    ts = datetime.fromisoformat(ts_python_iso)
-    timestamp_date = ts.strftime("%Y-%m-%d")
-    data = get_notification_data(latest_timestamp)
-
-    for item in data["changeLog"]:
-        if item["displayBanner"] is True and item["date"] >= timestamp_date:
-            response = {
-                "type": item["type"],
-                "headline": item["headline"],
-                "relativeUrl": item["relativeUrl"]
-            }
-            return response
-
-    return None
-
-
 def add_cloud_role_name(envelope):
     envelope.tags['ai.cloud.role'] = CLOUD_ROLE_NAME
     return True
