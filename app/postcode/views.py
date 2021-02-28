@@ -11,17 +11,18 @@ from json import load
 from typing import Union, Any
 
 # 3rd party:
-from starlette.templating import Jinja2Templates
 
 from pandas import DataFrame
 
 # Internal:
-from .types import AlertsType, QueryDataType, AlertLevel, DataItem
+from .types import AlertsType, QueryDataType, AlertLevel
 from .utils import get_validated_postcode
 from ..common.utils import get_release_timestamp
 from ..common.data.variables import DestinationMetrics, IsImproving, NationalAdjectives
 from ..database.postgres import Connection
 from ..config import Settings
+from ..template_processor import render_template
+from ..template_processor.types import DataItem
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -29,8 +30,6 @@ __all__ = [
     'postcode_page'
 ]
 
-
-templates = Jinja2Templates(directory=Settings.template_path)
 
 get_area_type = itemgetter("areaType")
 
@@ -102,59 +101,16 @@ async def get_postcode_data(conn: Any, timestamp: str, postcode: str) -> DataFra
     #
     # print(log_query)
 
-    values = await conn.fetch(query, *substitutes)
+    values = conn.fetch(query, *substitutes)
 
-    df = DataFrame(values, columns=query_data["local_data"]["column_names"])
+    df = DataFrame(
+        await values,
+        columns=query_data["local_data"]["column_names"]
+    )
 
-    df.date = df.date.map(lambda x: f"{x:%-d %B %Y}")
+    df = df.assign(formatted_date=df.date.map(lambda x: f"{x:%-d %B %Y}"))
 
     return df
-
-
-def get_data(metric: str, data: DataFrame) -> DataItem:
-    float_metrics = ["Rate", "Percent"]
-
-    try:
-        value = data.loc[
-            data.metric == metric,
-            query_data["local_data"]["getter_metrics"]
-        ].iloc[0]
-    except IndexError:
-        if metric != "alertLevel":
-            return dict()
-
-        df = data.loc[data['rank'] == data['rank'].max(), :]
-        df.metric = metric
-        df.value = None
-        value = df.loc[:, query_data["local_data"]["getter_metrics"]].iloc[0]
-
-    result = {
-        "date": value.date,
-        "areaName": value.areaName,
-        "areaType": value.areaType,
-        "areaCode": value.areaCode,
-        "adjective": NationalAdjectives.get(value.areaName)
-    }
-
-    is_float = any(m in metric for m in float_metrics)
-
-    try:
-        float_val = float(value[0])
-        result["raw"] = float_val
-
-        if (int_val := int(float_val)) == float_val and not is_float:
-            result["value"] = format(int_val, ",d")
-            return result
-
-        result["value"] = format(float_val, ".1f")
-        return result
-    except (ValueError, TypeError):
-        pass
-
-    result["raw"] = value[0]
-    result["value"] = value[0]
-
-    return result
 
 
 def is_improving(metric: str, value: Union[float, int]) -> Union[bool, None]:
@@ -174,10 +130,17 @@ def get_area_data(df: DataFrame) -> DataFrame:
     return small_areas
 
 
-templates.env.filters['get_data'] = get_data
+async def invalid_postcode_response(request, timestamp, raw_postcode):
+    from ..landing.views import get_home_page
+
+    return await get_home_page(
+        request=request,
+        timestamp=timestamp,
+        invalid_postcode=raw_postcode.upper()
+    )
 
 
-async def postcode_page(request) -> templates.TemplateResponse:
+async def postcode_page(request) -> render_template:
     timestamp = await get_release_timestamp()
 
     postcode_raw = request.query_params["postcode"]
@@ -186,16 +149,18 @@ async def postcode_page(request) -> templates.TemplateResponse:
     async with Connection() as conn:
         data = await get_postcode_data(conn, timestamp, postcode)
 
-    return templates.TemplateResponse(
+    if not data.size:
+        return await invalid_postcode_response(request, timestamp, postcode_raw)
+
+    return await render_template(
+        request,
         "postcode_results.html",
         context={
-            "request": request,
             "timestamp": timestamp,
             "cards": DestinationMetrics,
             "data": data,
             "area_data": get_area_data(data),
             "is_improving": is_improving,
             "process_alert": alert_level,
-            "DEBUG": Settings.DEBUG
         }
     )
