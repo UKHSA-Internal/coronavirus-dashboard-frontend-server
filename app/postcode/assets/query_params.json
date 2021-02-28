@@ -11,13 +11,6 @@
       "rank"
     ],
     "msoa_metric": "newCasesBySpecimenDate",
-    "getter_metrics": [
-      "value",
-      "date",
-      "areaName",
-      "areaType",
-      "areaCode"
-    ],
     "metrics": [
       "newAdmissions",
       "newAdmissionsChange",
