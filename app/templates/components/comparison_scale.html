@@ -4,7 +4,7 @@
 		Seven days to {{ ("newCasesBySpecimenDateRollingSum" | get_data(data)).date }}
 	</small>
 	<span class="govuk-!-font-size-36 govuk-!-margin-bottom-0">
-		{{ ("newCasesBySpecimenDateRollingSum" | get_data(data)).value | default('0 &ndash; 2') }}
+		{{ ("newCasesBySpecimenDateRollingSum" | get_data(data)).value }}
 	</span>
 </h3>
 
