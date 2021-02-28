@@ -8,10 +8,9 @@ from datetime import datetime
 
 # 3rd party:
 from markdown import markdown
-from flask import request, current_app as app
 
 # Internal:
-from ...storage import StorageClient
+from ...storage import AsyncStorageClient
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -33,10 +32,9 @@ def prep_data(item):
     return item
 
 
-def filter_fn(timestamp):
-    path = request.path
-
+def filter_fn(request, timestamp):
     def func(item):
+        path = request.scope["path"]
         is_published = item['appearByUpdate'] <= timestamp < item['disappearByUpdate']
 
         display_uri = item.get("displayUri", list())
@@ -49,20 +47,27 @@ def filter_fn(timestamp):
     return func
 
 
-def get_banners(timestamp):
-    with StorageClient(**BANNER_DATA) as client:
-        full_data = loads(client.download().readall().decode())
+async def get_banners(request, timestamp: str):
+    async with AsyncStorageClient(**BANNER_DATA) as client:
+        data_io = await client.download()
+        raw_data = await data_io.readall()
+
+    full_data = loads(raw_data.decode())
 
     if full_data is None:
         full_data = list()
 
     data = map(prep_data, full_data)
-    timestamp = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
-    banners = filter(filter_fn(timestamp), data)
+    timestamp = datetime.fromisoformat(timestamp[:26])
+    banners = filter(filter_fn(request, timestamp), data)
 
-    for banner in banners:
-        yield {
+    results = (
+        {
             "timestamp": banner["appearByUpdate"].date(),
             "display_timestamp": banner["appearByUpdate"].strftime("%-d %B %Y"),
             "body": markdown(banner["body"])
         }
+        for banner in banners
+    )
+
+    return results
