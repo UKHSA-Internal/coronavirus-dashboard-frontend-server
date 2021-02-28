@@ -22,9 +22,9 @@
 			{%- if R_growth_max is undefined %}
 				N/A
 			{%- elif R_growth_min.raw > 0 -%}
-				+{{ R_growth_min.value }}%
+				+{{ R_growth_min.raw | format_number }}%
 			{%- elif R_growth_min.raw < 0 -%}
-				{{ R_growth_min.value }}%
+				{{ R_growth_min.raw | format_number }}%
 			{%- else -%}
 				0%
 			{%- endif -%}
@@ -32,9 +32,9 @@
 			{%- if R_growth_max is undefined -%}
 				N/A
 			{%- elif R_growth_max.raw > 0 -%}
-				+{{ R_growth_max.value }}%
+				+{{ R_growth_max.raw | format_number }}%
 			{%- elif R_growth_max.raw < 0 -%}
-				{{ R_growth_max.value }}%
+				{{ R_growth_max.raw | format_number }}%
 			{%- else -%}
 				0%
 			{%- endif -%}
