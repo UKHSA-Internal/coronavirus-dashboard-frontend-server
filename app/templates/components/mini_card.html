@@ -22,7 +22,7 @@
 			<span class="govuk-caption-m govuk-!-font-weight-regular">{{ card.caption }}</span>
 			{%- if is_postcode -%}
 				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
-					{{ card.heading }} in {{ main.areaName }}
+					{{ card.heading }} in {{ main.areaName | trim_area_name }}
 				</h4>
 			{%- else -%}
 				<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
@@ -34,7 +34,7 @@
 		<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-0 govuk-!-margin-top-0">
 			Latest data
 			{% if is_postcode %}
-				at <strong>{{ main.areaType | lower }}</strong> level
+				at <strong>{{ main.areaType | to_full_area_type | lower }}</strong> level
 			{% endif %}
 			provided on&nbsp;<span style="white-space: nowrap">{{ main.date }}</span>
 		</p>
@@ -70,13 +70,13 @@
 						<div class="number-container govuk-!-padding-right-4">
 							<div class="float tooltip">
 								<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+									{% set rollingSum = (card.metric + "RollingSum") | get_data(data) %}
 									<a href="#" class="govuk-link--no-visited-state number-link"
 									   onclick="showHelp()">
-										{{ ((card.metric + "RollingSum") | get_data(data)).value }}
+										{{ rollingSum.value }}
 										<span class="tooltiptext govuk-!-font-size-16">
-										Total number of {{ card.heading | lower }} reported in the
-										last 7 days
-{#											({{ card.data[6].formatted }} &ndash; {{ card.data[0].formatted }})#}
+											Total number of {{ card.heading | lower }} reported in the last 7 days
+											({{ rollingSum.rawDate | subtract_days(6) | format_date }} &ndash; {{ rollingSum.date }})
 										</span></a>
 								</div>
 							</div>
@@ -89,21 +89,21 @@
 								<a href="#"
 								   class="govuk-link--no-visited-state number-link-red" style="border: none">
 									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1 change-box {{ colour }}">
-									{% set change = ((card.metric + "Change") | get_data(data)).value %}
-										{%- if change != 0 -%}
+									{% set change = ((card.metric + "Change") | get_data(data)) %}
+										{%- if change.value != 0 -%}
 											<img src="{{ url_for("static", path=image) }}"
 											     width="12px"
 											     alt="arrow"
 											     style="transform: rotate({{ ((card.metric + "Direction")| get_data(data)).raw }}deg)">
-											{{ change }}
+											{{ change.value }}
 											<span class="govuk-!-font-weight-regular">({{ ((card.metric + "ChangePercentage") | get_data(data)).value }}%)</span>
 										{%- else -%}
 											<span>No change</span>
 										{%- endif -%}
 									</strong>
 									<span class="tooltiptext govuk-!-font-size-16">
-											Change from previous 7 days
-{#										({{ card.data[13].formatted }} &ndash; {{ card.data[7].formatted }})#}
+										Change from previous 7 days
+										({{ change.rawDate | subtract_days(13) | format_date }} &ndash; {{ change.rawDate | subtract_days(7) | format_date }})
 									</span>
 								</a>
 							</div>
