@@ -7,7 +7,7 @@
 		  </span>
 		</summary>
 		<div class="govuk-details__text">
-			<span class="body-small">Seven-day rolling rate {{ description }}&nbsp;{{ item.date }}</span>
+			<span class="body-small">7-day rolling rate {{ description }}&nbsp;{{ item.date.replace(" ", "&nbsp;") | safe }}</span>
 		</div>
 	</details>
 {%- endmacro %}
