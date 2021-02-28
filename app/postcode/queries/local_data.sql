@@ -61,7 +61,12 @@ FROM (
                    area_type,
                    area_name,
                    date,
-                   TRIM( BOTH '"' FROM value::TEXT ) AS value,
+                   (
+                        CASE
+                            WHEN value::TEXT <> 'null' THEN TRIM( BOTH '"' FROM value::TEXT )
+                            WHEN value::TEXT = 'null'  THEN '-999999'
+                        END
+                   ) AS value,
                    rank
             FROM (
                 SELECT
