@@ -16,7 +16,7 @@ Contributors:  Pouria Hadjibagheri
 # 3rd party:
 
 # Internal: 
-from .view import *
+from .views import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Header
