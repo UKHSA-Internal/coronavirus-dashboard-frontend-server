@@ -15,8 +15,7 @@ __all__ = [
     "LocalDataType",
     "AlertsType",
     "AlertLevel",
-    "QueryDataType",
-    "DataItem"
+    "QueryDataType"
 ]
 
 
@@ -39,12 +38,3 @@ AlertsType = Dict[str, Union[Dict[str, AlertLevel], dict]]
 class QueryDataType(TypedDict):
     local_data: LocalDataType
 
-
-class DataItem(TypedDict):
-    date: str
-    areaName: str
-    areaType: str
-    areaCode: str
-    adjective: Union[str, None]
-    raw: Union[str, float, None]
-    value: Union[str, None]
