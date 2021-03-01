@@ -4,6 +4,9 @@
 			<label class="govuk-label govuk-!-font-weight-bold" for="postcode">
 				Enter a postcode
 			</label>
+	    <div class="govuk-hint govuk-!-margin-bottom-3">
+		    For example SW1A 0AA
+	    </div>
 			{% if invalid_postcode %}
 				<span id="passport-issued-error" class="govuk-error-message">
 		      <span class="govuk-visually-hidden">Error:</span> Invalid postcode "{{ invalid_postcode }}" &ndash; Enter a full and valid UK postcode.
