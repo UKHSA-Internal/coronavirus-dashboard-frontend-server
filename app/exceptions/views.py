@@ -28,7 +28,7 @@ async def handle_404(request, exc, **context):
     status_code = getattr(status, "value", 404)
     status_detail = getattr(status, "phrase", "Not Found")
 
-    return render_template(
+    return await render_template(
         request,
         "errors/404.html",
         context={
@@ -70,7 +70,7 @@ async def handle_500(request, exc, **context):
         status_code = getattr(status, "value", 500)
         status_detail = getattr(status, "phrase", "Internal Server Error")
 
-    return render_template(
+    return await render_template(
         request,
         "errors/50x.html",
         context={
