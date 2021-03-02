@@ -73,18 +73,19 @@ def as_template_filter(func):
     return add_filter
 
 
-async def render_template(request, template_name: str,
-                          context: Optional[Dict[str, Any]]) -> template.TemplateResponse:
+async def render_template(request, template_name: str, context: Optional[Dict[str, Any]],
+                          status_code: int = 200) -> template.TemplateResponse:
     context = {
         "DEBUG": Settings.DEBUG,
         **context
     }
 
     if "timestamp" not in context:
-        context["timestamp"]: await get_release_timestamp()
+        context["timestamp"] = await get_release_timestamp()
 
     return template.TemplateResponse(
         template_name,
+        status_code=status_code,
         context=dict(
             request=request,
             banners=await get_banners(request, context["timestamp"]),
