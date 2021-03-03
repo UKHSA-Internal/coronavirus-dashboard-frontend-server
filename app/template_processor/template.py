@@ -46,7 +46,7 @@ getter_metrics = [
 ]
 
 SUPPRESSED_MSOA = -999999.0
-timestamp_pattern = "%A %d %B %Y at %-I:%M %p"
+timestamp_pattern = "%A %-d %B %Y at %-I:%M %p"
 timezone_LN = timezone("Europe/London")
 
 
