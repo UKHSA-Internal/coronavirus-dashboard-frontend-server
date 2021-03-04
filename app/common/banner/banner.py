@@ -30,6 +30,11 @@ def prep_data(item):
     item['appearByUpdate'] = datetime.strptime(item['appearByUpdate'], "%Y-%m-%d")
     item['disappearByUpdate'] = datetime.strptime(item['disappearByUpdate'], "%Y-%m-%d")
 
+    if (datestamp := item.get("date")) is not None:
+        item['date'] = datetime.strptime(datestamp, "%Y-%m-%d")
+    else:
+        item['date'] = item['appearByUpdate']
+
     return item
 
 
@@ -63,6 +68,6 @@ def get_banners(timestamp):
     for banner in banners:
         yield {
             "timestamp": banner["appearByUpdate"].date(),
-            "display_timestamp": banner["appearByUpdate"].strftime("%-d %B %Y"),
+            "display_timestamp": f"{banner['date']:%-d %B %Y}",
             "body": markdown(banner["body"])
         }
