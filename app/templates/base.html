@@ -35,10 +35,6 @@
 	{%- include "components/header.html" -%}
 	{%- include "components/mobile_nav.html" -%}
 
-{%- cache 300, 'change_log', timestamp -%}
-	{%- include "components/change_notification.html" -%}
-{%- endcache -%}
-
 {%- cache 300, 'banner', timestamp -%}
 	{%- include "components/banners.html" -%}
 {%- endcache -%}
