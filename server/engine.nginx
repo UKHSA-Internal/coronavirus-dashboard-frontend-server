@@ -44,7 +44,7 @@ server {
 
         try_files              $uri @app;
 
-        limit_except GET HEAD OPTIONS {
+        limit_except GET POST HEAD OPTIONS {
             deny    all;
         }
 
@@ -80,7 +80,7 @@ server {
 
         proxy_pass             http://application;
 
-        limit_except GET HEAD OPTIONS {
+        limit_except GET POST HEAD OPTIONS {
             deny    all;
         }
 
