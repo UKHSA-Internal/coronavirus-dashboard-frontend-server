@@ -164,7 +164,7 @@ async def add_process_time_header(request: Request, call_next):
     last_modified = datetime.now()
     expires = last_modified + timedelta(minutes=1, seconds=30)
 
-    response.headers['last_modified'] = last_modified.strftime(HTTP_DATE_FORMAT)
+    response.headers['last-modified'] = last_modified.strftime(HTTP_DATE_FORMAT)
     response.headers['expires'] = expires.strftime(HTTP_DATE_FORMAT)
     response.headers['cache-control'] = 'public, must-revalidate, max-age=30, s-maxage=90'
     response.headers['PHE-Server-Loc'] = Settings.server_location
