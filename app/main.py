@@ -13,14 +13,9 @@ from starlette.staticfiles import StaticFiles
 from starlette.middleware import Middleware
 from starlette.requests import Request
 
-
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from opencensus.trace.samplers import AlwaysOnSampler
-from opencensus.trace.attributes_helper import COMMON_ATTRIBUTES
-# from opencensus.trace import config_integration
-# from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
-# from starlette.middleware.gzip import GZipMiddleware
 
 # Internal:
 from app.postcode.views import postcode_page
@@ -47,13 +42,6 @@ LATEST_PUBLISHED_TIMESTAMP = {
     "path": "info/latest_published"
 }
 
-HTTP_URL = COMMON_ATTRIBUTES['HTTP_URL']
-HTTP_STATUS_CODE = COMMON_ATTRIBUTES['HTTP_STATUS_CODE']
-HTTP_HOST = COMMON_ATTRIBUTES['HTTP_HOST']
-HTTP_METHOD = COMMON_ATTRIBUTES['HTTP_METHOD']
-HTTP_PATH = COMMON_ATTRIBUTES['HTTP_PATH']
-HTTP_ROUTE = COMMON_ATTRIBUTES['HTTP_ROUTE']
-
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
 routes = [
@@ -64,14 +52,15 @@ routes = [
 ]
 
 logging_instances = [
-    [logging.getLogger('uvicorn'), logging.INFO],
-    [logging.getLogger('uvicorn.access'), logging.INFO],
-    [logging.getLogger('uvicorn.error'), logging.INFO],
-    [logging.getLogger('azure'), logging.INFO],
-    [logging.getLogger('gunicorn'), logging.INFO],
-    [logging.getLogger('gunicorn.access'), logging.INFO],
-    [logging.getLogger('gunicorn.error'), logging.INFO],
-    [logging.getLogger('asyncpg'), logging.INFO],
+    [logging.getLogger('landing_page'), logging.INFO],
+    [logging.getLogger('uvicorn'), logging.WARNING],
+    [logging.getLogger('uvicorn.access'), logging.WARNING],
+    [logging.getLogger('uvicorn.error'), logging.ERROR],
+    [logging.getLogger('azure'), logging.WARNING],
+    [logging.getLogger('gunicorn'), logging.WARNING],
+    [logging.getLogger('gunicorn.access'), logging.WARNING],
+    [logging.getLogger('gunicorn.error'), logging.ERROR],
+    [logging.getLogger('asyncpg'), logging.WARNING],
 ]
 
 middleware = [
