@@ -64,7 +64,8 @@ class TraceHeaderMiddleware(BaseHTTPMiddleware):
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
-            return await self.app(scope, receive, send)
+            await self.app(scope, receive, send)
+            return
 
         tracer = Tracer(
             exporter=self.exporter,
@@ -82,7 +83,7 @@ class TraceHeaderMiddleware(BaseHTTPMiddleware):
 
                 scope['traceparent'] = trace_parent
 
-        return await self.app(scope, receive, send)
+        await self.app(scope, receive, send)
 
     async def dispatch(self, request: Request, call_next):
         tracer = Tracer(
@@ -105,6 +106,6 @@ class TraceHeaderMiddleware(BaseHTTPMiddleware):
 
             response = await call_next(request)
 
-            tracer.add_attribute_to_current_span(HTTP_STATUS_CODE, response.status_code)
+            tracer.add_attribute_to_current_span(HTTP_STATUS_CODE, str(response.status_code))
 
         return response
