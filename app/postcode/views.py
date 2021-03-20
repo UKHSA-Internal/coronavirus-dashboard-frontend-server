@@ -86,7 +86,6 @@ async def get_postcode_data(conn: Any, timestamp: str, postcode: str) -> DataFra
         query_data["local_data"]["metrics"],
         postcode,
         partition_ids,
-        msoa_metric,
         f"{msoa_metric}%",
         ["%Percentage%", "%Rate%"]
     )
