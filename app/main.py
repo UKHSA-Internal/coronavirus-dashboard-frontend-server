@@ -16,9 +16,12 @@ from starlette.requests import Request
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from opencensus.ext.azure.log_exporter import AzureLogHandler
-from opencensus.ext.azure.trace_exporter import AzureExporter
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
+from opencensus.ext.azure.trace_exporter import AzureExporter
 from opencensus.trace.samplers import AlwaysOnSampler
+from opencensus.trace.tracer import Tracer
+from opencensus.trace.span import SpanKind
+from opencensus.trace.attributes_helper import COMMON_ATTRIBUTES
 from opencensus.trace import config_integration
 from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
 
@@ -28,6 +31,7 @@ from app.landing.views import home_page
 from app.healthcheck.views import healthcheck
 from app.exceptions.views import exception_handlers
 from app.config import Settings
+from app.common.utils import add_cloud_role_name
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -45,7 +49,8 @@ LATEST_PUBLISHED_TIMESTAMP = {
     "path": "info/latest_published"
 }
 
-AI_INSTRUMENTATION_KEY = f"InstrumentationKey={Settings.instrumentation_key}"
+HTTP_URL = COMMON_ATTRIBUTES['HTTP_URL']
+HTTP_STATUS_CODE = COMMON_ATTRIBUTES['HTTP_STATUS_CODE']
 
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
@@ -96,17 +101,17 @@ app = Starlette(
 
 
 # @app.template_filter()
-def pluralise(number, singular, plural, null=str()):
-    if abs(number) > 1:
-        return plural
-
-    if abs(number) == 1:
-        return singular
-
-    if number == 0 and not len(null):
-        return plural
-
-    return null
+# def pluralise(number, singular, plural, null=str()):
+#     if abs(number) > 1:
+#         return plural
+#
+#     if abs(number) == 1:
+#         return singular
+#
+#     if number == 0 and not len(null):
+#         return plural
+#
+#     return null
 
 
 # @app.template_filter()
@@ -168,6 +173,37 @@ async def add_process_time_header(request: Request, call_next):
     response.headers['expires'] = expires.strftime(HTTP_DATE_FORMAT)
     response.headers['cache-control'] = 'public, must-revalidate, max-age=30, s-maxage=90'
     response.headers['PHE-Server-Loc'] = Settings.server_location
+
+    return response
+
+
+@app.middleware("http")
+async def logging_middleware(request: Request, call_next):
+    exporter = AzureExporter(connection_string=Settings.instrumentation_key)
+    exporter.add_telemetry_processor(add_cloud_role_name)
+
+    tracer = Tracer(
+        exporter=exporter,
+        sampler=AlwaysOnSampler()
+    )
+
+    with tracer.span("main") as span:
+        span.span_kind = SpanKind.SERVER
+
+        response = await call_next(request)
+
+        tracer.add_attribute_to_current_span(
+            attribute_key=HTTP_STATUS_CODE,
+            attribute_value=response.status_code
+        )
+
+        tracer.add_attribute_to_current_span(
+            attribute_key=HTTP_URL,
+            attribute_value=str(request.url)
+        )
+
+        tracer.add_attribute_to_current_span("environment", Settings.ENVIRONMENT)
+        tracer.add_attribute_to_current_span("server_location", Settings.server_location)
 
     return response
 
