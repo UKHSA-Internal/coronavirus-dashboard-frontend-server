@@ -20,7 +20,7 @@ from opencensus.trace.samplers import AlwaysOnSampler
 # Internal:
 from app.postcode.views import postcode_page
 from app.landing.views import home_page
-from app.healthcheck.views import healthcheck
+from app.healthcheck.views import run_healthcheck
 from app.exceptions.views import exception_handlers
 from app.config import Settings
 from app.common.utils import add_cloud_role_name
@@ -46,7 +46,7 @@ HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
 routes = [
     Route('/', endpoint=home_page, methods=["GET"]),
-    Route('/heathcheck', endpoint=healthcheck, methods=["GET", "HEAD"]),
+    Route('/heathcheck', endpoint=run_healthcheck, methods=["GET", "HEAD"]),
     Route('/search', endpoint=postcode_page, methods=["GET"]),
     Mount('/assets', StaticFiles(directory="static"), name="static")
 ]
