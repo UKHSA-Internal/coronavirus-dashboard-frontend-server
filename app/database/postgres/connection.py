@@ -39,7 +39,7 @@ __all__ = [
 
 
 CONN_STR = getenv("POSTGRES_CONNECTION_STRING")
-DB_NAME = CONN_STR.split("@")[1].split(".")[0]
+DB_NAME = "database"
 
 logger = getLogger("asyncpg")
 
