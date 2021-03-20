@@ -3,6 +3,7 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+import logging
 from datetime import datetime, timedelta
 
 # 3rd party:
@@ -24,6 +25,7 @@ from opencensus.trace.span import SpanKind
 from opencensus.trace.attributes_helper import COMMON_ATTRIBUTES
 from opencensus.trace import config_integration
 from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
+# from starlette.middleware.gzip import GZipMiddleware
 
 # Internal:
 from app.postcode.views import postcode_page
@@ -32,6 +34,7 @@ from app.healthcheck.views import healthcheck
 from app.exceptions.views import exception_handlers
 from app.config import Settings
 from app.common.utils import add_cloud_role_name
+from app.middleware.tracers import TraceHeaderMiddleware
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -51,6 +54,10 @@ LATEST_PUBLISHED_TIMESTAMP = {
 
 HTTP_URL = COMMON_ATTRIBUTES['HTTP_URL']
 HTTP_STATUS_CODE = COMMON_ATTRIBUTES['HTTP_STATUS_CODE']
+HTTP_HOST = COMMON_ATTRIBUTES['HTTP_HOST']
+HTTP_METHOD = COMMON_ATTRIBUTES['HTTP_METHOD']
+HTTP_PATH = COMMON_ATTRIBUTES['HTTP_PATH']
+HTTP_ROUTE = COMMON_ATTRIBUTES['HTTP_ROUTE']
 
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
@@ -61,8 +68,30 @@ routes = [
     Mount('/assets', StaticFiles(directory="static"), name="static")
 ]
 
+logging_instances = [
+    [logging.getLogger('uvicorn'), logging.INFO],
+    [logging.getLogger('uvicorn.access'), logging.INFO],
+    [logging.getLogger('uvicorn.error'), logging.INFO],
+    [logging.getLogger('azure'), logging.INFO],
+    [logging.getLogger('gunicorn'), logging.INFO],
+    [logging.getLogger('gunicorn.access'), logging.INFO],
+    [logging.getLogger('gunicorn.error'), logging.INFO],
+    [logging.getLogger('asyncpg'), logging.INFO],
+]
+
 middleware = [
-    Middleware(ProxyHeadersMiddleware, trusted_hosts=Settings.service_domain)
+    Middleware(ProxyHeadersMiddleware, trusted_hosts=Settings.service_domain),
+    Middleware(
+        TraceHeaderMiddleware,
+        sampler=AlwaysOnSampler(),
+        instrumentation_key=Settings.instrumentation_key,
+        cloud_role_name=add_cloud_role_name,
+        extra_attrs=dict(
+            environment=Settings.ENVIRONMENT,
+            server_location=Settings.server_location
+        ),
+        logging_instances=logging_instances
+    )
 ]
 
 
@@ -177,35 +206,35 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 
-@app.middleware("http")
-async def logging_middleware(request: Request, call_next):
-    exporter = AzureExporter(connection_string=Settings.instrumentation_key)
-    exporter.add_telemetry_processor(add_cloud_role_name)
-
-    tracer = Tracer(
-        exporter=exporter,
-        sampler=AlwaysOnSampler()
-    )
-
-    with tracer.span("main") as span:
-        span.span_kind = SpanKind.SERVER
-
-        response = await call_next(request)
-
-        tracer.add_attribute_to_current_span(
-            attribute_key=HTTP_STATUS_CODE,
-            attribute_value=response.status_code
-        )
-
-        tracer.add_attribute_to_current_span(
-            attribute_key=HTTP_URL,
-            attribute_value=str(request.url)
-        )
-
-        tracer.add_attribute_to_current_span("environment", Settings.ENVIRONMENT)
-        tracer.add_attribute_to_current_span("server_location", Settings.server_location)
-
-    return response
+# @app.middleware("http")
+# async def logging_middleware(request: Request, call_next):
+#     exporter = AzureExporter(connection_string=Settings.instrumentation_key)
+#     exporter.add_telemetry_processor(add_cloud_role_name)
+#
+#     tracer = Tracer(
+#         exporter=exporter,
+#         sampler=AlwaysOnSampler()
+#     )
+#
+#     with tracer.span("main") as span:
+#         span.span_kind = SpanKind.SERVER
+#
+#         response = await call_next(request)
+#
+#         tracer.add_attribute_to_current_span(
+#             attribute_key=HTTP_STATUS_CODE,
+#             attribute_value=response.status_code
+#         )
+#
+#         tracer.add_attribute_to_current_span(
+#             attribute_key=HTTP_URL,
+#             attribute_value=str(request.url)
+#         )
+#
+#         tracer.add_attribute_to_current_span("environment", Settings.ENVIRONMENT)
+#         tracer.add_attribute_to_current_span("server_location", Settings.server_location)
+#
+#     return response
 
 
 if __name__ == "__main__":
