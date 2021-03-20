@@ -16,15 +16,10 @@ from starlette.requests import Request
 
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
-from opencensus.ext.azure.log_exporter import AzureLogHandler
-from opencensus.ext.flask.flask_middleware import FlaskMiddleware
-from opencensus.ext.azure.trace_exporter import AzureExporter
 from opencensus.trace.samplers import AlwaysOnSampler
-from opencensus.trace.tracer import Tracer
-from opencensus.trace.span import SpanKind
 from opencensus.trace.attributes_helper import COMMON_ATTRIBUTES
-from opencensus.trace import config_integration
-from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
+# from opencensus.trace import config_integration
+# from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
 # from starlette.middleware.gzip import GZipMiddleware
 
 # Internal:
