@@ -11,9 +11,7 @@ from starlette.requests import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from opencensus.ext.azure.log_exporter import AzureLogHandler
-from opencensus.ext.flask.flask_middleware import FlaskMiddleware
 from opencensus.ext.azure.trace_exporter import AzureExporter
-from opencensus.trace.samplers import AlwaysOnSampler
 from opencensus.trace.tracer import Tracer
 from opencensus.trace.span import SpanKind
 from opencensus.trace.attributes_helper import COMMON_ATTRIBUTES
