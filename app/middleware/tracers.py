@@ -8,6 +8,7 @@ from typing import Dict, Iterable, Union
 
 # 3rd party:
 from starlette.requests import Request
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
@@ -36,10 +37,12 @@ HTTP_HOST = COMMON_ATTRIBUTES['HTTP_HOST']
 HTTP_METHOD = COMMON_ATTRIBUTES['HTTP_METHOD']
 HTTP_PATH = COMMON_ATTRIBUTES['HTTP_PATH']
 
+
 config_integration.trace_integrations(['logging'])
+config_integration.trace_integrations(['requests'])
 
 
-class TraceHeaderMiddleware:
+class TraceHeaderMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, sampler, instrumentation_key, cloud_role_name,
                  extra_attrs: Dict[str, str],
                  logging_instances: Iterable[Iterable[Union[logging.Logger, int]]]):
@@ -55,6 +58,7 @@ class TraceHeaderMiddleware:
         self.handler = AzureLogHandler(connection_string=instrumentation_key)
 
         self.handler.add_telemetry_processor(cloud_role_name)
+        super(TraceHeaderMiddleware, self).__init__(app)
 
         for log, level in logging_instances:
             log.addHandler(self.handler)
