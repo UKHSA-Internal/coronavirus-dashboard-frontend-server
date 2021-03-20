@@ -5,8 +5,7 @@
 # Python:
 import logging
 from os import getenv
-from sys import stdout
-from typing import Union, NoReturn, Any, Coroutine
+from typing import Union, NoReturn
 from gzip import compress
 
 # 3rd party:
@@ -24,6 +23,7 @@ from azure.storage.blob.aio import (
 )
 
 # Internal:
+from app.common.trace_wrappers import trace_async_method_operation
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -86,6 +86,7 @@ class StorageClient:
     tier: str
         Blob access tier - must be one of "Hot", "Cool", or "Archive". [Default: 'Hot']
     """
+    _name = "Azure Blob"
 
     def __init__(self, container: str, path: str = str(),
                  connection_string: str = STORAGE_CONNECTION_STRING,
@@ -215,6 +216,8 @@ class StorageClient:
 
 
 class AsyncStorageClient:
+    _name = "Azure Blob"
+
     def __init__(self, container: str, path: str = str(),
                  connection_string: str = STORAGE_CONNECTION_STRING,
                  content_type: Union[str, None] = DEFAULT_CONTENT_TYPE,
@@ -225,7 +228,7 @@ class AsyncStorageClient:
         self.path = path
         self.compressed = compressed
         self._connection_string = connection_string
-        self._container_name = container
+        self.container = container
         self._tier = getattr(StandardBlobTier, tier, None)
 
         if self._tier is None:
@@ -254,6 +257,8 @@ class AsyncStorageClient:
             min_large_block_upload_threshold=8 * 1024 * 1024 + 1
         )
 
+        self.account_name = self.client.account_name
+
     async def __aenter__(self) -> 'AsyncStorageClient':
         await self.client.__aenter__()
         return self
@@ -264,6 +269,12 @@ class AsyncStorageClient:
     def set_tier(self, tier: str):
         self.client.set_standard_blob_tier(tier)
 
+    @trace_async_method_operation(
+        "container", "path",
+        name="account_name",
+        dep_type="_name",
+        action="list"
+    )
     async def upload(self, data: Union[str, bytes], overwrite: bool = True) -> NoReturn:
         """
         Uploads blob data to the storage.
@@ -297,13 +308,26 @@ class AsyncStorageClient:
 
         return await upload
 
+    @trace_async_method_operation(
+        "container", "path",
+        name="account_name",
+        dep_type="_name",
+        action="list"
+    )
     async def download(self) -> AsyncStorageStreamDownloader:
         data = await self.client.download_blob()
-        logging.info(f"Downloaded blob '{self._container_name}/{self.path}'")
+        logging.info(f"Downloaded blob '{self.container}/{self.path}'")
         return data
 
+    @trace_async_method_operation(
+        "container", "path",
+        name="account_name",
+        dep_type="_name",
+        action="list"
+    )
     async def list_blobs(self):
         async with AsyncBlobServiceClient.from_connection_string(self._connection_string) as client:
-            container: AsyncContainerClient = client.get_container_client(self._container_name)
+            container: AsyncContainerClient = client.get_container_client(self.container)
             async for blob in container.list_blobs(name_starts_with=self.path):
                 yield blob
+
