@@ -129,6 +129,8 @@ class Exporter(AzureExporter):
                 for key, value in dict(sd.attributes).items():
                     if key == f"{data.type}.success":
                         data.success = value
+
+                        sd.attributes[f"{data.type}.status_code"] = 200 if value else 500
                         continue
 
                     if key.startswith(data.type):
