@@ -24,7 +24,7 @@ from app.healthcheck.views import run_healthcheck
 from app.exceptions.views import exception_handlers
 from app.config import Settings
 from app.common.utils import add_cloud_role_name
-from app.middleware.tracers import TraceHeaderMiddleware
+from app.middleware.tracers.starlette import TraceRequestMiddleware
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -33,26 +33,19 @@ __all__ = [
 ]
 
 
-WEBSITE_TIMESTAMP = {
-    "container": "publicdata",
-    "path":  "assets/dispatch/website_timestamp"
-}
-LATEST_PUBLISHED_TIMESTAMP = {
-    "container": "pipeline",
-    "path": "info/latest_published"
-}
-
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
+
 
 routes = [
     Route('/', endpoint=home_page, methods=["GET"]),
-    Route('/heathcheck', endpoint=run_healthcheck, methods=["GET", "HEAD"]),
+    Route(f'/{Settings.healthcheck_path}', endpoint=run_healthcheck, methods=["GET", "HEAD"]),
     Route('/search', endpoint=postcode_page, methods=["GET"]),
     Mount('/assets', StaticFiles(directory="static"), name="static")
 ]
 
+
 logging_instances = [
-    [logging.getLogger('landing_page'), logging.INFO],
+    [logging.getLogger(__name__), logging.INFO],
     [logging.getLogger('uvicorn'), logging.WARNING],
     [logging.getLogger('uvicorn.access'), logging.WARNING],
     [logging.getLogger('uvicorn.error'), logging.ERROR],
@@ -63,10 +56,11 @@ logging_instances = [
     [logging.getLogger('asyncpg'), logging.WARNING],
 ]
 
+
 middleware = [
     Middleware(ProxyHeadersMiddleware, trusted_hosts=Settings.service_domain),
     Middleware(
-        TraceHeaderMiddleware,
+        TraceRequestMiddleware,
         sampler=AlwaysOnSampler(),
         instrumentation_key=Settings.instrumentation_key,
         cloud_role_name=add_cloud_role_name,
@@ -87,94 +81,6 @@ app = Starlette(
 )
 
 
-# app.include_router(home_page, default_response_class=HTMLResponse)
-# app.include_router(postcode_page, default_response_class=HTMLResponse)
-#
-#     # instance_path=instance_path,
-#     static_folder="static",
-#     static_url_path="/assets",
-#     template_folder='templates'
-# )
-# app.url_map.strict_slashes = False
-# config_integration.trace_integrations(['requests'])
-# config_integration.trace_integrations(['logging'])
-
-# app.config.from_object('app.config.Config')
-
-# Logging -------------------------------------------------
-# log_level = getattr(logging, Settings.log_level)
-#
-# logging_instances = [
-#     [app.logger, log_level],
-#     [logging.getLogger('werkzeug'), logging.WARNING],
-#     [logging.getLogger('azure'), logging.WARNING]
-# ]
-
-# ---------------------------------------------------------
-
-
-# @app.template_filter()
-# def pluralise(number, singular, plural, null=str()):
-#     if abs(number) > 1:
-#         return plural
-#
-#     if abs(number) == 1:
-#         return singular
-#
-#     if number == 0 and not len(null):
-#         return plural
-#
-#     return null
-
-
-# @app.template_filter()
-# def isnone(value):
-#     return value is None
-
-
-# @app.before_first_request
-# def prep_service():
-#     exporter = AzureExporter(connection_string=AI_INSTRUMENTATION_KEY)
-#     exporter.add_telemetry_processor(add_cloud_role_name)
-#
-#     _ = FlaskMiddleware(
-#         app=app,
-#         exporter=exporter,
-#         sampler=AlwaysOnSampler(),
-#         propagator=TraceContextPropagator()
-#     )
-#
-#     handler = AzureLogHandler(connection_string=AI_INSTRUMENTATION_KEY)
-#
-#     handler.add_telemetry_processor(add_cloud_role_name)
-#
-#     for log, level in logging_instances:
-#         log.addHandler(handler)
-#         log.setLevel(level)
-
-
-# @app.before_request
-# def prepare_context():
-#     custom_dims = dict(
-#         custom_dimensions=dict(
-#             is_healthcheck=request.path == HEALTHCHECK_PATH,
-#             url=str(request.url),
-#             path=str(request.path),
-#             query_string=str(request.query_string)
-#         )
-#     )
-#
-#     app.logger.info(request.url, extra=custom_dims)
-#
-#     with StorageClient(**WEBSITE_TIMESTAMP) as client:
-#         g.website_timestamp = client.download().readall().decode()
-#
-#     with StorageClient(**LATEST_PUBLISHED_TIMESTAMP) as client:
-#         g.timestamp = client.download().readall().decode()
-#
-#     return None
-
-
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
     response = await call_next(request)
@@ -188,37 +94,6 @@ async def add_process_time_header(request: Request, call_next):
     response.headers['PHE-Server-Loc'] = Settings.server_location
 
     return response
-
-
-# @app.middleware("http")
-# async def logging_middleware(request: Request, call_next):
-#     exporter = AzureExporter(connection_string=Settings.instrumentation_key)
-#     exporter.add_telemetry_processor(add_cloud_role_name)
-#
-#     tracer = Tracer(
-#         exporter=exporter,
-#         sampler=AlwaysOnSampler()
-#     )
-#
-#     with tracer.span("main") as span:
-#         span.span_kind = SpanKind.SERVER
-#
-#         response = await call_next(request)
-#
-#         tracer.add_attribute_to_current_span(
-#             attribute_key=HTTP_STATUS_CODE,
-#             attribute_value=response.status_code
-#         )
-#
-#         tracer.add_attribute_to_current_span(
-#             attribute_key=HTTP_URL,
-#             attribute_value=str(request.url)
-#         )
-#
-#         tracer.add_attribute_to_current_span("environment", Settings.ENVIRONMENT)
-#         tracer.add_attribute_to_current_span("server_location", Settings.server_location)
-#
-#     return response
 
 
 if __name__ == "__main__":
