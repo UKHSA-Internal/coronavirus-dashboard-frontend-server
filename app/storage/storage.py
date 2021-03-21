@@ -23,7 +23,7 @@ from azure.storage.blob.aio import (
 )
 
 # Internal:
-from app.common.trace_wrappers import trace_async_method_operation
+from app.middleware.tracers.utils import trace_async_method_operation
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

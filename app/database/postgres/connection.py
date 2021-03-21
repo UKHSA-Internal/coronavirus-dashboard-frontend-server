@@ -1,14 +1,5 @@
 #!/usr/bin python3
 
-"""
-<Description of the programme>
-
-Author:        Pouria Hadjibagheri <pouria.hadjibagheri@phe.gov.uk>
-Created:       10 Mar 2021
-License:       MIT
-Contributors:  Pouria Hadjibagheri
-"""
-
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
@@ -23,14 +14,8 @@ from orjson import loads, dumps
 from asyncpg.exceptions import PostgresLogMessage
 
 # Internal:
-from app.common.trace_wrappers import trace_async_method_operation
+from app.middleware.tracers.utils import trace_async_method_operation
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Header
-__author__ = "Pouria Hadjibagheri"
-__copyright__ = "Copyright (c) 2021, Public Health England"
-__license__ = "MIT"
-__version__ = "0.0.1"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
