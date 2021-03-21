@@ -58,7 +58,7 @@ class Connection:
     @trace_async_method_operation(
         name="_account_name",
         dep_type="_name",
-        action="fetchval"
+        action="connection_fetchval"
     )
     async def fetchval(self, query, *args, **kwargs):
         return await self._conn.fetchval(query, *args, **kwargs)
@@ -66,7 +66,7 @@ class Connection:
     @trace_async_method_operation(
         name="_account_name",
         dep_type="_name",
-        action="fetch"
+        action="connection_fetch"
     )
     async def fetch(self, query, *args, **kwargs):
         return await self._conn.fetch(query, *args, **kwargs)
@@ -74,7 +74,7 @@ class Connection:
     @trace_async_method_operation(
         name="_account_name",
         dep_type="_name",
-        action="fetchrow"
+        action="connection_fetchrow"
     )
     async def fetchrow(self, query, *args, **kwargs):
         return await self._conn.fetchrow(query, *args, **kwargs)
