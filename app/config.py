@@ -23,6 +23,7 @@ class Settings:
     log_level = getenv("LOG_LEVEL", "INFO")
     ENVIRONMENT = getenv("API_ENV")
     healthcheck_path = "healthcheck"
+    cloud_role_name = getenv("WEBSITE_SITE_NAME", "landing-page")
     website_timestamp = {
         "container": "publicdata",
         "path":  "assets/dispatch/website_timestamp"
