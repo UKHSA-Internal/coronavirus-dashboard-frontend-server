@@ -22,6 +22,15 @@ class Settings:
     server_location = getenv('SERVER_LOCATION', "N/A")
     log_level = getenv("LOG_LEVEL", "INFO")
     ENVIRONMENT = getenv("API_ENV")
+    healthcheck_path = "healthcheck"
+    website_timestamp = {
+        "container": "publicdata",
+        "path":  "assets/dispatch/website_timestamp"
+    }
+    latest_published_timestamp = {
+        "container": "pipeline",
+        "path": "info/latest_published"
+    }
 
 
 class Config(object):
