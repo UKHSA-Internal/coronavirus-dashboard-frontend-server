@@ -16,17 +16,15 @@ from os import getenv
 from datetime import datetime
 from operator import itemgetter
 from typing import Dict
-from json import loads
 
 # 3rd party:
-from flask import current_app as app
 
 # Internal:
-# from .caching import cache_client
 from .visualisation import plot_thumbnail
 from .data.queries import get_last_fortnight, change_by_metric
 from .data.variables import DestinationMetrics
-from ..storage import StorageClient, AsyncStorageClient
+from app.storage import AsyncStorageClient
+from app.config import Settings
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -124,12 +122,7 @@ def add_cloud_role_name(envelope):
 
 
 async def get_release_timestamp():
-    latest_published_timestamp = {
-        "container": "pipeline",
-        "path": "info/latest_published"
-    }
-
-    async with AsyncStorageClient(**latest_published_timestamp) as client:
+    async with AsyncStorageClient(**Settings.latest_published_timestamp) as client:
         data = await client.download()
         timestamp = await data.readall()
 
