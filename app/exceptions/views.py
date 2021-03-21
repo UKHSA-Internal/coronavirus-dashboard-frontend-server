@@ -3,13 +3,15 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+from logging import getLogger
 from http import HTTPStatus
-from functools import wraps
+from starlette.requests import Request
 
 # 3rd party:
 
 # Internal:
-from ..template_processor import render_template
+from app.template_processor import render_template
+from app.config import Settings
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -18,15 +20,27 @@ __all__ = [
 ]
 
 
-async def handle_404(request, exc, **context):
-    # if isinstance(err, HandledException):
-    #     return err
+logger = getLogger(__name__)
 
-    # app.logger.info(f"404 - Not found", extra={'custom_dimensions': {"url": request.url}})
 
+async def handle_404(request: Request, exc, **context):
     status = HTTPStatus.NOT_FOUND
     status_code = getattr(status, "value", 404)
     status_detail = getattr(status, "phrase", "Not Found")
+
+    custom_dims = dict(
+        custom_dimensions=dict(
+            is_healthcheck=Settings.healthcheck_path in request.url.path,
+            url=str(request.url),
+            path=str(request.url.path),
+            query_string=str(request.query_params),
+            status_code=status_code,
+            status_detail=status_detail,
+            **context
+        )
+    )
+
+    logger.warning(exc, extra=custom_dims, exc_info=True)
 
     return await render_template(
         request,
@@ -34,34 +48,16 @@ async def handle_404(request, exc, **context):
         context={
             "status_code": status_code,
             "status_detail": status_detail,
+            "API_environment": Settings.ENVIRONMENT,
+            "server_location": Settings.server_location,
+            "is_dev": Settings.DEBUG,
             **context
         },
         status_code=status_code
     )
 
 
-async def handle_500(request, exc, **context):
-    # if isinstance(err, HandledException):
-    #     return err
-
-    # additional_info = {
-    #     'website_timestamp': g.website_timestamp,
-    #     'latest_release': g.timestamp,
-    #     'db_host': getenv("AzureCosmosHost", NOT_AVAILABLE),
-    #     "API_environment": getenv("API_ENV", NOT_AVAILABLE),
-    #     "server_location": getenv("SERVER_LOCATION", NOT_AVAILABLE),
-    #     "is_dev": getenv("IS_DEV", NOT_AVAILABLE),
-    #     "redis": getenv("AZURE_REDIS_HOST", NOT_AVAILABLE),
-    #     "AzureCosmosDBName": getenv("AzureCosmosDBName", NOT_AVAILABLE),
-    #     "AzureCosmosCollection": getenv("AzureCosmosCollection", NOT_AVAILABLE),
-    #     "AzureCosmosDestinationsCollection": getenv(
-    #         "AzureCosmosDestinationsCollection",
-    #         NOT_AVAILABLE
-    #     ),
-    # }
-    #
-    # app.logger.exception(err, extra={'custom_dimensions': additional_info})
-
+async def handle_500(request: Request, exc, **context):
     if hasattr(exc, "status_code"):
         status_code = getattr(exc, "status_code")
         status_detail = getattr(exc, "phrase", "detail")
@@ -69,6 +65,20 @@ async def handle_500(request, exc, **context):
         status = HTTPStatus.INTERNAL_SERVER_ERROR
         status_code = getattr(status, "value", 500)
         status_detail = getattr(status, "phrase", "Internal Server Error")
+
+    custom_dims = dict(
+        custom_dimensions=dict(
+            is_healthcheck=Settings.healthcheck_path in request.url.path,
+            url=str(request.url),
+            path=str(request.url.path),
+            query_string=str(request.query_params),
+            status_code=status_code,
+            status_detail=status_detail,
+            **context
+        )
+    )
+
+    logger.error(exc, extra=custom_dims, exc_info=True)
 
     return await render_template(
         request,
