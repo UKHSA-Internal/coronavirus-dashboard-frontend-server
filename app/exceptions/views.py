@@ -36,6 +36,9 @@ async def handle_404(request: Request, exc, **context):
             query_string=str(request.query_params),
             status_code=status_code,
             status_detail=status_detail,
+            api_environment=Settings.ENVIRONMENT,
+            server_location=Settings.server_location,
+            is_dev=Settings.DEBUG,
             **context
         )
     )
@@ -48,9 +51,6 @@ async def handle_404(request: Request, exc, **context):
         context={
             "status_code": status_code,
             "status_detail": status_detail,
-            "API_environment": Settings.ENVIRONMENT,
-            "server_location": Settings.server_location,
-            "is_dev": Settings.DEBUG,
             **context
         },
         status_code=status_code
@@ -74,6 +74,9 @@ async def handle_500(request: Request, exc, **context):
             query_string=str(request.query_params),
             status_code=status_code,
             status_detail=status_detail,
+            api_environment=Settings.ENVIRONMENT,
+            server_location=Settings.server_location,
+            is_dev=Settings.DEBUG,
             **context
         )
     )
