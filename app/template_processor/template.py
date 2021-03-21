@@ -23,7 +23,7 @@ from ..common.data.variables import NationalAdjectives
 from ..common.utils import get_release_timestamp
 from ..common.banner import get_banners
 from ..common.whats_new import get_whats_new_banners
-from app.common.utils import get_og_image_names, add_cloud_role_name
+from app.common.utils import get_og_image_names
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
