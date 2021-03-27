@@ -21,3 +21,5 @@ aiohttp
 uvicorn
 starlette
 orjson
+uvicorn[standard]
+gunicorn
