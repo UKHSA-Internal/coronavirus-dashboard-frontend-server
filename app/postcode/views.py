@@ -15,14 +15,12 @@ from typing import Union, Any
 from pandas import DataFrame
 
 # Internal:
-from .types import AlertsType, QueryDataType, AlertLevel
+from .types import QueryDataType
 from .utils import get_validated_postcode
 from ..common.utils import get_release_timestamp
-from ..common.data.variables import DestinationMetrics, IsImproving, NationalAdjectives
+from ..common.data.variables import DestinationMetrics, IsImproving
 from ..database.postgres import Connection
-from ..config import Settings
 from ..template_processor import render_template
-from ..template_processor.types import DataItem
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -42,30 +40,8 @@ with open(join_path(queries_dir, "local_data.sql")) as fp:
     local_data_query = fp.read()
 
 
-with open(join_path(assets_dir, "alert_levels.json")) as fp:
-    alerts: AlertsType = load(fp)
-
-
 with open(join_path(assets_dir, "query_params.json")) as fp:
     query_data: QueryDataType = load(fp)
-
-
-def alert_level(row: DataItem) -> Union[AlertLevel, dict]:
-    try:
-        area_code, alert, date = row["areaCode"], row["value"], row["date"]
-    except TypeError:
-        return alerts["default"]
-
-    if area_code[0] == "E":
-        if alert == '-99' and date > "2021-01-03":
-            alert = "-99|2021-01-03"
-
-        return alerts["E"][alert]
-
-    elif area_code[0] == "S":
-        return alerts["S"][alert]
-
-    return alerts["default"]
 
 
 async def get_postcode_data(conn: Any, timestamp: str, postcode: str) -> DataFrame:
@@ -159,7 +135,6 @@ async def postcode_page(request) -> render_template:
             "cards": DestinationMetrics,
             "data": data,
             "area_data": get_area_data(data),
-            "is_improving": is_improving,
-            "process_alert": alert_level,
+            "is_improving": is_improving
         }
     )
