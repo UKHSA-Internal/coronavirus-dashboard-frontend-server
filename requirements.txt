@@ -14,7 +14,7 @@ pandas==1.1.5
 flask-minify==0.29
 werkzeug==1.0.1
 redis==3.5.3
-pytz==2020.4
+pytz==2021.1
 flask-caching==1.9.0
 flask_cors==3.0.9
 opencensus-ext-azure==1.0.5
