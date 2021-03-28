@@ -35,10 +35,10 @@ COPY server/upload.nginx              /etc/nginx/conf.d/upload.conf
 COPY server/engine.nginx              /etc/nginx/conf.d/engine.conf
 
 
-RUN addgroup --system --gid 102 app                                  && \
+RUN addgroup --system --gid 123 app                                  && \
     adduser  --system --disabled-login --ingroup app                    \
              --no-create-home --home /nonexistent                       \
-             --gecos "app user" --shell /bin/false --uid 102 app
+             --gecos "app user" --shell /bin/false --uid 123 app
 
 # Gunicorn config
 COPY server/gunicorn_conf.py          /gunicorn_conf.py
