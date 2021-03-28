@@ -30,7 +30,7 @@ RUN apt-get update                             && \
     apt-get install -y supervisor              && \
     rm -rf /var/lib/apt/lists/*
 
-COPY server/base.nginx               ./nginx.conf
+COPY server/base.nginx                /etc/nginx/nginx.conf
 COPY server/upload.nginx              /etc/nginx/conf.d/upload.conf
 COPY server/engine.nginx              /etc/nginx/conf.d/engine.conf
 
@@ -46,9 +46,6 @@ COPY server/gunicorn_conf.py          /gunicorn_conf.py
 # Gunicorn entrypoint - used by supervisord
 COPY server/start-gunicorn.sh         /start-gunicorn.sh
 RUN chmod +x /start-gunicorn.sh
-
-# Custom Supervisord config
-COPY server/supervisord.conf          /etc/supervisor/conf.d/supervisord.conf
 
 # Main service entrypoint - launches supervisord
 COPY server/entrypoint.sh             /entrypoint.sh
@@ -68,6 +65,22 @@ RUN python3 -m pip install --no-cache-dir -U pip                      && \
     python3 -m pip install --no-cache-dir setuptools                  && \
     python3 -m pip install -U --no-cache-dir -r ./requirements.txt    && \
     rm ./requirements.txt
+
+# Custom Supervisord config
+COPY server/supervisord.conf          /opt/supervisor/supervisord.conf
+
+RUN mkdir -p /run/supervisord/                                    && \
+    mkdir -p /opt/supervisor/                                     && \
+    mkdir -p /opt/log/                                            && \
+    mkdir -p /opt/gunicorn/                                       && \
+    mkdir -p /opt/ngnix/                                          && \
+    mkdir -p /opt/nginx/cache/                                    && \
+    chgrp -R app /var/cache/nginx/                                && \
+    chmod -R g+rw /var/cache/nginx/                               && \
+    chgrp -R app /app/                                            && \
+    chmod -R g+r /app/                                            && \
+    chgrp -R app /opt/                                            && \
+    chmod -R g+wr /opt/
 
 USER app
 
