@@ -12,7 +12,7 @@ RUN npm run build /app/static
 RUN rm -rf node_modules
 
 
-FROM python:3.9.2-buster
+FROM python:3.9-buster
 LABEL maintainer="Pouria Hadjibagheri <Pouria.Hadjibagheri@phe.gov.uk>"
 
 # Gunicorn binding port
