@@ -13,8 +13,6 @@ from typing import TypedDict, List, Dict, Union
 
 __all__ = [
     "LocalDataType",
-    "AlertsType",
-    "AlertLevel",
     "QueryDataType"
 ]
 
@@ -24,15 +22,6 @@ class LocalDataType(TypedDict):
     msoa_metric: str
     getter_metrics: List[str]
     metrics: List[str]
-
-
-class AlertLevel(TypedDict):
-    value: str
-    url: str
-    level: int
-
-
-AlertsType = Dict[str, Union[Dict[str, AlertLevel], dict]]
 
 
 class QueryDataType(TypedDict):
