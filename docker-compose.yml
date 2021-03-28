@@ -6,7 +6,7 @@ services:
     restart: always
     volumes:
       - ./app/:/app/app/
-      - ./server/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
+      - ./server/supervisord.conf:/opt/supervisor/supervisord.conf
       - ./server/gunicorn_conf.py:/gunicorn_conf.py
       - ./app/static/dist/application.css:/app/static/application.css
       - ./app/static/images:/app/static/images
