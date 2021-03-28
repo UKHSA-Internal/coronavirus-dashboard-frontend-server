@@ -29,6 +29,7 @@ WITH
             JOIN covid19.release_reference AS rr ON rr.id = release_id
             JOIN metrics ON metrics.id = ts.metric_id
             JOIN location AS ref ON ref.id = ts.area_id
+        WHERE released IS TRUE
     )
 SELECT "areaCode", postcode, "areaType", "areaName", date, metric, value, priority
 FROM (
