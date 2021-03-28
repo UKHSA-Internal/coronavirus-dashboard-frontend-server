@@ -1,10 +1,9 @@
-{% macro tail_banners(header) %}
-	{% if invalid_postcode is defined and invalid_postcode %}
-		{% set invalidPostcode = "I" %}
-	{% else %}
-		{% set invalidPostcode = "V" %}
-	{% endif %}
-
+{%- macro tail_banners(header) -%}
+	{%- if invalid_postcode is defined and invalid_postcode -%}
+		{%- set invalidPostcode = "I" -%}
+	{%- else -%}
+		{%- set invalidPostcode = "V" -%}
+	{%- endif -%}
 	<h2 class="govuk-heading-l govuk-!-margin-top-4 govuk-!-margin-bottom-0">{{ header }}</h2>
 	<div class="card-container double-row">
 		<div class="mini-card">
@@ -15,9 +14,8 @@
 			<p class="govuk-body">Not all data are available for every area &ndash; we will show the most
 				local information in each category for your selected area.
 			</p>
-			{% include "components/postcode_search.html" %}
+			{%- include "components/postcode_search.html" -%}
 		</div>
-
-		{% include "components/map_card.html" %}
+		{%- include "components/map_card.html" -%}
 	</div>
-{% endmacro %}
+{%- endmacro -%}
