@@ -16,7 +16,7 @@ werkzeug==1.0.1
 redis==3.5.3
 pytz==2020.4
 flask-caching==1.9.0
-flask_cors==3.0.9
+flask_cors==3.0.10
 opencensus-ext-azure==1.0.5
 opencensus-ext-flask==0.7.3
 opencensus-ext-logging==0.1.0
