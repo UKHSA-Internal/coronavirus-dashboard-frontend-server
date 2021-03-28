@@ -1,30 +1,15 @@
-{% extends "base.html" %}
-{% from "components/mini_card.html" import create_card with context %}
-{% from "components/default_tail.html" import tail_banners with context %}
-
-{#{% if area_info.ltla.startswith("E") %}#}
-{#	{% set nameAttr = "msoaName" %}#}
-{#	{% set codeAttr = "msoa" %}#}
-{#	{% set areaType = "msoa" %}#}
-{#{% else %}#}
-{#	{% set nameAttr = "ltlaName" %}#}
-{#	{% set codeAttr = "ltla" %}#}
-{#	{% set areaType = "ltla" %}#}
-{#{% endif %}#}
-
-{% set postcode = area_data.postcode %}
-
-{% block head %}
-{#	{% cache 1800, 'head-postcode', timestamp, postcode -%}#}
-		<title>Daily summary | {{ area_data.areaName }}</title>
-		<meta property="og:description" content="Daily summary | {{ area_data.areaName }}">
-		<meta name="twitter:description" content="Daily summary | {{ area_data.areaName }}">
-		<meta property="og:url" content="https://coronavirus.data.gov.uk/search?postcode={{ postcode }}">
-		<meta name="twitter:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">
-		<meta property="og:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">
-{#	{% endcache -%}#}
-{% endblock %}
-
+{%- extends "base.html" -%}
+{%- from "components/mini_card.html" import create_card with context -%}
+{%- from "components/default_tail.html" import tail_banners with context -%}
+{%- set postcode = area_data.postcode -%}
+{%- block head -%}
+	<title>Daily summary | {{ area_data.areaName }}</title>
+	<meta property="og:description" content="Daily summary | {{ area_data.areaName }}">
+	<meta name="twitter:description" content="Daily summary | {{ area_data.areaName }}">
+	<meta property="og:url" content="https://coronavirus.data.gov.uk/search?postcode={{ postcode }}">
+	<meta name="twitter:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">
+	<meta property="og:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">
+{%- endblock -%}
 {%- block page_title -%}Daily update{% endblock %}
 {%- block main -%}
 	<div class="local-intro govuk-!-margin-left-0">
@@ -43,7 +28,6 @@
 
 		<div>
 			{% include "components/comparison_scale.html" %}
-			{% include "components/alert_level.html" %}
 		</div>
 	</div>
 
@@ -64,17 +48,14 @@
 			, {{ data.loc[data.areaType.isin(["utla", "ltla"])].sort_values("rank").areaName.values[0] }}
 		{%- endif -%}.
 	</p>
-	{% include "components/vaccination.html" %}
-	{% include "components/r_number.html" %}
-
+	{%- include "components/vaccination.html" -%}
+	{%- include "components/r_number.html" -%}
 	<div class="card-container">
-		{% for card in cards %}
+		{%- for card in cards -%}
 			{{ create_card(cards[card], True) }}
-		{% endfor %}
+		{%- endfor -%}
 	</div>
-
 {%- endblock -%}
-
-{% block lower_section %}
+{%- block lower_section -%}
 	{{ tail_banners("Search another location") }}
-{% endblock %}
+{%- endblock -%}
