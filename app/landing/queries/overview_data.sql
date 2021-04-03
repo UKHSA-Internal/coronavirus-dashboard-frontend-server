@@ -24,7 +24,7 @@ FROM (
     JOIN covid19.area_reference    AS ar ON ar.id = main.area_id
     WHERE
           area_type = 'overview'
-      AND date > ( DATE($1) - INTERVAL '8 days' )
+      AND date > ( DATE($1) - INTERVAL '30 days' )
       AND metric = ANY( $2::VARCHAR[] )
     GROUP BY area_type, area_code, date, metric
 ) AS result
