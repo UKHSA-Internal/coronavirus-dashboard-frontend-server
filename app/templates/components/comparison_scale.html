@@ -11,7 +11,7 @@
 
 {%- set rollingRate = ("newCasesBySpecimenDateRollingRate" | get_data(data)) -%}
 <p class="govuk-body govuk-!-margin-bottom-2 govuk-!-margin-top-2">
-	Rate per 100k resident population:&nbsp;<strong>{{ rollingRate.value }}</strong>
+	Rate per 100,000 people:&nbsp;<strong>{{ rollingRate.value }}</strong>
 </p>
 {%- if rollingRate.raw == '-999999.0' or areaType != "msoa" -%}
 	<p class="govuk-caption-m govuk-!-font-weight-regular govuk-!-margin-bottom-1 govuk-!-margin-top-1">
