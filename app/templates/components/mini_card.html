@@ -74,13 +74,14 @@
 								<span href="#" class="govuk-link--no-visited-state number-link-red" style="border: none">
 									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1 change-box {{ colour }}">
 										{%- set change = ((card.metric + "Change") | get_data(data)) -%}
-										{%- if change.value != 0 -%}
+										{%- set changePercentage = ((card.metric + "ChangePercentage") | get_data(data)) -%}
+										{%- if changePercentage.value != 0 -%}
 											<img src="{{ url_for("static", path=image) }}"
 											     width="12px"
 											     alt="arrow"
 											     style="transform: rotate({{ ((card.metric + "Direction")| get_data(data)).raw }}deg)">
 											{{ change.value }}
-											<span class="govuk-!-font-weight-regular">({{ ((card.metric + "ChangePercentage") | get_data(data)).value }}%)</span>
+											<span class="govuk-!-font-weight-regular">({{ changePercentage.value }}%)</span>
 										{%- else -%}
 											<span>No change</span>
 										{%- endif -%}
