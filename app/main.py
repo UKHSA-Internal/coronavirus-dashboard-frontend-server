@@ -45,7 +45,7 @@ routes = [
 
 
 logging_instances = [
-    [logging.getLogger(__name__), logging.INFO],
+    [logging.getLogger("app"), logging.INFO],
     [logging.getLogger('uvicorn'), logging.WARNING],
     [logging.getLogger('uvicorn.access'), logging.WARNING],
     [logging.getLogger('uvicorn.error'), logging.ERROR],
