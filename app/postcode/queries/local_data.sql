@@ -4,32 +4,91 @@ WITH
         FROM covid19.postcode_lookup
             JOIN covid19.area_reference  AS ref ON ref.id = area_id
             JOIN covid19.area_priorities AS ap  ON ref.area_type = ap.area_type
-        WHERE
-              UPPER(REPLACE(postcode, ' ', '')) = $2
+        WHERE UPPER(REPLACE(postcode, ' ', '')) = $2
     ),
      metrics AS (
         SELECT id, metric
         FROM covid19.metric_reference
-        WHERE
-              metric ILIKE ANY($1::VARCHAR[])
+        WHERE metric ILIKE
+            ANY($1::VARCHAR[])
     ),
-     data AS (
-        SELECT area_code, postcode, area_type, area_name, date, metric, payload, priority
-        FROM covid19.time_series       AS ts
-            JOIN covid19.release_reference AS rr ON rr.id = release_id
-            JOIN metrics ON metrics.id = metric_id
-            JOIN location ON location.id = ts.area_id
-        WHERE
-              partition_id = ANY($3::VARCHAR[])
-          AND released IS TRUE
+    data AS (
+        SELECT * FROM (
+                          SELECT hash,
+                                 metric,
+                                 priority,
+                                 area_code AS area_code,
+                                 postcode  AS postcode,
+                                 area_type AS area_type,
+                                 area_name AS area_name,
+                                 date      AS date,
+                                 payload
+                          FROM covid19.time_series_p{partition_date}_other AS ts
+                                   JOIN covid19.release_reference AS rr ON rr.id = release_id
+                                   JOIN metrics ON metrics.id = metric_id
+                                   JOIN location ON location.id = ts.area_id
+                          WHERE released IS TRUE
+                          UNION ALL
+                          (
+                              SELECT hash,
+                                     metric,
+                                     priority,
+                                     area_code AS area_code,
+                                     postcode  AS postcode,
+                                     area_type AS area_type,
+                                     area_name AS area_name,
+                                     date      AS date,
+                                     payload
+                              FROM covid19.time_series_p{partition_date}_utla AS ts
+                                       JOIN covid19.release_reference AS rr ON rr.id = release_id
+                                       JOIN metrics ON metrics.id = metric_id
+                                       JOIN location ON location.id = ts.area_id
+                              WHERE released IS TRUE
+                          )
+                          UNION ALL
+                          (
+                              SELECT hash,
+                                     metric,
+                                     priority,
+                                     area_code AS area_code,
+                                     postcode  AS postcode,
+                                     area_type AS area_type,
+                                     area_name AS area_name,
+                                     date      AS date,
+                                     payload
+                              FROM covid19.time_series_p{partition_date}_ltla AS ts
+                                       JOIN covid19.release_reference AS rr ON rr.id = release_id
+                                       JOIN metrics ON metrics.id = metric_id
+                                       JOIN location ON location.id = ts.area_id
+                              WHERE released IS TRUE
+                          )
+                          UNION ALL
+                          (
+                              SELECT hash,
+                                     metric,
+                                     priority,
+                                     area_code AS area_code,
+                                     postcode  AS postcode,
+                                     area_type AS area_type,
+                                     area_name AS area_name,
+                                     date      AS date,
+                                     payload
+                              FROM covid19.time_series_p{partition_date}_nhstrust AS ts
+                                       JOIN covid19.release_reference AS rr ON rr.id = release_id
+                                       JOIN metrics ON metrics.id = metric_id
+                                       JOIN location ON location.id = ts.area_id
+                              WHERE released IS TRUE
+                          )
+                      ) as f
     ),
      msoa AS (
         SELECT area_code, postcode, area_type, area_name, date, metric, payload, priority
-        FROM covid19.time_series_p{msoa_partition} AS ts
+         FROM covid19.time_series_p{partition_date}_msoa AS ts
             JOIN covid19.release_reference AS rr ON rr.id = release_id
             JOIN metrics ON metrics.id = ts.metric_id
             JOIN location AS ref ON ref.id = ts.area_id
         WHERE released IS TRUE
+         OFFSET 0
     )
 SELECT "areaCode", postcode, "areaType", "areaName", date, metric, value, priority
 FROM (
@@ -45,8 +104,8 @@ FROM (
                 WHEN value::TEXT = 'UP'                    THEN 0
                 WHEN value::TEXT = 'DOWN'                  THEN 180
                 WHEN value::TEXT = 'SAME'                  THEN 90
-                WHEN area_type = 'msoa' AND metric LIKE $4 THEN value::NUMERIC
-                WHEN metric ILIKE ANY( $5::VARCHAR[] )     THEN value::NUMERIC
+                        WHEN area_type = 'msoa' AND metric LIKE $3 THEN value::NUMERIC
+                        WHEN metric ILIKE ANY ($4::VARCHAR[]) THEN value::NUMERIC
                 ELSE round( value::NUMERIC )::INT
             END
         ) AS "value",
@@ -57,20 +116,21 @@ FROM (
         ) AS rank
     FROM (
         SELECT
-           metric,
-           priority,
-           area_code                     AS area_code,
-           postcode                      AS postcode,
-           area_type                     AS area_type,
-           area_name                     AS area_name,
-           date                          AS date,
-           ( payload ->> 'value' )::TEXT AS "value",
-           RANK() OVER (
-               PARTITION BY ( metric )
-               ORDER BY priority, date DESC
-           ) AS rank
-           FROM data
-        UNION (
+                metric,
+                priority,
+                area_code AS area_code,
+                postcode  AS postcode,
+                area_type AS area_type,
+                area_name AS area_name,
+                date      AS date,
+                (payload ->> 'value')::TEXT AS "value",
+                RANK() OVER (
+                    PARTITION BY (metric)
+                    ORDER BY priority, date DESC
+                ) AS rank
+        FROM (SELECT * FROM data OFFSET 0) AS t
+
+        UNION ALL (
             SELECT
                    (metric || UPPER(LEFT(key, 1)) || RIGHT(key, -1)) AS metric,
                    1 AS priority,
