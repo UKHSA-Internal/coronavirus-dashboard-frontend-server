@@ -14,7 +14,7 @@
 	<p class="sam-body">Second dose: {{ secondDose.value }}</p>
 	<p class="sam-body">
 		<a class="govuk-link govuk-link--no-visited-state"
-		   href="{{ urlPath }}{% if firstDose.areaName != "overview" %}?areaType=nation&areaName={{ firstDose.areaName }}{% endif %}">
+		   href="{{ urlPath }}{% if firstDose.areaType != "overview" %}?areaType=nation&areaName={{ firstDose.areaName }}{% endif %}">
 			View vaccination data
 		</a>
 	</p>
