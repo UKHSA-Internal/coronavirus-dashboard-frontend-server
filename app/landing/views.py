@@ -69,11 +69,6 @@ metrics = [
     'newVirusTestsChangePercentage',
     'newVirusTestsRollingSum',
     'newVirusTestsDirection',
-
-    'transmissionRateMin',
-    'transmissionRateMax',
-    'transmissionRateGrowthRateMin',
-    'transmissionRateGrowthRateMax'
 ]
 
 
