@@ -157,5 +157,4 @@ FROM (
         )
     ) AS result_inner
     WHERE result_inner.rank = 1
-) AS result
-WHERE result.rank = 1;
+) AS result;

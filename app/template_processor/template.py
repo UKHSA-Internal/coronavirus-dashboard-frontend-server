@@ -42,7 +42,8 @@ getter_metrics = [
     "formatted_date",
     "areaName",
     "areaType",
-    "areaCode"
+    "areaCode",
+    "rank"
 ]
 
 SUPPRESSED_MSOA = -999999.0
@@ -131,14 +132,20 @@ def format_number(value: Union[int, float, str]) -> str:
 
 
 @as_template_filter
-def get_data(metric: str, data: DataFrame) -> DataItem:
+def get_data(metric: str, data: DataFrame, msoa=False) -> DataItem:
     float_metrics = ["Rate", "Percent"]
 
     try:
-        value = data.loc[
-            data.metric == metric,
-            getter_metrics
-        ].iloc[0]
+        if msoa is not True:
+            dt = data.loc[
+                ((data.metric == metric) & (data.areaType != "msoa")),
+                getter_metrics
+            ]
+        else:
+            dt = data.loc[data.metric == metric, getter_metrics]
+            dt = dt.loc[dt["rank"] == dt["rank"].min(), :]
+
+        value = dt.iloc[0]
     except IndexError:
         if metric != "alertLevel":
             return dict()
