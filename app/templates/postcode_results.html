@@ -10,8 +10,22 @@
 	<meta name="twitter:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">
 	<meta property="og:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">
 {%- endblock -%}
-{%- block page_title -%}Daily update{% endblock %}
 {%- block main -%}
+		<div id="top">
+		<div class="sticky-header govuk-!-padding-top-3">
+			<div class="sticky-header govuk-grid-row govuk-!-margin-top-0" style="width: 100%">
+				<div class="govuk-grid-column-one-half">
+					<h1 class="govuk-caption-l govuk-!-margin-bottom-0 govuk-!-margin-top-0 panel-title-new">Daily update</h1>
+				</div>
+			</div>
+			<div class="govuk-grid-row govuk-!-margin-top-0">
+				<div class="govuk-grid-column-full">
+					<hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-2 govuk-!-margin-bottom-2 govuk-section-break--visible">
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="local-intro govuk-!-margin-left-0">
 		<h2 class="govuk-heading-l govuk-!-margin-bottom-2 govuk-!-margin-top-0 govuk-!-margin-left-0 govuk-!-padding-top-0 govuk-!-padding-left-0">
 			{{ postcode }} &ndash; {{ area_data.areaName }}
