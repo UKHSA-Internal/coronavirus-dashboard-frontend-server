@@ -125,3 +125,11 @@ async def get_release_timestamp():
         timestamp = await data.readall()
 
     return timestamp.decode()
+
+
+async def get_website_timestamp():
+    async with AsyncStorageClient(**Settings.website_timestamp) as client:
+        data = await client.download()
+        timestamp = await data.readall()
+
+    return timestamp.decode()

@@ -20,7 +20,7 @@ from pytz import timezone
 from ..config import Settings
 from .types import DataItem
 from ..common.data.variables import NationalAdjectives
-from ..common.utils import get_release_timestamp
+from ..common.utils import get_website_timestamp
 from ..common.banner import get_banners
 from ..common.whats_new import get_whats_new_banners
 from app.common.utils import get_og_image_names
@@ -81,7 +81,7 @@ async def render_template(request, template_name: str, context: Optional[Dict[st
     }
 
     if "timestamp" not in context:
-        context["timestamp"] = await get_release_timestamp()
+        context["timestamp"] = await get_website_timestamp()
 
     return template.TemplateResponse(
         template_name,
