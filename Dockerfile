@@ -17,6 +17,8 @@ LABEL maintainer="Pouria Hadjibagheri <Pouria.Hadjibagheri@phe.gov.uk>"
 
 # Gunicorn binding port
 ENV GUNICORN_PORT 5200
+ENV WORKERS_PER_CORE 2
+ENV NUMEXPR_MAX_THREADS   1
 
 COPY server/install-nginx.sh          /install-nginx.sh
 
