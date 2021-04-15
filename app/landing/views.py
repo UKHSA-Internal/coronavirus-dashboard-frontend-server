@@ -21,7 +21,7 @@ from pandas import DataFrame
 # Internal:
 from ..common.data.variables import DestinationMetrics, IsImproving
 from ..common.utils import get_release_timestamp
-from .graphics import get_timeseries
+# from .graphics import get_timeseries
 from ..database.postgres import Connection
 from ..template_processor import render_template
 
@@ -103,19 +103,21 @@ async def get_home_page(request, timestamp: str, invalid_postcode=None) -> rende
     async with Connection() as conn:
         data = await get_landing_data(conn, timestamp)
 
-        time_series = {
-            key: await value
-            async for key, value in get_timeseries(conn, timestamp)
-        }
+        # time_series = {
+        #     key: await value
+        #     async for key, value in get_timeseries(conn, timestamp)
+        # }
 
     return await render_template(
         request,
         "main.html",
         context={
             "timestamp": timestamp,
+            "date": timestamp.split("T")[0],
             "data": data,
+            "base": request.url.hostname,
             "cards": DestinationMetrics,
-            "plots": time_series,
+            # "plots": time_series,
             "is_improving": is_improving,
             "invalid_postcode": invalid_postcode
         }
