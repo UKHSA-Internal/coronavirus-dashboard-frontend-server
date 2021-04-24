@@ -9,6 +9,7 @@ from os.path import abspath, split as split_path, join as join_path
 from operator import itemgetter
 from json import load
 from typing import Union, Any
+from asyncio import gather
 
 # 3rd party:
 
@@ -36,7 +37,7 @@ curr_dir, _ = split_path(abspath(__file__))
 queries_dir = join_path(curr_dir, "queries")
 assets_dir = join_path(curr_dir, "assets")
 
-with open(join_path(queries_dir, "local_data.sql")) as fp:
+with open(join_path(queries_dir, "local_data_se.sql")) as fp:
     local_data_query = fp.read()
 
 
@@ -44,15 +45,9 @@ with open(join_path(assets_dir, "query_params.json")) as fp:
     query_data: QueryDataType = load(fp)
 
 
-async def get_postcode_data(conn: Any, timestamp: str, postcode: str) -> DataFrame:
+async def get_postcode_data(timestamp: str, postcode: str) -> DataFrame:
     ts = datetime.fromisoformat(timestamp.replace("5Z", ""))
     partition_ts = f"{ts:%Y_%-m_%-d}"
-    partition_ids = [
-        f"{partition_ts}|other",
-        f"{partition_ts}|ltla",
-        f"{partition_ts}|utla",
-        f"{partition_ts}|nhstrust",
-    ]
     msoa_partition = f"{partition_ts}_msoa"
     msoa_metric = query_data["local_data"]["msoa_metric"]
 
@@ -64,7 +59,6 @@ async def get_postcode_data(conn: Any, timestamp: str, postcode: str) -> DataFra
     substitutes = (
         query_data["local_data"]["metrics"],
         postcode,
-        # partition_ids,
         f"{msoa_metric}%",
         ["%Percentage%", "%Rate%"]
     )
@@ -79,12 +73,14 @@ async def get_postcode_data(conn: Any, timestamp: str, postcode: str) -> DataFra
     #
     # print(log_query)
 
-    values = conn.fetch(query, *substitutes)
+    queries = query.split(";")
+    async with Connection() as conn, conn.transaction():
+        for qr in queries[:-2]:
+            await conn.execute(qr, *substitutes[:2])
+        result = await conn.fetch(queries[-2], *substitutes[2:])
+        await conn.execute("DROP TABLE data; DROP TABLE msoa;")
 
-    df = DataFrame(
-        await values,
-        columns=query_data["local_data"]["column_names"]
-    )
+    df = DataFrame(result, columns=query_data["local_data"]["column_names"])
 
     df = df.assign(formatted_date=df.date.map(lambda x: f"{x:%-d %B %Y}"))
 
@@ -124,8 +120,7 @@ async def postcode_page(request) -> render_template:
     postcode_raw = request.query_params["postcode"]
     postcode = get_validated_postcode(postcode_raw)
 
-    async with Connection() as conn:
-        data = await get_postcode_data(conn, timestamp, postcode)
+    data = await get_postcode_data(timestamp, postcode)
 
     if not data.size:
         return await invalid_postcode_response(request, timestamp, postcode_raw)
