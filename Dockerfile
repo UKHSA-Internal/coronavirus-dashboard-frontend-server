@@ -77,6 +77,7 @@ RUN mkdir -p /run/supervisord/                                    && \
     mkdir -p /opt/gunicorn/                                       && \
     mkdir -p /opt/ngnix/                                          && \
     mkdir -p /opt/nginx/cache/                                    && \
+    mkdir -p /opt/nginx/tmp/                                      && \
     chgrp -R app /var/cache/nginx/                                && \
     chmod -R g+rw /var/cache/nginx/                               && \
     chgrp -R app /app/                                            && \
@@ -84,7 +85,7 @@ RUN mkdir -p /run/supervisord/                                    && \
     chgrp -R app /opt/                                            && \
     chmod -R g+wr /opt/
 
-USER app
+#USER app
 
 EXPOSE 5000
 
