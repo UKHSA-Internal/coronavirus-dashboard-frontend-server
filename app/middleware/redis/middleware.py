@@ -11,6 +11,7 @@ from asyncio import get_event_loop
 from aioredis import create_redis_pool
 
 import ssl
+import certifi
 
 # Internal:
 from app.context.redis import set_redis_pool, get_redis_pool, shutdown_redis_pool
@@ -27,6 +28,7 @@ async def instantiate_redis_pool(address, password, maxsize):
     ssl_context.verify_mode = ssl.CERT_REQUIRED
     ssl_context.check_hostname = True
     ssl_context.load_default_certs()
+    ssl_context.load_verify_locations(certifi.where())
 
     conn = await create_redis_pool(
         address=address,
