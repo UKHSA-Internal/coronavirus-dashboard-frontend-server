@@ -41,7 +41,7 @@ config_integration.trace_integrations(['logging'])
 config_integration.trace_integrations(['requests'])
 
 
-logger = logging.getLogger("app")
+logger = logging.getLogger(__name__)
 
 
 class TraceRequestMiddleware(BaseHTTPMiddleware):

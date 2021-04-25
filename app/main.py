@@ -25,6 +25,8 @@ from app.exceptions.views import exception_handlers
 from app.config import Settings
 from app.common.utils import add_cloud_role_name
 from app.middleware.tracers.starlette import TraceRequestMiddleware
+from app.middleware.redis import RedisContextMiddleware
+from app.context.redis import shutdown_redis_pool
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -45,7 +47,7 @@ routes = [
 
 
 logging_instances = [
-    [logging.getLogger("app"), logging.INFO],
+    [logging.getLogger(__name__), logging.INFO],
     [logging.getLogger('uvicorn'), logging.WARNING],
     [logging.getLogger('uvicorn.access'), logging.WARNING],
     [logging.getLogger('uvicorn.error'), logging.ERROR],
@@ -58,6 +60,7 @@ logging_instances = [
 
 
 middleware = [
+    Middleware(RedisContextMiddleware, **Settings.redis),
     Middleware(ProxyHeadersMiddleware, trusted_hosts=Settings.service_domain),
     Middleware(
         TraceRequestMiddleware,
@@ -78,6 +81,7 @@ app = Starlette(
     routes=routes,
     middleware=middleware,
     exception_handlers=exception_handlers,
+    on_shutdown=[shutdown_redis_pool]
 )
 
 
@@ -99,4 +103,4 @@ async def add_process_time_header(request: Request, call_next):
 if __name__ == "__main__":
     from uvicorn import run as uvicorn_run
 
-    uvicorn_run(app, port=1234)
+    uvicorn_run(app, port=1235)

@@ -21,7 +21,7 @@ __all__ = [
 ]
 
 
-logger = getLogger("app")
+logger = getLogger(__name__)
 
 
 def trace_async_method_operation(*cls_attrs, dep_type="name", name="name", **attrs):
@@ -57,6 +57,8 @@ def trace_async_method_operation(*cls_attrs, dep_type="name", name="name", **att
             if "query" in bound_inputs.arguments:
                 span.add_attribute(f"{dependency_type}.query", bound_inputs.arguments['query'])
                 span.add_attribute(f"{dependency_type}.method.name", func.__name__)
+            elif "expire" in bound_inputs.arguments:
+                span.add_attribute(f"{dependency_type}.expire", f"{bound_inputs.arguments['expire']} ms")
 
             for key in cls_attrs:
                 span.add_attribute(f"{dependency_type}.{key}", getattr(klass, key, None))
@@ -66,7 +68,14 @@ def trace_async_method_operation(*cls_attrs, dep_type="name", name="name", **att
 
             success = True
             try:
-                return await func(klass, *args, **kwargs)
+                result = await func(klass, *args, **kwargs)
+
+                if dependency_type.lower() == "redis" and (
+                        attrs.get("action", None) == "get" or
+                        func.__name__ == "get"):
+                    span.add_attribute(f"{dependency_type}.cache", "HIT" if result is not None else "MISS")
+
+                return result
             except Exception as err:
                 success = False
                 logger.exception(err, exc_info=True)
