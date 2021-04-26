@@ -103,14 +103,10 @@ class TraceRequestMiddleware(BaseHTTPMiddleware):
                 for key, value in self.extra_attrs.items():
                     span.add_attribute(key, value)
 
-                try:
-                    response = await call_next(request)
-                    return response
-                except Exception as err:
-                    logger.error(err, exc_info=True)
-                    raise err
-                finally:
-                    span.add_attribute(HTTP_STATUS_CODE, response.status_code)
+                response = await call_next(request)
+                span.add_attribute(HTTP_STATUS_CODE, response.status_code)
+
+                return response
 
         except Exception as err:
             logger.error(err, exc_info=True)
