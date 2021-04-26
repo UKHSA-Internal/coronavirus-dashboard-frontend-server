@@ -3,16 +3,26 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+from ssl import SSLContext, CERT_REQUIRED, PROTOCOL_TLSv1_2
 
 # 3rd party:
+import certifi
 
 # Internal: 
-from app.context.redis import get_redis_pool
 from app.middleware.tracers.utils import trace_async_method_operation
+from app.config import Settings
+from app.context.redis import get_redis_pool
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = ['Redis']
+
+
+ssl_context = SSLContext(PROTOCOL_TLSv1_2)
+ssl_context.verify_mode = CERT_REQUIRED
+ssl_context.check_hostname = True
+ssl_context.load_default_certs()
+ssl_context.load_verify_locations(certifi.where())
 
 
 class Redis:
@@ -20,12 +30,14 @@ class Redis:
 
     def __init__(self, raw_key=None):
         self._conn = get_redis_pool()
-        if isinstance(self._conn.address, (tuple, list)):
-            self.account_name = self._conn.address[0].split(".")[0]
-            self.url = str.join(":", self._conn.address)
+
+        address = Settings.redis['address']
+        if isinstance(address, (tuple, list)):
+            self.account_name = address[0].split(".")[0]
+            self.url = str.join(":", address)
         else:
-            self.account_name = self._conn.address.split(".")[0]
-            self.url = self._conn.address
+            self.account_name = address.split(".")[0]
+            self.url = address
 
         self.key = raw_key
 
