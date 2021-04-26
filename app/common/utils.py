@@ -21,7 +21,6 @@ from typing import Dict
 
 # Internal:
 from .visualisation import plot_thumbnail
-from .data.queries import get_last_fortnight, change_by_metric
 from .data.variables import DestinationMetrics
 from app.storage import AsyncStorageClient
 from app.config import Settings
