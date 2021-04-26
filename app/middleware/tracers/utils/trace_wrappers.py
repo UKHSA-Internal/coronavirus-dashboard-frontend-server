@@ -72,11 +72,11 @@ def trace_async_method_operation(*cls_attrs, dep_type="name", name="name", **att
                 span.add_attribute(f"{dependency_type}.data", getattr(klass, "url", None))
 
             if "query" in bound_inputs.arguments:
-                args = list()
+                query_args = list()
                 if "args" in bound_inputs.arguments:
-                    args = bound_inputs.arguments["args"]
+                    query_args = bound_inputs.arguments["args"]
 
-                query = format_query(bound_inputs.arguments['query'], *args)
+                query = format_query(bound_inputs.arguments['query'], *query_args)
                 span.add_attribute(f"{dependency_type}.query", query)
                 span.add_attribute(f"{dependency_type}.method.name", func.__name__)
             elif "expire" in bound_inputs.arguments:
