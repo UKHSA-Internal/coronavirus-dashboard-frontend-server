@@ -23,18 +23,19 @@ __all__ = [
 ]
 
 
-async def instantiate_redis_pool(address, password, maxsize):
-    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-    ssl_context.verify_mode = ssl.CERT_REQUIRED
-    ssl_context.check_hostname = True
-    ssl_context.load_default_certs()
-    ssl_context.load_verify_locations(certifi.where())
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+ssl_context.verify_mode = ssl.CERT_REQUIRED
+ssl_context.check_hostname = True
+ssl_context.load_default_certs()
+ssl_context.load_verify_locations(certifi.where())
 
+
+async def instantiate_redis_pool(address, password, maxsize):
     conn = await create_redis_pool(
         address=address,
         password=password,
         loop=get_event_loop(),
-        minsize=10,
+        minsize=5,
         maxsize=maxsize,
         ssl=ssl_context,
     )
