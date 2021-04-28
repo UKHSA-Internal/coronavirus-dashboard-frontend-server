@@ -50,11 +50,6 @@
         "method": [
           "GET",
           "HEAD"
-        ],
-        "host": [
-          "coronavirus.data.gov.uk",
-          "*.coronavirus.data.gov.uk",
-          "0.0.0.0"
         ]
       },
       "action": {
