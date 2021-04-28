@@ -47,6 +47,11 @@
     },
     {
       "match": {
+        "uri": [
+          "/",
+          "/search",
+          "/healthcheck"
+        ],
         "method": [
           "GET",
           "HEAD"
@@ -76,8 +81,7 @@
             "body_read_timeout": 15,
             "send_timeout": 15,
             "idle_timeout": 60,
-            "max_body_size": 6291456,
-            "discard_unsafe_fields": true
+            "discard_unsafe_fields": false
         }
     }
 }
