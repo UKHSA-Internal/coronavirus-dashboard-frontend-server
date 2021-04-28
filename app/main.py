@@ -63,7 +63,6 @@ logging_instances = [
 middleware = [
     Middleware(ProxyHeadersHostMiddleware),
     Middleware(ProxyHeadersMiddleware, trusted_hosts=Settings.service_domain),
-    Middleware(RedisContextMiddleware, **Settings.redis),
     Middleware(
         TraceRequestMiddleware,
         sampler=AlwaysOnSampler(),
@@ -83,7 +82,6 @@ app = Starlette(
     routes=routes,
     middleware=middleware,
     exception_handlers=exception_handlers,
-    on_shutdown=[shutdown_redis_pool]
 )
 
 

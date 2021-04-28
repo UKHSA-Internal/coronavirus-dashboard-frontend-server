@@ -14,9 +14,12 @@ from hashlib import blake2b
 from io import BytesIO
 from random import randint
 from functools import wraps
+import ssl
+from inspect import signature
 
 # 3rd party:
-
+import certifi
+from aioredis import create_redis_pool
 from pandas import DataFrame, concat, read_pickle
 
 # Internal:
@@ -27,6 +30,7 @@ from app.common.data.variables import DestinationMetrics, IsImproving
 from app.database.postgres import Connection
 from app.template_processor import render_template
 from app.caching import Redis
+from app.config import Settings
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -36,6 +40,12 @@ __all__ = [
 
 
 get_area_type = itemgetter("areaType")
+
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+ssl_context.verify_mode = ssl.CERT_REQUIRED
+ssl_context.check_hostname = True
+ssl_context.load_default_certs()
+ssl_context.load_verify_locations(certifi.where())
 
 
 curr_dir, _ = split_path(abspath(__file__))
@@ -66,24 +76,25 @@ def from_cache_or_db(prefix):
     def outer(func):
         @wraps(func)
         async def inner(*args, **kwargs):
-
             raw_key = prefix + str.join("|", map(str, [*args, *kwargs.values()]))
             cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
 
-            redis = Redis(raw_key)
-
             buffer = BytesIO()
-            if (redis_result := await redis.get(cache_key)) is not None:
-                buffer.write(redis_result)
-                buffer.seek(0)
-                result = read_pickle(buffer)
-                return result
+            async with Redis(raw_key) as redis:
+                if (redis_result := await redis.get(cache_key)) is not None:
+                    buffer.write(redis_result)
+                    buffer.seek(0)
+                    result = read_pickle(buffer)
 
-            result: DataFrame = await func(*args, **kwargs)
-            result.to_pickle(buffer)
-            buffer.seek(0)
-            await redis.set(cache_key, buffer.read(), randint(30, 300) * 60)
-            return result
+                    return result
+
+                result: DataFrame = await func(*args, **kwargs)
+                result.to_pickle(buffer)
+                buffer.seek(0)
+
+                await redis.set(cache_key, buffer.read(), randint(30, 300) * 60)
+
+                return result
 
         return inner
     return outer
@@ -151,13 +162,15 @@ async def get_postcode_data(timestamp: str, postcode: str) -> DataFrame:
             partition_names[area_type],
             area_type,
             area_data["id"],
-            partition_ts
+            partition_ts,
+            # redis=redis
         )
 
         tasks.append(task)
 
     data = await gather(*tasks)
-
+    # redis.close()
+    # await redis.wait_closed()
     result = concat(data).reset_index(drop=True)
     result["rank"] = result.groupby("metric")[["priority", "date"]].rank(ascending=True)
     filters = (
