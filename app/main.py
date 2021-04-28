@@ -25,6 +25,7 @@ from app.config import Settings
 from app.common.utils import add_cloud_role_name
 from app.middleware.tracers.starlette import TraceRequestMiddleware
 from app.middleware.tracers.redis import RedisContextMiddleware
+from app.middleware.headers import ProxyHeadersHostMiddleware
 from app.exceptions import exception_handlers
 from app.context.redis import shutdown_redis_pool
 
@@ -60,8 +61,9 @@ logging_instances = [
 
 
 middleware = [
-    Middleware(RedisContextMiddleware, **Settings.redis),
+    Middleware(ProxyHeadersHostMiddleware),
     Middleware(ProxyHeadersMiddleware, trusted_hosts=Settings.service_domain),
+    Middleware(RedisContextMiddleware, **Settings.redis),
     Middleware(
         TraceRequestMiddleware,
         sampler=AlwaysOnSampler(),
@@ -72,7 +74,7 @@ middleware = [
             server_location=Settings.server_location
         ),
         logging_instances=logging_instances
-    )
+    ),
 ]
 
 
