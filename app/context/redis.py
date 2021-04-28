@@ -29,5 +29,8 @@ def set_redis_pool(pool: Any):
 async def shutdown_redis_pool():
     pool = get_redis_pool()
     set_redis_pool(None)
-    pool.close()
-    await pool.wait_closed()
+    try:
+        pool.close()
+        await pool.wait_closed()
+    except AttributeError:
+        pass
