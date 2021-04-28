@@ -26,16 +26,11 @@ class ProxyHeadersHostMiddleware:
             headers = dict(scope["headers"])
 
             if b"x-forwarded-host" in headers:
-                # x_forwarded_host = headers[b"x-forwarded-host"].decode("ascii")
                 headers[b"host"] = headers[b"x-forwarded-host"]
+                headers[b"x-forwarded-proto"] = b"https"
+                headers[b"scheme"] = b"https"
+                scope["scheme"] = "https"
                 scope["headers"] = tuple(headers.items())
-                # scope["host"] = ()
-                # (host, sep, port) = x_forwarded_host.partition(":")
-                # if port is None:
-                #     # scope["server"] = (host, 0)
-                #     scope["host"] = host
-                # else:
-                #     # scope["server"] = (host, int(port))
-                #     scope["host"] = f"{host}:{port}"
 
+            # print(headers)
         return await self.app(scope, receive, send)
