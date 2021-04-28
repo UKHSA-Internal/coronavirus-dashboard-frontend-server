@@ -66,7 +66,7 @@
       "callable": "app",
       "protocol": "asgi",
       "environment": {
-        "IS_DEV": "1"
+        "IS_DEV": "0"
       }
     }
   },
