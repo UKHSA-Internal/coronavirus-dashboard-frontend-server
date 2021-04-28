@@ -64,6 +64,7 @@
       "home": "/usr/local",
       "module": "main",
       "callable": "app",
+      "protocol": "asgi",
       "environment": {
         "IS_DEV": "1"
       }
