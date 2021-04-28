@@ -21,7 +21,7 @@
         "uri": "/assets/*"
       },
       "action": {
-        "share": "/opt/static/",
+        "share": "/opt/",
         "fallback": {
           "pass": "applications/landing"
         }
