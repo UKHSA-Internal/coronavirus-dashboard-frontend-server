@@ -3,7 +3,7 @@ LABEL maintainer="Pouria Hadjibagheri <Pouria.Hadjibagheri@phe.gov.uk>"
 
 WORKDIR /app/static
 
-COPY ./app/static                     /app/static
+COPY ./app/assets                     /app/static
 
 RUN rm -rf node_modules
 RUN npm install
@@ -25,10 +25,10 @@ RUN apt update                                                   && \
     rm -rf /opt/config/requirements.txt
 
 
-COPY --from=builder /app/static/dist /opt/static
-COPY app/static/images               /opt/static/images
-COPY app/static/icon                 /opt/static/icon
-COPY app/static/govuk-frontend       /opt/static/govuk-frontend
+COPY --from=builder /app/static/dist /opt/assets
+COPY app/assets/images               /opt/assets/images
+COPY app/assets/icon                 /opt/assets/icon
+COPY app/assets/govuk-frontend       /opt/assets/govuk-frontend
 COPY ./app                           /opt/app
 
 
