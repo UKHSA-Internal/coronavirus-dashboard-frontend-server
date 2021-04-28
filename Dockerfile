@@ -42,4 +42,4 @@ RUN touch /opt/.netrc             && \
 ENV NETRC    /opt/.netrc
 ENV PYTHONPATH          /opt/app
 
-EXPOSE 5000
+EXPOSE 5100
