@@ -43,7 +43,7 @@ routes = [
     Route('/', endpoint=home_page, methods=["GET"]),
     Route(f'/{Settings.healthcheck_path}', endpoint=run_healthcheck, methods=["GET", "HEAD"]),
     Route('/search', endpoint=postcode_page, methods=["GET"]),
-    Mount('/assets', StaticFiles(directory="static"), name="static")
+    Mount('/assets', StaticFiles(directory="assets"), name="static")
 ]
 
 
