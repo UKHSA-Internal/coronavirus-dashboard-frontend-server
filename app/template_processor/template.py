@@ -143,8 +143,8 @@ def get_data(metric: str, data: DataFrame, msoa=False) -> DataItem:
             ]
         else:
             dt = data.loc[data.metric == metric, getter_metrics]
-            dt = dt.loc[dt["rank"] == dt["rank"].min(), :]
 
+        dt = dt.loc[dt["rank"] == dt["rank"].min(), :]
         value = dt.iloc[0]
     except IndexError:
         if metric != "alertLevel":

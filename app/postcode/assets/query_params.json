@@ -2,14 +2,21 @@
   "local_data": {
     "column_names": [
       "areaCode",
-      "postcode",
       "areaType",
       "areaName",
       "date",
       "metric",
       "value",
-      "rank"
+      "priority"
     ],
+    "column_types": {
+      "areaCode": "str",
+      "areaType": "str",
+      "areaName": "str",
+      "metric": "str",
+      "value": "float64",
+      "priority": "int"
+    },
     "msoa_metric": "newCasesBySpecimenDate",
     "metrics": [
       "newAdmissions",

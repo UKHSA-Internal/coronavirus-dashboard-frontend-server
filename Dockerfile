@@ -3,7 +3,7 @@ LABEL maintainer="Pouria Hadjibagheri <Pouria.Hadjibagheri@phe.gov.uk>"
 
 WORKDIR /app/static
 
-COPY ./app/static                     /app/static
+COPY ./app/assets                     /app/static
 
 RUN rm -rf node_modules
 RUN npm install
@@ -11,81 +11,35 @@ RUN npm rebuild node-sass
 RUN npm run build /app/static
 RUN rm -rf node_modules
 
+FROM nginx/unit:1.23.0-python3.9
 
-FROM python:3.9-buster
-LABEL maintainer="Pouria Hadjibagheri <Pouria.Hadjibagheri@phe.gov.uk>"
+WORKDIR /opt
 
-# Gunicorn binding port
-ENV GUNICORN_PORT 5200
-ENV WORKERS_PER_CORE 2
-ENV NUMEXPR_MAX_THREADS   1
+COPY requirements.txt       ./config/requirements.txt
 
-COPY server/install-nginx.sh          /install-nginx.sh
-
-RUN bash /install-nginx.sh
-RUN rm /etc/nginx/conf.d/default.conf
-
-
-# Install Supervisord
-RUN apt-get update                             && \
-    apt-get upgrade -y --no-install-recommends && \
-    apt-get install -y supervisor              && \
-    rm -rf /var/lib/apt/lists/*
-
-COPY server/base.nginx                /etc/nginx/nginx.conf
-COPY server/upload.nginx              /etc/nginx/conf.d/upload.conf
-COPY server/engine.nginx              /etc/nginx/conf.d/engine.conf
+RUN apt update                                                   && \
+    pip3 install -r /opt/config/requirements.txt                 && \
+    apt remove -y python3-pip                                    && \
+    apt autoremove --purge -y                                    && \
+    rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/*.list   && \
+    rm -rf /opt/config/requirements.txt
 
 
-RUN addgroup --system --gid 123 app                                  && \
-    adduser  --system --disabled-login --ingroup app                    \
-             --no-create-home --home /nonexistent                       \
-             --gecos "app user" --shell /bin/false --uid 123 app
-
-# Gunicorn config
-COPY server/gunicorn_conf.py          /gunicorn_conf.py
-
-# Gunicorn entrypoint - used by supervisord
-COPY server/start-gunicorn.sh         /start-gunicorn.sh
-RUN chmod +x /start-gunicorn.sh
-
-# Main service entrypoint - launches supervisord
-COPY server/entrypoint.sh             /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY --from=builder /app/static/dist /opt/assets
+COPY app/assets/images               /opt/assets/images
+COPY app/assets/icon                 /opt/assets/icon
+COPY app/assets/govuk-frontend       /opt/assets/govuk-frontend
+COPY ./app                           /opt/app
 
 
-WORKDIR /app
+COPY server/*.json      /docker-entrypoint.d/
 
-COPY --from=builder /app/static/dist ./static
-COPY app/static/images               ./static/images
-COPY app/static/icon                 ./static/icon
-COPY app/static/govuk-frontend       ./static/govuk-frontend
-COPY ./app                           ./app
-COPY ./requirements.txt              ./requirements.txt
+RUN chown -R unit:unit  /opt
 
-RUN python3 -m pip install --no-cache-dir -U pip                      && \
-    python3 -m pip install --no-cache-dir setuptools                  && \
-    python3 -m pip install -U --no-cache-dir -r ./requirements.txt    && \
-    rm ./requirements.txt
+RUN touch /opt/.netrc             && \
+    chown unit:unit  /opt/.netrc
 
-# Custom Supervisord config
-COPY server/supervisord.conf          /opt/supervisor/supervisord.conf
+ENV NETRC    /opt/.netrc
+ENV PYTHONPATH          /opt/app
 
-RUN mkdir -p /run/supervisord/                                    && \
-    mkdir -p /opt/supervisor/                                     && \
-    mkdir -p /opt/log/                                            && \
-    mkdir -p /opt/gunicorn/                                       && \
-    mkdir -p /opt/ngnix/                                          && \
-    mkdir -p /opt/nginx/cache/                                    && \
-    chgrp -R app /var/cache/nginx/                                && \
-    chmod -R g+rw /var/cache/nginx/                               && \
-    chgrp -R app /app/                                            && \
-    chmod -R g+r /app/                                            && \
-    chgrp -R app /opt/                                            && \
-    chmod -R g+wr /opt/
-
-USER app
-
-EXPOSE 5000
-
-ENTRYPOINT ["/entrypoint.sh"]
+EXPOSE 5100

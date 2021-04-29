@@ -11,12 +11,12 @@ from starlette.requests import Request
 
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.trace.tracer import Tracer
 from opencensus.trace.span import SpanKind
 from opencensus.trace.attributes_helper import COMMON_ATTRIBUTES
 from opencensus.trace import config_integration
 from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
+from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.trace.execution_context import get_opencensus_tracer, get_current_span
 
 # Internal:
@@ -93,20 +93,23 @@ class TraceRequestMiddleware(BaseHTTPMiddleware):
                 span.add_attribute(HTTP_HOST, request.url.hostname)
                 span.add_attribute(HTTP_METHOD, request.method)
                 span.add_attribute(HTTP_PATH, request.url.path)
-                span.add_attribute(HTTP_ROUTE, request.url.path)
+                if not len(request.query_params):
+                    span.add_attribute(HTTP_ROUTE, request.url.path)
+                else:
+                    span.add_attribute(HTTP_ROUTE, f"{request.url.path}?{request.url.query}")
+
                 span.add_attribute("x_forwarded_host", request.headers.get("x_forwarded_host"))
 
                 for key, value in self.extra_attrs.items():
                     span.add_attribute(key, value)
 
                 response = await call_next(request)
-                # response.headers['traceparent'] = trace_parent
-
                 span.add_attribute(HTTP_STATUS_CODE, response.status_code)
 
-            return response
+                return response
 
         except Exception as err:
             logger.error(err, exc_info=True)
+            raise err
         finally:
             tracer.finish()

@@ -7,7 +7,6 @@
 # 3rd party:
 
 # Internal:
-from .queries import get_last_fortnight
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Header

@@ -21,10 +21,13 @@ from opencensus.trace.samplers import AlwaysOnSampler
 from app.postcode.views import postcode_page
 from app.landing.views import home_page
 from app.healthcheck.views import run_healthcheck
-from app.exceptions.views import exception_handlers
 from app.config import Settings
 from app.common.utils import add_cloud_role_name
 from app.middleware.tracers.starlette import TraceRequestMiddleware
+from app.middleware.tracers.redis import RedisContextMiddleware
+from app.middleware.headers import ProxyHeadersHostMiddleware
+from app.exceptions import exception_handlers
+from app.context.redis import shutdown_redis_pool
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -40,7 +43,7 @@ routes = [
     Route('/', endpoint=home_page, methods=["GET"]),
     Route(f'/{Settings.healthcheck_path}', endpoint=run_healthcheck, methods=["GET", "HEAD"]),
     Route('/search', endpoint=postcode_page, methods=["GET"]),
-    Mount('/assets', StaticFiles(directory="static"), name="static")
+    Mount('/assets', StaticFiles(directory="assets"), name="static")
 ]
 
 
@@ -58,6 +61,7 @@ logging_instances = [
 
 
 middleware = [
+    Middleware(ProxyHeadersHostMiddleware),
     Middleware(ProxyHeadersMiddleware, trusted_hosts=Settings.service_domain),
     Middleware(
         TraceRequestMiddleware,
@@ -69,7 +73,7 @@ middleware = [
             server_location=Settings.server_location
         ),
         logging_instances=logging_instances
-    )
+    ),
 ]
 
 
@@ -99,4 +103,4 @@ async def add_process_time_header(request: Request, call_next):
 if __name__ == "__main__":
     from uvicorn import run as uvicorn_run
 
-    uvicorn_run(app, port=1234)
+    uvicorn_run(app, port=1235)

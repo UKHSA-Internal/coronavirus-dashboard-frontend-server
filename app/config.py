@@ -32,6 +32,11 @@ class Settings:
         "container": "pipeline",
         "path": "info/latest_published"
     }
+    redis = dict(
+        address=(getenv("AZURE_REDIS_HOST", ""), getenv("AZURE_REDIS_PORT", "")),
+        password=getenv("AZURE_REDIS_PASSWORD"),
+        maxsize=8
+    )
 
 
 class Config(object):
