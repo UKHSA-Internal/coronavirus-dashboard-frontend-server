@@ -5,6 +5,7 @@
 # Python:
 import logging
 from datetime import datetime, timedelta
+from pathlib import Path
 
 # 3rd party:
 from starlette.applications import Starlette
@@ -16,6 +17,7 @@ from starlette.requests import Request
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from opencensus.trace.samplers import AlwaysOnSampler
+from starlette.responses import FileResponse, Response
 
 # Internal:
 from app.postcode.views import postcode_page
@@ -24,11 +26,9 @@ from app.healthcheck.views import run_healthcheck
 from app.config import Settings
 from app.common.utils import add_cloud_role_name
 from app.middleware.tracers.starlette import TraceRequestMiddleware
-from app.middleware.tracers.redis import RedisContextMiddleware
 from app.middleware.headers import ProxyHeadersHostMiddleware
 from app.exceptions import exception_handlers
-from app.context.redis import shutdown_redis_pool
-
+from app import generic
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
@@ -39,11 +39,16 @@ __all__ = [
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
 
+assets_path = Path(__file__).parent.joinpath("assets")
+
 routes = [
     Route('/', endpoint=home_page, methods=["GET"]),
     Route(f'/{Settings.healthcheck_path}', endpoint=run_healthcheck, methods=["GET", "HEAD"]),
     Route('/search', endpoint=postcode_page, methods=["GET"]),
-    Mount('/assets', StaticFiles(directory="assets"), name="static")
+    Mount('/assets', StaticFiles(directory=assets_path.resolve()), name="static"),
+    Route('/favicon.ico', endpoint=generic.favicon_ico),
+    Route('/favicon.png', endpoint=generic.favicon_png),
+    Route('/sitemap.xml', endpoint=generic.sitemap),
 ]
 
 
@@ -94,7 +99,10 @@ async def add_process_time_header(request: Request, call_next):
 
     response.headers['last-modified'] = last_modified.strftime(HTTP_DATE_FORMAT)
     response.headers['expires'] = expires.strftime(HTTP_DATE_FORMAT)
-    response.headers['cache-control'] = 'public, must-revalidate, max-age=30, s-maxage=90'
+
+    if "cache-control" not in response.headers:
+        response.headers['cache-control'] = 'public, must-revalidate, max-age=30, s-maxage=90'
+
     response.headers['PHE-Server-Loc'] = Settings.server_location
 
     return response

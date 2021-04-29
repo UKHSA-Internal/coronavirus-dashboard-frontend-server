@@ -11,7 +11,19 @@ RUN npm rebuild node-sass
 RUN npm run build /app/static
 RUN rm -rf node_modules
 
-FROM nginx/unit:1.23.0-python3.9
+FROM python:3.9-buster
+
+ENV NUMEXPR_MAX_THREADS   1
+
+COPY server/install-nginx.sh          /install-nginx.sh
+RUN bash /install-nginx.sh
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Install Supervisord
+RUN apt-get update                             && \
+    apt-get upgrade -y --no-install-recommends && \
+    apt-get install -y supervisor              && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
 
@@ -32,15 +44,30 @@ COPY app/assets/govuk-frontend                   /opt/assets/govuk-frontend
 COPY app/assets/images/opengraph-image.png       /opt/assets/public/images/opengraph-image.png
 COPY ./app                                       /opt/app
 
+# Gunicorn config
+COPY server/gunicorn_conf.py          /opt/gunicorn_conf.py
 
-COPY server/*.json      /docker-entrypoint.d/
+COPY server/supervisord.conf          /opt/supervisor/supervisord.conf
 
-RUN chown -R unit:unit  /opt
+# Main service entrypoint - launches supervisord
+COPY server/start-gunicorn.sh             /opt/start-gunicorn.sh
+COPY server/entrypoint.sh             /opt/entrypoint.sh
+RUN chmod +x /opt/entrypoint.sh
+RUN chmod +x /opt/start-gunicorn.sh
 
-RUN touch /opt/.netrc             && \
-    chown unit:unit  /opt/.netrc
+COPY server/base.nginx                /etc/nginx/nginx.conf
+COPY server/upload.nginx              /etc/nginx/conf.d/upload.conf
+COPY server/engine.nginx              /etc/nginx/conf.d/engine.conf
 
-ENV NETRC    /opt/.netrc
-ENV PYTHONPATH          /opt/app
+RUN mkdir -p /opt/log  && \
+    mkdir -p /opt/nginx && \
+    mkdir -p /opt/nginx/cache && \
+    mkdir -p /opt/supervisor/
+
+ENV PYTHONPATH          /opt/
 
 EXPOSE 5100
+
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-c", "/opt/gunicorn_conf.py", "app.main:app"]
+#ENTRYPOINT ["/opt/entrypoint.sh"]
+
