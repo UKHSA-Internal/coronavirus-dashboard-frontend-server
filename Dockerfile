@@ -25,11 +25,12 @@ RUN apt update                                                   && \
     rm -rf /opt/config/requirements.txt
 
 
-COPY --from=builder /app/static/dist /opt/assets
-COPY app/assets/images               /opt/assets/images
-COPY app/assets/icon                 /opt/assets/icon
-COPY app/assets/govuk-frontend       /opt/assets/govuk-frontend
-COPY ./app                           /opt/app
+COPY --from=builder /app/static/dist             /opt/assets
+COPY app/assets/images                           /opt/assets/images
+COPY app/assets/icon                             /opt/assets/icon
+COPY app/assets/govuk-frontend                   /opt/assets/govuk-frontend
+COPY app/assets/images/opengraph-image.png       /opt/assets/public/images/opengraph-image.png
+COPY ./app                                       /opt/app
 
 
 COPY server/*.json      /docker-entrypoint.d/
