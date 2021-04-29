@@ -65,9 +65,9 @@ accesslog_var = getenv("ACCESS_LOG", "-")
 use_accesslog = accesslog_var or None
 errorlog_var = getenv("ERROR_LOG", "-")
 use_errorlog = errorlog_var or None
-graceful_timeout_str = getenv("GRACEFUL_TIMEOUT", "120")
-timeout_str = getenv("TIMEOUT", "120")
-keepalive_str = getenv("KEEP_ALIVE", "5")
+graceful_timeout_str = getenv("GRACEFUL_TIMEOUT", "30")
+timeout_str = getenv("TIMEOUT", "20")
+keepalive_str = getenv("KEEP_ALIVE", "10")
 
 # Gunicorn config variables
 loglevel = use_loglevel
