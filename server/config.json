@@ -7,10 +7,10 @@
   "routes": [
     {
       "match": {
-        "uri": "/favicon*"
+        "uri": "/favicon.*"
       },
       "action": {
-        "share": "/opt/static/icon/",
+        "share": "/opt/assets/icon/",
         "fallback": {
           "pass": "applications/landing"
         }
