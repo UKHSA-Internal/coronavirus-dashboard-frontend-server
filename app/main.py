@@ -5,7 +5,6 @@
 # Python:
 import logging
 from datetime import datetime, timedelta
-from pathlib import Path
 
 # 3rd party:
 from starlette.applications import Starlette
@@ -17,7 +16,6 @@ from starlette.requests import Request
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from opencensus.trace.samplers import AlwaysOnSampler
-from starlette.responses import FileResponse, Response
 
 # Internal:
 from app.postcode.views import postcode_page
@@ -39,13 +37,11 @@ __all__ = [
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
 
-assets_path = Path(__file__).parent.joinpath("assets")
-
 routes = [
     Route('/', endpoint=home_page, methods=["GET"]),
     Route(f'/{Settings.healthcheck_path}', endpoint=run_healthcheck, methods=["GET", "HEAD"]),
     Route('/search', endpoint=postcode_page, methods=["GET"]),
-    Mount('/assets', StaticFiles(directory=assets_path.resolve()), name="static"),
+    Mount('/assets', StaticFiles(directory="assets"), name="static"),
     Route('/favicon.ico', endpoint=generic.favicon_ico),
     Route('/favicon.png', endpoint=generic.favicon_png),
     Route('/sitemap.xml', endpoint=generic.sitemap),
