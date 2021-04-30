@@ -13,4 +13,13 @@ fi
 
 # Start Supervisor, with Nginx and ASGI
 #exec /usr/bin/supervisord -c /opt/supervisor/supervisord.conf
-exec uvicorn app.main:app --uds /opt/uvicorn.sock --workers 4 --loop asyncio --proxy-headers --host 0.0.0.0 --port 5100 --backlog 32
+exec uvicorn app.main:app --uds /opt/uvicorn.sock \
+                          --workers 4 \
+                          --loop uvloop \
+                          --proxy-headers \
+                          --host 0.0.0.0 \
+                          --port 5100 \
+                          --backlog 128 \
+                          --timeout-keep-alive 5 \
+                          --limit-max-requests 32 \
+                          --http httptools

@@ -29,9 +29,9 @@ server {
 
     gzip               off;
     server_tokens      off;
-    listen             5100;
-    listen             [::]:5100 ipv6only=on default_server;
-     server_name        coronavirus.data.gov.uk;
+    listen             5100 http2;
+#    listen             [::]:5100 ipv6only=on default_server;
+    server_name        coronavirus.data.gov.uk;
     resolver_timeout   30s;
     merge_slashes      on;
 
