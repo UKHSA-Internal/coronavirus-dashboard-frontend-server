@@ -92,7 +92,7 @@ def from_cache_or_db(prefix):
                 result.to_pickle(buffer)
                 buffer.seek(0)
 
-                await redis.set(cache_key, buffer.read(), randint(30, 300) * 60)
+                await redis.set(cache_key, buffer.read(), randint(120, 900) * 60)
 
                 return result
 
