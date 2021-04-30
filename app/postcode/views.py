@@ -77,27 +77,30 @@ redis_instance = Redis()
 
 def from_cache_or_db(prefix):
     def outer(func):
+        lock = Lock()
+
         @wraps(func)
         async def inner(*args, **kwargs):
             raw_key = prefix + str.join("|", map(str, [*args, *kwargs.values()]))
             cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
 
-            buffer = BytesIO()
-            async with redis_instance as redis, Lock():
+            async with redis_instance as redis, lock:
                 redis.key = raw_key
-                if (redis_result := await redis.get(cache_key)) is not None:
-                    buffer.write(redis_result)
-                    buffer.seek(0)
-                    result = read_pickle(buffer)
+                redis_result = await redis.get(cache_key)
 
-                    return result
+            buffer = BytesIO()
+            if redis_result is not None:
+                buffer.write(redis_result)
+                buffer.seek(0)
+                result = read_pickle(buffer)
+                return result
 
             result: DataFrame = await func(*args, **kwargs)
-            redis.key = raw_key
             result.to_pickle(buffer)
             buffer.seek(0)
 
-            async with redis_instance as redis, Lock():
+            async with redis_instance as redis, lock:
+                redis.key = raw_key
                 await redis.set(cache_key, buffer.read(), randint(120, 900) * 60)
 
             return result
