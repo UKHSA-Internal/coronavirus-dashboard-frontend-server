@@ -15,6 +15,7 @@ from io import BytesIO
 from random import randint
 from functools import wraps
 import ssl
+from asyncio import Lock
 from inspect import signature
 
 # 3rd party:
@@ -71,6 +72,8 @@ with open(join_path(queries_dir, "single_query_msoa.sql")) as fp:
 with open(join_path(queries_dir, "locations.sql")) as fp:
     locations_query = fp.read()
 
+redis_instance = Redis()
+
 
 def from_cache_or_db(prefix):
     def outer(func):
@@ -80,7 +83,8 @@ def from_cache_or_db(prefix):
             cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
 
             buffer = BytesIO()
-            async with Redis(raw_key) as redis:
+            async with redis_instance as redis, Lock():
+                redis.key = raw_key
                 if (redis_result := await redis.get(cache_key)) is not None:
                     buffer.write(redis_result)
                     buffer.seek(0)
@@ -88,13 +92,15 @@ def from_cache_or_db(prefix):
 
                     return result
 
-                result: DataFrame = await func(*args, **kwargs)
-                result.to_pickle(buffer)
-                buffer.seek(0)
+            result: DataFrame = await func(*args, **kwargs)
+            redis.key = raw_key
+            result.to_pickle(buffer)
+            buffer.seek(0)
 
+            async with redis_instance as redis, Lock():
                 await redis.set(cache_key, buffer.read(), randint(120, 900) * 60)
 
-                return result
+            return result
 
         return inner
     return outer

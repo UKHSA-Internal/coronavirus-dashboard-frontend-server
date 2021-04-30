@@ -55,7 +55,15 @@ class Redis:
             self.account_name = address.split(".")[0]
             self.url = address
 
-        self.key = raw_key
+        self._key = raw_key
+
+    @property
+    def key(self):
+        return self._key
+
+    @key.setter
+    def key(self, key):
+        self._key = key
 
     # def __await__(self):
     #     yield from self._connection.__await__()
@@ -71,7 +79,7 @@ class Redis:
         # await self._conn.wait_closed()
 
     @trace_async_method_operation(
-        "url", "key",
+        "url", "_key",
         name="account_name",
         dep_type="_name",
         action="GET"
@@ -80,7 +88,7 @@ class Redis:
         return await self._conn.get(key)
 
     @trace_async_method_operation(
-        "url", "key",
+        "url", "_key",
         name="account_name",
         dep_type="_name",
         action="SET"
