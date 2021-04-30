@@ -42,9 +42,9 @@ routes = [
     Route(f'/{Settings.healthcheck_path}', endpoint=run_healthcheck, methods=["GET", "HEAD"]),
     Route('/search', endpoint=postcode_page, methods=["GET"]),
     Mount('/assets', StaticFiles(directory="assets"), name="static"),
-    Route('/favicon.ico', endpoint=generic.favicon_ico),
-    Route('/favicon.png', endpoint=generic.favicon_png),
-    Route('/sitemap.xml', endpoint=generic.sitemap),
+    # Route('/favicon.ico', endpoint=generic.favicon_ico),
+    # Route('/favicon.png', endpoint=generic.favicon_png),
+    # Route('/sitemap.xml', endpoint=generic.sitemap),
 ]
 
 

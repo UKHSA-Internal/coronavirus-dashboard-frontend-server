@@ -56,7 +56,6 @@ RUN chmod +x /opt/entrypoint.sh
 RUN chmod +x /opt/start-gunicorn.sh
 
 COPY server/base.nginx                /etc/nginx/nginx.conf
-COPY server/upload.nginx              /etc/nginx/conf.d/upload.conf
 COPY server/engine.nginx              /etc/nginx/conf.d/engine.conf
 
 RUN mkdir -p /opt/log  && \
@@ -68,6 +67,6 @@ ENV PYTHONPATH          /opt/
 
 EXPOSE 5100
 
-#CMD ["gunicorn", "-k", "app.uvicorn_worker.ServerUvicornWorker", "-c", "/opt/gunicorn_conf.py", "app.main:app"]
+CMD ["nginx"]
 ENTRYPOINT ["/opt/entrypoint.sh"]
 

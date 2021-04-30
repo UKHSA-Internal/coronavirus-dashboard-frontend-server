@@ -18,9 +18,9 @@ map $http_x_forwarded_host $best_host {
 
 upstream application {
 
-#    server             0.0.0.0:5200;
+    server             0.0.0.0:5200;
 #    server             unix:///opt/server.sock;
-    server             unix:///opt/uvicorn.sock;
+#    server             unix:///opt/uvicorn.sock;
 
 }
 
@@ -29,15 +29,18 @@ server {
 
     gzip               off;
     server_tokens      off;
-    listen             5100 http2;
+    listen             5100;
 #    listen             [::]:5100 ipv6only=on default_server;
-    server_name        coronavirus.data.gov.uk;
+#    server_name        coronavirus.data.gov.uk;
     resolver_timeout   30s;
+    keepalive_timeout  65s;
+    uwsgi_read_timeout 60s;
+
     merge_slashes      on;
 
     charset            utf-8;
 
-    access_log         /var/log/nginx/access.log  main;
+#    access_log         /var/log/nginx/access.log  main;
     sendfile           on;
 
     location / {
@@ -50,31 +53,40 @@ server {
 
     }
 
+    location /nginx_status {
+        stub_status     on;
+        allow           127.0.0.1;
+        limit_except GET {
+            deny    all;
+        }
+#        deny            all;
+    }
+
     location @app {
 
-        proxy_set_header       X-Forwarded-For           $proxy_add_x_forwarded_for;
-        proxy_set_header       X-Forwarded-Host          $best_host;
+        proxy_set_header        X-Forwarded-For           $proxy_add_x_forwarded_for;
+        proxy_set_header        X-Forwarded-Host          $best_host;
         # proxy_set_header       X-Forwarded-Proto         $scheme;
-        proxy_set_header       Host                      $best_host;
-        proxy_set_header       X-Real-IP                 $remote_addr;
-        proxy_redirect         off;
-        proxy_set_header       X-NginX-Proxy             true;
-        proxy_http_version     1.1;
+        proxy_set_header        Host                      $best_host;
+        proxy_set_header        X-Real-IP                 $remote_addr;
+        proxy_redirect          off;
+        proxy_set_header        X-NginX-Proxy             true;
+        proxy_http_version      1.1;
 
         # websocket headers
-        proxy_set_header       Upgrade                   $http_upgrade;
-        proxy_set_header       Connection                $http_upgrade;
+        proxy_set_header        Upgrade                   $http_upgrade;
+        proxy_set_header        Connection                $http_upgrade;
 
-        add_header             X-Content-Type-Options    "nosniff";
-        add_header             Cache-Control             "max-age=30, must-revalidate, s-maxage=90";
-        add_header             x-phe-media-type          "PHE-COVID19.v1";
-        add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
-        add_header             Content-Language          "en-GB";
-        add_header             Content-Security-Policy   "default-src 'self'; font-src 'self'; img-src 'self' *.data.gov.uk *.google-analytics.com data:; script-src 'unsafe-inline' *; connect-src 'self' *; style-src 'unsafe-inline' *;";
-        add_header             X-XSS-Protection          "1; mode=block";
-        add_header             X-Frame-Options           "SAMEORIGIN";
-        add_header             Referrer-Policy           "strict-origin";
-        add_header             Permissions-Policy        "geolocation=();notifications=();push=();sync-xhr=();vibrate=();fullscreen=(self);";
+        add_header              X-Content-Type-Options    "nosniff";
+        add_header              Cache-Control             "max-age=30, must-revalidate, s-maxage=90";
+        add_header              x-phe-media-type          "PHE-COVID19.v1";
+        add_header              strict-transport-security "max-age=31536000; includeSubDomains; preload";
+        add_header              Content-Language          "en-GB";
+        add_header              Content-Security-Policy   "default-src 'self'; font-src 'self'; img-src 'self' *.data.gov.uk *.google-analytics.com data:; script-src 'unsafe-inline' *; connect-src 'self' *; style-src 'unsafe-inline' *;";
+        add_header              X-XSS-Protection          "1; mode=block";
+        add_header              X-Frame-Options           "SAMEORIGIN";
+        add_header              Referrer-Policy           "strict-origin";
+        add_header              Permissions-Policy        "geolocation=();notifications=();push=();sync-xhr=();vibrate=();fullscreen=(self);";
 
         client_max_body_size    0;
         client_body_buffer_size 16k;
@@ -82,9 +94,10 @@ server {
         proxy_send_timeout      10;
         proxy_read_timeout      30;
 
-        proxy_redirect off;
-        proxy_buffering off;
-        proxy_pass              http://application;
+        proxy_redirect          off;
+        proxy_buffering         off;
+
+        proxy_pass               http://application;
 
         limit_except GET POST HEAD OPTIONS {
             deny    all;
@@ -92,21 +105,23 @@ server {
 
     }
 
-    location ~ ^/(favicon.+)$ {
+    location ~ /favicon\.(png|ico) {
 
-        root                   /app/static/icon;
-        autoindex              on;
+        root                   /opt/assets/icon;
+        autoindex              off;
         gzip_static            off;
         sendfile               on;
         tcp_nopush             on;
         sendfile_max_chunk     1m;
         tcp_nodelay            on;
-        try_files              $1 /$1 @app;
+        try_files              $1 /$1;
 
         proxy_ignore_headers   X-Accel-Expires Expires Cache-Control;
         proxy_cache_valid      any 86400s;
         proxy_cache_lock       on;
         proxy_cache_use_stale  updating;
+
+        expires                365d;
 
         access_log             off;
         log_not_found          off;
@@ -117,42 +132,16 @@ server {
 
     }
 
-    location ~ ^/assets/(.*\.css)$ {
+    location /assets/ {
 
         root                   /opt/assets;
         autoindex              on;
         gzip_static            off;
-        sendfile               on;
         tcp_nopush             on;
         sendfile_max_chunk     1m;
         tcp_nodelay            on;
         try_files              $1 /$1;
-
-        proxy_ignore_headers   X-Accel-Expires Expires Cache-Control;
-        proxy_cache_valid      any 30s;
-        proxy_cache_lock       on;
-        proxy_cache_use_stale  updating;
-
-        add_header             Cache-Control             "max-age=7200, stale-while-revalidate=300";
-        add_header             x-phe-media-type          "PHE-COVID19.v1";
-        add_header             strict-transport-security "max-age=31536000; includeSubDomains; preload";
-
-        limit_except GET HEAD {
-            deny    all;
-        }
-
-    }
-
-    location /assets/ {
-
-        root                   /opt/assets/;
-        autoindex              on;
-        gzip_static            off;
         sendfile               on;
-        tcp_nopush             on;
-        sendfile_max_chunk     1m;
-        tcp_nodelay            on;
-        try_files              $1 /$1 @app;
 
         proxy_ignore_headers   X-Accel-Expires Expires Cache-Control;
         proxy_cache_valid      any 86400s;
@@ -168,6 +157,10 @@ server {
         }
 
     }
+
+#    location ~* .(jpg|jpeg|png|gif|ico|js)$ {
+#        expires                365d;
+#    }
 
     location = /sitemap.xml {
 
