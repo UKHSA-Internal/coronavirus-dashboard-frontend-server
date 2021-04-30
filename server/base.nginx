@@ -14,7 +14,7 @@ daemon off;
 
 events {
 
-    worker_connections 512;
+    worker_connections 1024;
     accept_mutex off;
 
 }
