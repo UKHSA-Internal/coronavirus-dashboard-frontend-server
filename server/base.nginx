@@ -1,4 +1,4 @@
-worker_processes       auto;
+worker_processes       1;
 
 error_log              /opt/log/ngnix.error.log warn;
 pid                    /opt/nginx/nginx.pid;
@@ -14,7 +14,7 @@ daemon off;
 
 events {
 
-    worker_connections 1024;
+    worker_connections 512;
     accept_mutex off;
 
 }

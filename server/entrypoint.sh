@@ -19,7 +19,7 @@ exec uvicorn app.main:app --uds /opt/uvicorn.sock \
                           --proxy-headers \
                           --host 0.0.0.0 \
                           --port 5100 \
-                          --backlog 64 \
-                          --timeout-keep-alive 5 \
+                          --backlog 256 \
+                          --timeout-keep-alive 10 \
                           --limit-max-requests 32 \
                           --http httptools
