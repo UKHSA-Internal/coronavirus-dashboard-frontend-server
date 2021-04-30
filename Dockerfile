@@ -67,6 +67,6 @@ ENV PYTHONPATH          /opt/
 
 EXPOSE 5100
 
-CMD ["nginx"]
+#CMD ["nginx"]
 ENTRYPOINT ["/opt/entrypoint.sh"]
 
