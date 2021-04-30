@@ -19,7 +19,8 @@ map $http_x_forwarded_host $best_host {
 upstream application {
 
 #    server             0.0.0.0:5200;
-    server             unix:///opt/server.sock;
+#    server             unix:///opt/server.sock;
+    server             unix:///opt/uvicorn.sock;
 
 }
 

@@ -68,6 +68,6 @@ ENV PYTHONPATH          /opt/
 
 EXPOSE 5100
 
-CMD ["gunicorn", "-k", "app.uvicorn_worker.ServerUvicornWorker", "-c", "/opt/gunicorn_conf.py", "app.main:app"]
-#ENTRYPOINT ["/opt/entrypoint.sh"]
+#CMD ["gunicorn", "-k", "app.uvicorn_worker.ServerUvicornWorker", "-c", "/opt/gunicorn_conf.py", "app.main:app"]
+ENTRYPOINT ["/opt/entrypoint.sh"]
 

@@ -50,13 +50,13 @@ routes = [
 
 logging_instances = [
     [logging.getLogger("app"), logging.INFO],
-    [logging.getLogger('uvicorn'), logging.WARNING],
-    [logging.getLogger('uvicorn.access'), logging.WARNING],
-    [logging.getLogger('uvicorn.error'), logging.ERROR],
+    [logging.getLogger('uvicorn'), logging.INFO],
+    [logging.getLogger('uvicorn.access'), logging.INFO],
+    [logging.getLogger('uvicorn.error'), logging.WARNING],
     [logging.getLogger('azure'), logging.WARNING],
-    [logging.getLogger('gunicorn'), logging.WARNING],
-    [logging.getLogger('gunicorn.access'), logging.WARNING],
-    [logging.getLogger('gunicorn.error'), logging.ERROR],
+    [logging.getLogger('gunicorn'), logging.INFO],
+    [logging.getLogger('gunicorn.access'), logging.INFO],
+    [logging.getLogger('gunicorn.error'), logging.WARNING],
     [logging.getLogger('asyncpg'), logging.WARNING],
 ]
 
