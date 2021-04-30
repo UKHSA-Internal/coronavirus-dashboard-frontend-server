@@ -7,14 +7,14 @@ pid                    /opt/nginx/nginx.pid;
 # Maximum number of open files per worker process.
 # Should be > worker_connections.
 # Default: no limit
-worker_rlimit_nofile   2048;
+worker_rlimit_nofile   4096;
 
 # Turn off daemon (run in container).
 daemon off;
 
 events {
 
-    worker_connections 1024;
+    worker_connections 2048;
     accept_mutex off;
 
 }
@@ -24,7 +24,7 @@ http {
 
     include             /etc/nginx/mime.types;
 
-#    client_body_temp_path  /opt/nginx/tmp 1 2;
+    client_body_temp_path  /opt/nginx/tmp 1 2;
     proxy_cache_path    /opt/nginx/cache keys_zone=one:10m loader_threshold=300 loader_files=200;
     proxy_cache_methods GET HEAD;
     proxy_cache_valid   any 30s;
