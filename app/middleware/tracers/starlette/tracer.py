@@ -80,6 +80,7 @@ class TraceRequestMiddleware(BaseHTTPMiddleware):
         try:
             # tracer.span_context.trace_options.set_enabled(True)
             with tracer.span(f"[{request.method}] {request.url.path}") as span:
+
                 span.span_kind = SpanKind.SERVER
                 # if "traceparent" not in request.headers:
                 #     trace_ctx = span.context_tracer
@@ -88,15 +89,15 @@ class TraceRequestMiddleware(BaseHTTPMiddleware):
                 #     trace_parent = f"00-{trace_id}-{span.span_id}-0{trace_options}"
                 # else:
                 #     trace_parent = request.headers['traceparent']
-
                 span.add_attribute(HTTP_URL, str(request.url))
                 span.add_attribute(HTTP_HOST, request.url.hostname)
                 span.add_attribute(HTTP_METHOD, request.method)
                 span.add_attribute(HTTP_PATH, request.url.path)
+                span.add_attribute("http.query", request.url.path)
                 if not len(request.query_params):
                     span.add_attribute(HTTP_ROUTE, request.url.path)
                 else:
-                    span.add_attribute(HTTP_ROUTE, f"{request.url.path}?{request.url.query}")
+                    span.add_attribute(HTTP_ROUTE, request.url.path)
 
                 span.add_attribute("x_forwarded_host", request.headers.get("x_forwarded_host"))
 
