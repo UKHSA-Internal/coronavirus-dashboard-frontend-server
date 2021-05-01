@@ -14,11 +14,11 @@ set -e
 exec uvicorn app.main:app --host 0.0.0.0 \
                           --port 5100 \
                           --workers 8 \
-                          --loop uvloop \
+                          --loop asyncio \
                           --proxy-headers \
-                          --backlog 32 \
+                          --backlog 256 \
                           --timeout-keep-alive 15 \
-                          --limit-max-requests 16 \
+                          --limit-max-requests 32 \
                           --http httptools
 
 #exec gunicorn -k app.uvicorn_worker.ServerUvicornWorker -c /opt/gunicorn_conf.py app.main:app
