@@ -109,7 +109,7 @@ def from_cache_or_db(prefix):
 
 
 @from_cache_or_db("FRONTEND::PC::")
-async def get_data(request, partition_name, area_type, area_id, timestamp):
+async def get_data(request, partition_name, area_type, area_id, timestamp, lock):
     numeric_metrics = ["%Percentage%", "%Rate%"]
     local_metrics = query_data["local_data"]["metrics"]
     msoa_metric = [f'{query_data["local_data"]["msoa_metric"]}%']
@@ -130,8 +130,7 @@ async def get_data(request, partition_name, area_type, area_id, timestamp):
         ]
 
     query = query.format(partition_id=f"{timestamp}_{partition_name}")
-
-    async with Connection() as conn:
+    async with Connection() as conn, lock:
         result = await conn.fetch(query, *args)
 
     df = DataFrame(
@@ -157,7 +156,8 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
         "msoa": "msoa",
     }
 
-    async with Connection() as conn:
+    lock = Lock()
+    async with Connection() as conn, lock:
         area_codes = await conn.fetch(locations_query, postcode)
 
     if not len(area_codes):
@@ -172,6 +172,7 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
             area_type,
             area_data["id"],
             partition_ts,
+            lock
             # redis=redis
         )
 
