@@ -14,10 +14,11 @@ set -e
 exec uvicorn app.main:app --host 0.0.0.0 \
                           --port 5100 \
                           --workers 8 \
-                          --loop asyncio \
+                          --loop uvloop \
                           --proxy-headers \
+                          --interface asgi3 \
                           --backlog 128 \
-                          --timeout-keep-alive 20 \
+                          --timeout-keep-alive 5 \
                           --limit-max-requests 32 \
                           --http httptools
 
