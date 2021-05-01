@@ -80,8 +80,7 @@ class Connection:
 
     def __init__(self, conn_str=CONN_STR):
         self.conn_str = conn_str
-        self._connection = connect(self.conn_str, statement_cache_size=0,
-                                   command_timeout=4, timeout=10)
+        self._connection = connect(self.conn_str, statement_cache_size=0, timeout=20)
 
     def __await__(self):
         yield from self._connection.__await__()
