@@ -45,11 +45,11 @@ class Redis:
         self._key = key
 
     async def __aenter__(self):
-        self._conn = await self._connection
+        self._conn = (await self._connection).__enter__()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        pass
+        self._conn.__exit__()
 
     @trace_async_method_operation(
         "url", "_key",
@@ -68,6 +68,15 @@ class Redis:
     )
     async def set(self, key, value, expire=None):
         return await self._conn.set(key, value, expire=expire)
+
+    @trace_async_method_operation(
+        "url",
+        name="account_name",
+        dep_type="_name",
+        action="MGET"
+    )
+    async def mget(self, *keys):
+        return await self._conn.mget(*keys)
 
     @trace_async_method_operation(
         "url",
