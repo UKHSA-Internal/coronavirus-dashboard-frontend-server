@@ -16,9 +16,9 @@ exec uvicorn app.main:app --host 0.0.0.0 \
                           --workers 8 \
                           --loop asyncio \
                           --proxy-headers \
-                          --backlog 32 \
+                          --backlog 128 \
                           --timeout-keep-alive 20 \
-                          --limit-max-requests 16 \
+                          --limit-max-requests 32 \
                           --http httptools
 
 #exec gunicorn -k app.uvicorn_worker.ServerUvicornWorker -c /opt/gunicorn_conf.py app.main:app
