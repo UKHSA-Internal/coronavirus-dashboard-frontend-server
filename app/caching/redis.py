@@ -139,7 +139,7 @@ def from_cache_or_db(prefix):
                     result = read_pickle(buffer)
                     return result
 
-                result: DataFrame = await func(*bound_inputs.args, **bound_inputs.kwargs)
+                result: DataFrame = await func(request, *bound_inputs.args, **bound_inputs.kwargs)
                 result.to_pickle(buffer)
                 buffer.seek(0)
 
