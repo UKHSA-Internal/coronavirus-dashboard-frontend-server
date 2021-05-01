@@ -82,10 +82,10 @@ middleware = [
 
 async def lifespan(application: Starlette):
     pool = await redis.instantiate_redis_pool()
-    redis.redis_pool_ctx_var.set(pool)
     application.state.redis = pool
     yield
-    await redis.shutdown_redis_pool()
+    pool.close()
+    await pool.wait_closed()
 
 
 app = Starlette(
