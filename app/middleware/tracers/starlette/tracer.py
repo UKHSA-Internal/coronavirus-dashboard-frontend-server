@@ -79,7 +79,7 @@ class TraceRequestMiddleware(BaseHTTPMiddleware):
 
         try:
             # tracer.span_context.trace_options.set_enabled(True)
-            with tracer.span(f"[{request.method}] {request.url}") as span:
+            with tracer.span(f"[{request.method}] {request.url.path}") as span:
                 span.span_kind = SpanKind.SERVER
                 # if "traceparent" not in request.headers:
                 #     trace_ctx = span.context_tracer
