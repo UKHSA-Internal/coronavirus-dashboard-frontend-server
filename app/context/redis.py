@@ -5,10 +5,16 @@
 # Python:
 from typing import Any
 from contextvars import ContextVar
+from asyncio import get_event_loop
+import ssl
 
 # 3rd party:
+from aioredis import create_redis_pool
 
-# Internal: 
+import certifi
+
+# Internal:
+from app.config import Settings
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -16,6 +22,35 @@ from contextvars import ContextVar
 REQUEST_ID_CTX_KEY = "redis_pool"
 
 redis_pool_ctx_var: ContextVar[Any] = ContextVar(REQUEST_ID_CTX_KEY, default=None)
+
+
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+ssl_context.verify_mode = ssl.CERT_REQUIRED
+ssl_context.check_hostname = True
+ssl_context.load_default_certs()
+ssl_context.load_verify_locations(certifi.where())
+
+
+# conn = create_redis_pool(
+#     **Settings.redis,
+#     minsize=10,
+#     loop=get_event_loop(),
+#     ssl=ssl_context,
+# )
+
+
+async def instantiate_redis_pool():
+    if (pool := get_redis_pool()) is not None:
+        return pool
+
+    conn = await create_redis_pool(
+        **Settings.redis,
+        minsize=10,
+        loop=get_event_loop(),
+        ssl=ssl_context,
+    )
+
+    return conn
 
 
 def get_redis_pool():

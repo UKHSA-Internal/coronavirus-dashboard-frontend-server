@@ -19,7 +19,7 @@ from app.context.redis import set_redis_pool, get_redis_pool, shutdown_redis_poo
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'RedisContextMiddleware'
+    'instantiate_redis_pool'
 ]
 
 
@@ -43,21 +43,21 @@ async def instantiate_redis_pool(address, password, maxsize):
     return conn
 
 
-class RedisContextMiddleware(BaseHTTPMiddleware):
-    def __init__(self, *args, address, password, maxsize, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.address = address
-        self.password = password
-        self.maxsize = maxsize
-
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
-        if get_redis_pool() is None:
-            pool = await instantiate_redis_pool(self.address, self.password, self.maxsize)
-            set_redis_pool(pool)
-
-        response = await call_next(request)
-        try:
-            return response
-        finally:
-            await shutdown_redis_pool()
-
+# class RedisContextMiddleware(BaseHTTPMiddleware):
+#     def __init__(self, *args, address, password, maxsize, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.address = address
+#         self.password = password
+#         self.maxsize = maxsize
+#
+#     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
+#         if get_redis_pool() is None:
+#             pool = await instantiate_redis_pool(self.address, self.password, self.maxsize)
+#             set_redis_pool(pool)
+#
+#         response = await call_next(request)
+#         try:
+#             return response
+#         finally:
+#             await shutdown_redis_pool()
+#

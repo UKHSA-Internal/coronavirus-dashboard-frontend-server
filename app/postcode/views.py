@@ -72,20 +72,21 @@ with open(join_path(queries_dir, "single_query_msoa.sql")) as fp:
 with open(join_path(queries_dir, "locations.sql")) as fp:
     locations_query = fp.read()
 
-redis_instance = Redis()
+# redis_instance = Redis()
 
 
 def from_cache_or_db(prefix):
     def outer(func):
-        lock = Lock()
+        sig = signature(func)
 
         @wraps(func)
         async def inner(*args, **kwargs):
+            bound_inputs = sig.bind(*args, **kwargs)
+            request = bound_inputs.arguments["request"]
             raw_key = prefix + str.join("|", map(str, [*args, *kwargs.values()]))
             cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
 
-            async with redis_instance as redis, lock:
-                redis.key = raw_key
+            async with Redis(request, raw_key) as redis:
                 redis_result = await redis.get(cache_key)
 
             buffer = BytesIO()
@@ -95,12 +96,11 @@ def from_cache_or_db(prefix):
                 result = read_pickle(buffer)
                 return result
 
-            result: DataFrame = await func(*args, **kwargs)
+            result: DataFrame = await func(*bound_inputs.args, **bound_inputs.kwargs)
             result.to_pickle(buffer)
             buffer.seek(0)
 
-            async with redis_instance as redis, lock:
-                redis.key = raw_key
+            async with Redis(request, raw_key) as redis:
                 await redis.set(cache_key, buffer.read(), randint(120, 900) * 60)
 
             return result
@@ -110,7 +110,7 @@ def from_cache_or_db(prefix):
 
 
 @from_cache_or_db("FRONTEND::PC::")
-async def get_data(partition_name, area_type, area_id, timestamp):
+async def get_data(request, partition_name, area_type, area_id, timestamp):
     numeric_metrics = ["%Percentage%", "%Rate%"]
     local_metrics = query_data["local_data"]["metrics"]
     msoa_metric = [f'{query_data["local_data"]["msoa_metric"]}%']
@@ -143,7 +143,7 @@ async def get_data(partition_name, area_type, area_id, timestamp):
     return df
 
 
-async def get_postcode_data(timestamp: str, postcode: str) -> DataFrame:
+async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame:
     msoa_metric = query_data["local_data"]["msoa_metric"]
     ts = datetime.fromisoformat(timestamp.replace("5Z", ""))
     partition_ts = f"{ts:%Y_%-m_%-d}"
@@ -168,6 +168,7 @@ async def get_postcode_data(timestamp: str, postcode: str) -> DataFrame:
     for area_data in area_codes:
         area_type = area_data["area_type"]
         task = get_data(
+            request,
             partition_names[area_type],
             area_type,
             area_data["id"],
@@ -228,10 +229,14 @@ async def postcode_page(request) -> render_template:
     postcode_raw = request.query_params["postcode"]
     postcode = get_validated_postcode(postcode_raw)
 
-    data = await get_postcode_data(timestamp, postcode)
+    data = await get_postcode_data(timestamp, postcode, request)
 
     if not data.size:
-        return await invalid_postcode_response(request, timestamp, postcode_raw)
+        return await invalid_postcode_response(
+            request,
+            timestamp,
+            postcode_raw
+        )
 
     return await render_template(
         request,

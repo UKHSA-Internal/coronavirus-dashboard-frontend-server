@@ -27,6 +27,8 @@ from app.middleware.tracers.starlette import TraceRequestMiddleware
 from app.middleware.headers import ProxyHeadersHostMiddleware
 from app.exceptions import exception_handlers
 from app import generic
+from app.context import redis
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
@@ -78,11 +80,20 @@ middleware = [
 ]
 
 
+async def lifespan(application: Starlette):
+    pool = await redis.instantiate_redis_pool()
+    redis.redis_pool_ctx_var.set(pool)
+    application.state.redis = pool
+    yield
+    await redis.shutdown_redis_pool()
+
+
 app = Starlette(
     debug=Settings.DEBUG,
     routes=routes,
     middleware=middleware,
     exception_handlers=exception_handlers,
+    lifespan=lifespan
 )
 
 
