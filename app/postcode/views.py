@@ -82,8 +82,10 @@ def from_cache_or_db(prefix):
         @wraps(func)
         async def inner(*args, **kwargs):
             bound_inputs = sig.bind(*args, **kwargs)
-            request = bound_inputs.arguments["request"]
-            raw_key = prefix + str.join("|", map(str, [*args, *kwargs.values()]))
+            request = bound_inputs.arguments.pop("request")
+            key = [*bound_inputs.args, *bound_inputs.kwargs.values()]
+            raw_key = prefix + str.join("|", map(str, key))
+
             cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
 
             buffer = BytesIO()
@@ -96,7 +98,7 @@ def from_cache_or_db(prefix):
                     result = read_pickle(buffer)
                     return result
 
-                result: DataFrame = await func(*bound_inputs.args, **bound_inputs.kwargs)
+                result: DataFrame = await func(request, *bound_inputs.args, **bound_inputs.kwargs)
                 result.to_pickle(buffer)
                 buffer.seek(0)
 
@@ -109,7 +111,7 @@ def from_cache_or_db(prefix):
 
 
 @from_cache_or_db("FRONTEND::PC::")
-async def get_data(request, partition_name, area_type, area_id, timestamp, lock):
+async def get_data(request, partition_name, area_type, area_id, timestamp):
     numeric_metrics = ["%Percentage%", "%Rate%"]
     local_metrics = query_data["local_data"]["metrics"]
     msoa_metric = [f'{query_data["local_data"]["msoa_metric"]}%']
@@ -130,7 +132,7 @@ async def get_data(request, partition_name, area_type, area_id, timestamp, lock)
         ]
 
     query = query.format(partition_id=f"{timestamp}_{partition_name}")
-    async with Connection() as conn, lock:
+    async with Connection() as conn:
         result = await conn.fetch(query, *args)
 
     df = DataFrame(
@@ -156,8 +158,7 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
         "msoa": "msoa",
     }
 
-    lock = Lock()
-    async with Connection() as conn, lock:
+    async with Connection() as conn:
         area_codes = await conn.fetch(locations_query, postcode)
 
     if not len(area_codes):
@@ -171,16 +172,12 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
             partition_names[area_type],
             area_type,
             area_data["id"],
-            partition_ts,
-            lock
-            # redis=redis
+            partition_ts
         )
 
         tasks.append(task)
 
     data = await gather(*tasks)
-    # redis.close()
-    # await redis.wait_closed()
     result = concat(data).reset_index(drop=True)
     result["rank"] = result.groupby("metric")[["priority", "date"]].rank(ascending=True)
     filters = (
