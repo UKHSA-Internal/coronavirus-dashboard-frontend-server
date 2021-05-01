@@ -4,24 +4,17 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from os.path import abspath, split as split_path, join as join_path
 from operator import itemgetter
 from json import load
 from typing import Union
 from asyncio import gather
-from hashlib import blake2b
-from io import BytesIO
-from random import randint
-from functools import wraps
 import ssl
-from asyncio import Lock
-from inspect import signature
 
 # 3rd party:
 import certifi
-from aioredis import create_redis_pool
-from pandas import DataFrame, concat, read_pickle
+from pandas import DataFrame, concat
 
 # Internal:
 from .types import QueryDataType
@@ -30,8 +23,7 @@ from app.common.utils import get_release_timestamp
 from app.common.data.variables import DestinationMetrics, IsImproving
 from app.database.postgres import Connection
 from app.template_processor import render_template
-from app.caching import Redis
-from app.config import Settings
+from app.caching import from_cache_or_db
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -71,43 +63,6 @@ with open(join_path(queries_dir, "single_query_msoa.sql")) as fp:
 
 with open(join_path(queries_dir, "locations.sql")) as fp:
     locations_query = fp.read()
-
-# redis_instance = Redis()
-
-
-def from_cache_or_db(prefix):
-    def outer(func):
-        sig = signature(func)
-
-        @wraps(func)
-        async def inner(*args, **kwargs):
-            bound_inputs = sig.bind(*args, **kwargs)
-            request = bound_inputs.arguments.pop("request")
-            key = [*bound_inputs.args, *bound_inputs.kwargs.values()]
-            raw_key = prefix + str.join("|", map(str, key))
-
-            cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
-
-            buffer = BytesIO()
-            async with Redis(request, raw_key) as redis:
-                redis_result = await redis.get(cache_key)
-
-                if redis_result is not None:
-                    buffer.write(redis_result)
-                    buffer.seek(0)
-                    result = read_pickle(buffer)
-                    return result
-
-                result: DataFrame = await func(request, *bound_inputs.args, **bound_inputs.kwargs)
-                result.to_pickle(buffer)
-                buffer.seek(0)
-
-                await redis.set(cache_key, buffer.read(), randint(120, 900) * 60)
-
-            return result
-
-        return inner
-    return outer
 
 
 @from_cache_or_db("FRONTEND::PC::")
@@ -221,7 +176,7 @@ async def invalid_postcode_response(request, timestamp, raw_postcode):
 
 
 async def postcode_page(request) -> render_template:
-    timestamp = await get_release_timestamp()
+    timestamp = await get_release_timestamp(request)
 
     postcode_raw = request.query_params["postcode"]
     postcode = get_validated_postcode(postcode_raw)

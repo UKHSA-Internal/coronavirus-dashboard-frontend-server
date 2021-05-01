@@ -24,6 +24,7 @@ from .visualisation import plot_thumbnail
 from .data.variables import DestinationMetrics
 from app.storage import AsyncStorageClient
 from app.config import Settings
+from app.caching import from_cache_or_func
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -118,17 +119,33 @@ def add_cloud_role_name(envelope):
     return True
 
 
-async def get_release_timestamp():
-    async with AsyncStorageClient(**Settings.latest_published_timestamp) as client:
-        data = await client.download()
-        timestamp = await data.readall()
+async def get_from_storage(*args, **kwargs):
+    async with AsyncStorageClient(*args, **kwargs) as client:
+        data_io = await client.download()
+        data_bytes = await data_io.readall()
 
-    return timestamp.decode()
+    return data_bytes.decode()
 
 
-async def get_website_timestamp():
-    async with AsyncStorageClient(**Settings.website_timestamp) as client:
-        data = await client.download()
-        timestamp = await data.readall()
+async def get_release_timestamp(request):
+    response = from_cache_or_func(
+        request=request,
+        func=get_from_storage,
+        prefix="FRONTEND::TS::",
+        expire=40,
+        **Settings.latest_published_timestamp
+    )
 
-    return timestamp.decode()
+    return await response
+
+
+async def get_website_timestamp(request):
+    response = from_cache_or_func(
+        request=request,
+        func=get_from_storage,
+        prefix="FRONTEND::TS::",
+        expire=40,
+        **Settings.latest_published_timestamp
+    )
+
+    return await response

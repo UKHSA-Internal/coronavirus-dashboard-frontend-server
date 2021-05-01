@@ -3,21 +3,27 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-from ssl import SSLContext, CERT_REQUIRED, PROTOCOL_TLSv1_2
+from inspect import signature
+from hashlib import blake2b
+from io import BytesIO
+from random import randint
+from functools import wraps
+from pickle import loads, dumps
 
 # 3rd party:
-import certifi
-from aioredis import create_redis_pool
-from aredis import StrictRedis
+from pandas import DataFrame, read_pickle
 
 # Internal: 
 from app.middleware.tracers.utils import trace_async_method_operation
 from app.config import Settings
-from app.context import redis
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-__all__ = ['Redis']
+__all__ = [
+    'Redis',
+    'from_cache_or_func',
+    'from_cache_or_db'
+]
 
 
 class Redis:
@@ -86,3 +92,60 @@ class Redis:
     )
     async def ping(self):
         return await self._conn.ping()
+
+
+async def from_cache_or_func(request, func, prefix, expire, with_request=False, *args, **kwargs):
+    key = [*args, *kwargs.values()]
+    raw_key = prefix + str.join("|", map(str, key))
+    cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
+
+    async with Redis(request, raw_key) as redis:
+        redis_result = await redis.get(cache_key)
+
+        if redis_result is not None:
+            return loads(redis_result)
+
+        if with_request:
+            result = await func(request, *args, **kwargs)
+        else:
+            result = await func(*args, **kwargs)
+
+        print(result)
+        await redis.set(cache_key, dumps(result), expire)
+
+    return result
+
+
+def from_cache_or_db(prefix):
+    def outer(func):
+        sig = signature(func)
+
+        @wraps(func)
+        async def inner(*args, **kwargs):
+            bound_inputs = sig.bind(*args, **kwargs)
+            request = bound_inputs.arguments.pop("request")
+            key = [*bound_inputs.args, *bound_inputs.kwargs.values()]
+            raw_key = prefix + str.join("|", map(str, key))
+
+            cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
+
+            buffer = BytesIO()
+            async with Redis(request, raw_key) as redis:
+                redis_result = await redis.get(cache_key)
+
+                if redis_result is not None:
+                    buffer.write(redis_result)
+                    buffer.seek(0)
+                    result = read_pickle(buffer)
+                    return result
+
+                result: DataFrame = await func(*bound_inputs.args, **bound_inputs.kwargs)
+                result.to_pickle(buffer)
+                buffer.seek(0)
+
+                await redis.set(cache_key, buffer.read(), randint(120, 900) * 60)
+
+            return result
+
+        return inner
+    return outer

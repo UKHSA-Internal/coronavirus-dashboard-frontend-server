@@ -82,10 +82,10 @@ async def render_template(request, template_name: str, context: Optional[Dict[st
     }
 
     if "timestamp" not in context:
-        context["timestamp"] = await get_release_timestamp()
+        context["timestamp"] = await get_release_timestamp(request)
 
     if "despatch" not in context:
-        context["despatch"] = await get_website_timestamp()
+        context["despatch"] = await get_website_timestamp(request)
 
     return template.TemplateResponse(
         template_name,

@@ -19,11 +19,11 @@ from os.path import abspath, split as split_path, join as join_path
 from pandas import DataFrame
 
 # Internal:
-from ..common.data.variables import DestinationMetrics, IsImproving
-from ..common.utils import get_release_timestamp
-# from .graphics import get_timeseries
-from ..database.postgres import Connection
-from ..template_processor import render_template
+from app.common.data.variables import DestinationMetrics, IsImproving
+from app.common.utils import get_release_timestamp
+from app.database.postgres import Connection
+from app.template_processor import render_template
+from app.caching import from_cache_or_func
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -103,11 +103,6 @@ async def get_home_page(request, timestamp: str, invalid_postcode=None) -> rende
     async with Connection() as conn:
         data = await get_landing_data(conn, timestamp)
 
-        # time_series = {
-        #     key: await value
-        #     async for key, value in get_timeseries(conn, timestamp)
-        # }
-
     return await render_template(
         request,
         "main.html",
@@ -125,6 +120,15 @@ async def get_home_page(request, timestamp: str, invalid_postcode=None) -> rende
 
 
 async def home_page(request) -> render_template:
-    timestamp = await get_release_timestamp()
+    timestamp = await get_release_timestamp(request)
 
-    return await get_home_page(request, timestamp)
+    # response = from_cache_or_func(
+    #     request=request,
+    #     func=get_home_page,
+    #     prefix="FRONTEND::HP::",
+    #     with_request=True,
+    #     expire=8 * 60 * 60,
+    #     timestamp=timestamp
+    # )
+    # return await response
+    return await get_home_page(request, timestamp=timestamp)
