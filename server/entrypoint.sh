@@ -16,7 +16,7 @@ exec uvicorn app.main:app --host 0.0.0.0 \
                           --workers 8 \
                           --loop asyncio \
                           --proxy-headers \
-                          --backlog 256 \
+                          --backlog 128 \
                           --timeout-keep-alive 15 \
                           --limit-max-requests 32 \
                           --http httptools

@@ -86,21 +86,20 @@ def from_cache_or_db(prefix):
             raw_key = prefix + str.join("|", map(str, [*args, *kwargs.values()]))
             cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
 
+            buffer = BytesIO()
             async with Redis(request, raw_key) as redis:
                 redis_result = await redis.get(cache_key)
 
-            buffer = BytesIO()
-            if redis_result is not None:
-                buffer.write(redis_result)
+                if redis_result is not None:
+                    buffer.write(redis_result)
+                    buffer.seek(0)
+                    result = read_pickle(buffer)
+                    return result
+
+                result: DataFrame = await func(*bound_inputs.args, **bound_inputs.kwargs)
+                result.to_pickle(buffer)
                 buffer.seek(0)
-                result = read_pickle(buffer)
-                return result
 
-            result: DataFrame = await func(*bound_inputs.args, **bound_inputs.kwargs)
-            result.to_pickle(buffer)
-            buffer.seek(0)
-
-            async with Redis(request, raw_key) as redis:
                 await redis.set(cache_key, buffer.read(), randint(120, 900) * 60)
 
             return result
