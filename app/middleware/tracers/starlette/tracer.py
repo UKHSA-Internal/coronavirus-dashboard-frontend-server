@@ -93,7 +93,6 @@ class TraceRequestMiddleware(BaseHTTPMiddleware):
                 span.add_attribute(HTTP_HOST, request.url.hostname)
                 span.add_attribute(HTTP_METHOD, request.method)
                 span.add_attribute(HTTP_PATH, request.url.path)
-                span.add_attribute("http.query", request.url.path)
                 if not len(request.query_params):
                     span.add_attribute(HTTP_ROUTE, request.url.path)
                 else:

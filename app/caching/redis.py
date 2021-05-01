@@ -110,7 +110,6 @@ async def from_cache_or_func(request, func, prefix, expire, with_request=False, 
         else:
             result = await func(*args, **kwargs)
 
-        print(result)
         await redis.set(cache_key, dumps(result), expire)
 
     return result
