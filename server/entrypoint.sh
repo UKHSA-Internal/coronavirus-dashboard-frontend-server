@@ -17,7 +17,7 @@ exec uvicorn app.main:app --host 0.0.0.0 \
                           --loop uvloop \
                           --proxy-headers \
                           --interface asgi3 \
-                          --backlog 32 \
+                          --backlog 16 \
                           --timeout-keep-alive 10 \
                           --limit-max-requests 16 \
                           --http httptools
