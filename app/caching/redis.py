@@ -139,7 +139,7 @@ def from_cache_or_db(prefix):
                 await redis.set(
                     key=cache_key,
                     value=dumps(result),
-                    expire=randint(5 * 60, 15 * 8) * 60  # Between 5 and 8 hours
+                    expire=randint(5 * 60, 8 * 60) * 60  # Between 5 and 8 hours
                 )
 
             return result
