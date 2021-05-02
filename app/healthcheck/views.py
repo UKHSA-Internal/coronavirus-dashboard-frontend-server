@@ -18,19 +18,13 @@ import certifi
 from app.database.postgres import Connection
 from app.storage import AsyncStorageClient
 from app.config import Settings
+from app.caching import Redis
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
     'run_healthcheck'
 ]
-
-
-ssl_context = SSLContext(PROTOCOL_TLSv1_2)
-ssl_context.verify_mode = CERT_REQUIRED
-ssl_context.check_hostname = True
-ssl_context.load_default_certs()
-ssl_context.load_verify_locations(certifi.where())
 
 
 async def test_db():
@@ -48,21 +42,15 @@ async def test_storage():
     return {"storage": f"healthy - {blob_data.decode()}"}
 
 
-# async def test_redis():
-#     redis = await create_connection(
-#         Settings.redis['address'],
-#         password=Settings.redis["password"],
-#         timeout=1,
-#         ssl=SSLContext
-#     )
-#
-#     response = await redis.execute("EXEC", "PING")
-#
-#     return {"storage": f"healthy - {response}"}
+async def test_redis(request):
+    async with Redis(request) as redis:
+        response = await redis.ping()
+
+    return {"storage": f"healthy - {response}"}
 
 
 async def run_healthcheck(request: Request) -> Union[JSONResponse, Response]:
-    response = await gather(test_db(), test_storage())
+    response = await gather(test_db(), test_storage(), test_redis(request))
 
     if request.method == 'GET':
         return JSONResponse(response, status_code=HTTPStatus.OK.real)
