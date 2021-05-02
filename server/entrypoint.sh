@@ -11,19 +11,19 @@ set -e
 #    echo "There is no script $PRE_START_PATH"
 #fi
 
-exec uvicorn app.main:app --host 0.0.0.0 \
-                          --port 5100 \
-                          --workers 8 \
-                          --loop uvloop \
-                          --proxy-headers \
-                          --interface asgi3 \
-                          --backlog 16 \
-                          --timeout-keep-alive 10 \
-                          --limit-max-requests 16 \
-                          --http httptools
+#exec uvicorn app.main:app --host 0.0.0.0 \
+#                          --port 5100 \
+#                          --workers 8 \
+#                          --loop uvloop \
+#                          --proxy-headers \
+#                          --interface asgi3 \
+#                          --backlog 16 \
+#                          --timeout-keep-alive 10 \
+#                          --limit-max-requests 16 \
+#                          --http httptools
 
-#exec gunicorn -k app.uvicorn_worker.ServerUvicornWorker -c /opt/gunicorn_conf.py app.main:app
 #exec nginx
+#exec gunicorn -k app.uvicorn_worker.ServerUvicornWorker -c /opt/gunicorn_conf.py app.main:app
 
 # Start Supervisor, with Nginx and ASGI
-#exec /usr/bin/supervisord -c /opt/supervisor/supervisord.conf
+exec /usr/bin/supervisord -c /opt/supervisor/supervisord.conf

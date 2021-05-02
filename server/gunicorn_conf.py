@@ -65,7 +65,7 @@ web_concurrency = max(int(default_web_concurrency), 2)
 # use_accesslog = accesslog_var or None
 # errorlog_var = getenv("ERROR_LOG", "-")
 # use_errorlog = errorlog_var or None
-graceful_timeout_str = getenv("GRACEFUL_TIMEOUT", "30")
+graceful_timeout_str = getenv("GRACEFUL_TIMEOUT", "8")
 timeout_str = getenv("TIMEOUT", "20")
 keepalive_str = getenv("KEEP_ALIVE", "10")
 

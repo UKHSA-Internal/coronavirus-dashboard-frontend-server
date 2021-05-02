@@ -14,9 +14,9 @@ from uvicorn.workers import UvicornWorker
 
 class ServerUvicornWorker(UvicornWorker):
     CONFIG_KWARGS = {
-        "loop": "asyncio",
+        "loop": "uvloop",
         "proxy_headers": True,
         "access_log": True,
         "reload": False,
-        "backlog": 32
+        "backlog": 8,
     }
