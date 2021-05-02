@@ -45,33 +45,21 @@ logger = logging.getLogger("app")
 
 
 class TraceRequestMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, sampler, instrumentation_key, cloud_role_name,
-                 extra_attrs: Dict[str, str],
-                 logging_instances: Iterable[Iterable[Union[logging.Logger, int]]]):
-
-        self.exporter = Exporter(connection_string=instrumentation_key)
-        self.exporter.add_telemetry_processor(cloud_role_name)
+    def __init__(self, app, sampler, extra_attrs: Dict[str, str]):
 
         self.app = app
 
         self.sampler = sampler
         self.extra_attrs = extra_attrs
 
-        self.handler = AzureLogHandler(connection_string=instrumentation_key)
-
-        self.handler.add_telemetry_processor(cloud_role_name)
         super(TraceRequestMiddleware, self).__init__(app)
-
-        for log, level in logging_instances:
-            log.addHandler(self.handler)
-            log.setLevel(level)
 
     async def dispatch(self, request: Request, call_next):
         propagator = TraceContextPropagator()
         span_context = propagator.from_headers(dict(request.headers))
 
         tracer = Tracer(
-            exporter=self.exporter,
+            exporter=request.app.state.azure_exporter,
             sampler=self.sampler,
             span_context=span_context,
             propagator=propagator
@@ -79,7 +67,7 @@ class TraceRequestMiddleware(BaseHTTPMiddleware):
 
         try:
             # tracer.span_context.trace_options.set_enabled(True)
-            with tracer.span(f"[{request.method}] {request.url}") as span:
+            with tracer.span(f"[{request.method}] {request.url.path}") as span:
                 span.span_kind = SpanKind.SERVER
                 # if "traceparent" not in request.headers:
                 #     trace_ctx = span.context_tracer
