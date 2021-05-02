@@ -23,7 +23,7 @@ set -e
 #                          --http httptools
 
 #exec nginx
-#exec gunicorn -k app.uvicorn_worker.ServerUvicornWorker -c /opt/gunicorn_conf.py app.main:app
-
+exec gunicorn -k app.uvicorn_worker.ServerUvicornWorker -c /opt/gunicorn_conf.py app.main:app
+#
 # Start Supervisor, with Nginx and ASGI
-exec /usr/bin/supervisord -c /opt/supervisor/supervisord.conf
+#exec /usr/bin/supervisord -c /opt/supervisor/supervisord.conf
