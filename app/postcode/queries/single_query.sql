@@ -18,8 +18,8 @@ FROM (
                         WHEN (payload ->> 'value') = 'DOWN' THEN 180
                         WHEN (payload ->> 'value') = 'SAME' THEN 90
                         WHEN (ref.area_type = 'msoa' AND metric LIKE 'newCasesBySpecimenDate%')
-                            OR metric ILIKE ANY ($1::VARCHAR[]) THEN (payload -> 'value')::NUMERIC
-                        ELSE round((payload -> 'value')::NUMERIC)::INT
+                            OR metric ILIKE ANY ($1::VARCHAR[]) THEN (payload ->> 'value')::NUMERIC
+                        ELSE round((payload ->> 'value')::NUMERIC)::INT
                         END
                 )         AS "value",
                 RANK() OVER (
