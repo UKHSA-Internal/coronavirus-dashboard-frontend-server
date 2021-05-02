@@ -1,0 +1,18 @@
+{% extends 'errors/error.html' %}
+{%- block status_code -%}{{ status_code }}{%- endblock -%}
+{%- block error_message -%}{{ status_detail }}{%- endblock -%}
+{%- block error_body -%}
+	<h2 class="govuk-heading-l">
+		Sorry, it is taking too long to process your request.</h2>
+	<p class="govuk-body">
+		This is usually because too many people are trying to use the service at the same time.
+	</p>
+  <p class="govuk-body">
+	  Please try again later. If the problem persists for over one
+	  hour, <a class="govuk-link govuk-link--no-visited-state"
+							href="mailto:coronavirus-tracker@phe.gov.uk?Subject=Dashboard%20Error%20(500)"
+							rel="noopener noreferrer"
+							target="_blank">contact us</a> to report the issue.
+  </p>
+{%- endblock -%}
+

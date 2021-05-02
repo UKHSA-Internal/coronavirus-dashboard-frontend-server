@@ -95,9 +95,86 @@ async def handle_500(request: Request, exc, **context):
     )
 
 
+async def overload_503(request: Request, exc, **context):
+    if hasattr(exc, "status_code"):
+        status_code = getattr(exc, "status_code")
+        status_detail = getattr(exc, "phrase", "detail")
+    else:
+        status = HTTPStatus.INTERNAL_SERVER_ERROR
+        status_code = getattr(status, "value", 503)
+        status_detail = getattr(status, "phrase", "Service Unavailable")
+
+    custom_dims = dict(
+        custom_dimensions=dict(
+            is_healthcheck=Settings.healthcheck_path in request.url.path,
+            url=str(request.url),
+            path=str(request.url.path),
+            query_string=str(request.query_params),
+            status_code=status_code,
+            status_detail=status_detail,
+            api_environment=Settings.ENVIRONMENT,
+            server_location=Settings.server_location,
+            is_dev=Settings.DEBUG,
+            **context
+        )
+    )
+
+    logger.error(exc, extra=custom_dims, exc_info=True)
+
+    return await render_template(
+        request,
+        "errors/503.html",
+        context={
+            "status_code": status_code,
+            "status_detail": status_detail,
+            **context
+        },
+        status_code=status_code
+    )
+
+
+async def timeout_504(request: Request, exc, **context):
+    if hasattr(exc, "status_code"):
+        status_code = getattr(exc, "status_code")
+        status_detail = getattr(exc, "phrase", "detail")
+    else:
+        status = HTTPStatus.INTERNAL_SERVER_ERROR
+        status_code = getattr(status, "value", 504)
+        status_detail = getattr(status, "phrase", "Gateway Timeout")
+
+    custom_dims = dict(
+        custom_dimensions=dict(
+            is_healthcheck=Settings.healthcheck_path in request.url.path,
+            url=str(request.url),
+            path=str(request.url.path),
+            query_string=str(request.query_params),
+            status_code=status_code,
+            status_detail=status_detail,
+            api_environment=Settings.ENVIRONMENT,
+            server_location=Settings.server_location,
+            is_dev=Settings.DEBUG,
+            **context
+        )
+    )
+
+    logger.error(exc, extra=custom_dims, exc_info=True)
+
+    return await render_template(
+        request,
+        "errors/504.html",
+        context={
+            "status_code": status_code,
+            "status_detail": status_detail,
+            **context
+        },
+        status_code=status_code
+    )
+
+
 exception_handlers = {
     404: handle_404,
     500: handle_500,
     502: handle_500,
-    503: handle_500
+    503: overload_503,
+    504: timeout_504
 }
