@@ -5,13 +5,12 @@
 # Python:
 from inspect import signature
 from hashlib import blake2b
-from io import BytesIO
 from random import randint
 from functools import wraps
 from pickle import loads, dumps
 
 # 3rd party:
-from pandas import DataFrame, read_pickle
+from pandas import DataFrame
 
 # Internal: 
 from app.middleware.tracers.utils import trace_async_method_operation
@@ -128,21 +127,20 @@ def from_cache_or_db(prefix):
 
             cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
 
-            buffer = BytesIO()
             async with Redis(request, raw_key) as redis:
                 redis_result = await redis.get(cache_key)
 
                 if redis_result is not None:
-                    buffer.write(redis_result)
-                    buffer.seek(0)
-                    result = read_pickle(buffer)
+                    result = loads(redis_result)
                     return result
 
                 result: DataFrame = await func(request, *bound_inputs.args, **bound_inputs.kwargs)
-                result.to_pickle(buffer)
-                buffer.seek(0)
 
-                await redis.set(cache_key, buffer.read(), randint(120, 900) * 60)
+                await redis.set(
+                    key=cache_key,
+                    value=dumps(result),
+                    expire=randint(5 * 60, 15 * 8) * 60  # Between 5 and 8 hours
+                )
 
             return result
 
