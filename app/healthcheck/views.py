@@ -6,18 +6,14 @@
 from typing import Union
 from http import HTTPStatus
 from asyncio import gather
-from ssl import SSLContext, PROTOCOL_TLSv1_2, CERT_REQUIRED
 
 # 3rd party:
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from aioredis import create_connection
-import certifi
 
 # Internal:
 from app.database.postgres import Connection
 from app.storage import AsyncStorageClient
-from app.config import Settings
 from app.caching import Redis
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -29,24 +25,23 @@ __all__ = [
 
 async def test_db():
     async with Connection() as conn:
-        db_active = await conn.fetchval("SELECT 1 AS passed;")
+        db_active = await conn.fetchval("SELECT TRUE AS passed;")
 
-    return {"db": f"healthy - {db_active}"}
+    return {"db": db_active is True}
 
 
 async def test_storage():
     async with AsyncStorageClient("pipeline", "info/seen") as blob_client:
-        blob = await blob_client.download()
-        blob_data = await blob.readall()
+        data = await blob_client.exists()
 
-    return {"storage": f"healthy - {blob_data.decode()}"}
+    return {"storage": data is True}
 
 
 async def test_redis(request):
     async with Redis(request) as redis:
         response = await redis.ping()
 
-    return {"storage": f"healthy - {response}"}
+    return {"redis": response == b"PONG"}
 
 
 async def run_healthcheck(request: Request) -> Union[JSONResponse, Response]:
