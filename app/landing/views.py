@@ -14,6 +14,7 @@ Contributors:  Pouria Hadjibagheri
 # Python:
 from datetime import datetime
 from os.path import abspath, split as split_path, join as join_path
+from random import randint
 
 # 3rd party:
 from pandas import DataFrame
@@ -72,14 +73,15 @@ metrics = [
 ]
 
 
-async def get_landing_data(conn, timestamp):
+async def get_landing_data(timestamp):
     ts = datetime.fromisoformat(timestamp.replace("5Z", ""))
     query = overview_data_query.format(partition=f"{ts:%Y_%-m_%-d}_other")
 
-    values = conn.fetch(query, ts, metrics)
+    async with Connection() as conn:
+        values = await conn.fetch(query, ts, metrics)
 
     df = DataFrame(
-        await values,
+        values,
         columns=["areaCode", "areaType", "areaName", "date", "metric", "value", "rank"]
     )
 
@@ -100,35 +102,28 @@ def is_improving(metric, value):
 
 
 async def get_home_page(request, timestamp: str, invalid_postcode=None) -> render_template:
-    async with Connection() as conn:
-        data = await get_landing_data(conn, timestamp)
-
-    return await render_template(
-        request,
-        "main.html",
-        context={
-            "timestamp": timestamp,
-            "date": timestamp.split("T")[0],
-            "data": data,
-            "base": request.url.hostname,
-            "cards": DestinationMetrics,
-            # "plots": time_series,
-            "is_improving": is_improving,
-            "invalid_postcode": invalid_postcode
-        }
+    response = from_cache_or_func(
+        request=request,
+        func=get_landing_data,
+        prefix="FRONTEND::LP::",
+        expire=randint(5 * 60, 8 * 60) * 60,  # Between 5 and 8 hours
+        timestamp=timestamp
     )
+
+    context = {
+        "timestamp": timestamp,
+        "date": timestamp.split("T")[0],
+        "data": await response,
+        "base": request.url.hostname,
+        "cards": DestinationMetrics,
+        "is_improving": is_improving,
+        "invalid_postcode": invalid_postcode
+    }
+
+    return await render_template(request, "main.html", context=context)
 
 
 async def home_page(request) -> render_template:
     timestamp = await get_release_timestamp(request)
 
-    # response = from_cache_or_func(
-    #     request=request,
-    #     func=get_home_page,
-    #     prefix="FRONTEND::HP::",
-    #     with_request=True,
-    #     expire=8 * 60 * 60,
-    #     timestamp=timestamp
-    # )
-    # return await response
     return await get_home_page(request, timestamp=timestamp)
