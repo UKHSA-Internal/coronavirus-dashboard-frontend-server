@@ -10,7 +10,8 @@ from datetime import datetime
 # 3rd party:
 
 # Internal:
-from ...storage import AsyncStorageClient
+from app.storage import AsyncStorageClient
+from app.caching import from_cache_or_func
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -28,7 +29,7 @@ special_chars_pattern = re.compile(r"[\"')]")
 to_underscore_pattern = re.compile(r"[\s.(&,]+")
 
 
-async def get_whats_new_banners(timestamp: str):
+async def _get_whats_new_banners(timestamp: str):
     async with AsyncStorageClient(**BANNER_DATA) as client:
         data_io = await client.download()
         raw_data = await data_io.readall()
@@ -55,3 +56,15 @@ async def get_whats_new_banners(timestamp: str):
         results.append(banner)
 
     return results
+
+
+async def get_whats_new_banners(request, timestamp):
+    response = from_cache_or_func(
+        request=request,
+        func=_get_whats_new_banners,
+        prefix="FRONTEND::BN::",
+        expire=300,
+        timestamp=timestamp
+    )
+
+    return await response

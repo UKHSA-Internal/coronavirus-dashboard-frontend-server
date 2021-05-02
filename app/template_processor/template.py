@@ -93,13 +93,10 @@ async def render_template(request, template_name: str, context: Optional[Dict[st
         context=dict(
             request=request,
             banners=await get_banners(request, context["timestamp"]),
-            whatsnew_banners=await get_whats_new_banners(context["timestamp"]),
+            whatsnew_banners=await get_whats_new_banners(request, context["timestamp"]),
             app_insight_token=Settings.instrumentation_key,
             og_images=get_og_image_names(context["timestamp"]),
             **context
-            # changelog=get_notification_content(website_timestamp),
-            # banners=get_banners,
-            # whatsnew_banners=get_whats_new_banners,
         )
     )
 

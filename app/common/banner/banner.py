@@ -10,7 +10,8 @@ from datetime import datetime
 from markdown import markdown
 
 # Internal:
-from ...storage import AsyncStorageClient
+from app.storage import AsyncStorageClient
+from app.caching import from_cache_or_func
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -52,7 +53,7 @@ def filter_fn(request, timestamp):
     return func
 
 
-async def get_banners(request, timestamp: str):
+async def _get_banners(request, timestamp: str):
     async with AsyncStorageClient(**BANNER_DATA) as client:
         data_io = await client.download()
         raw_data = await data_io.readall()
@@ -75,4 +76,17 @@ async def get_banners(request, timestamp: str):
         for banner in banners
     )
 
-    return results
+    return list(results)
+
+
+async def get_banners(request, timestamp):
+    response = from_cache_or_func(
+        request=request,
+        func=_get_banners,
+        prefix="FRONTEND::BN::",
+        expire=300,
+        with_request=True,
+        timestamp=timestamp
+    )
+
+    return await response
