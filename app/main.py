@@ -12,10 +12,12 @@ from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 from starlette.middleware import Middleware
 from starlette.requests import Request
+from starlette.responses import Response
 
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from opencensus.trace.samplers import AlwaysOnSampler
+from opencensus.ext.azure.log_exporter import AzureLogHandler
 
 # Internal:
 from app.postcode.views import postcode_page
@@ -25,6 +27,7 @@ from app.config import Settings
 from app.common.utils import add_cloud_role_name
 from app.middleware.tracers.starlette import TraceRequestMiddleware
 from app.middleware.headers import ProxyHeadersHostMiddleware
+from app.middleware.tracers.azure.exporter import Exporter
 from app.exceptions import exception_handlers
 from app import generic
 from app.context import redis
@@ -69,23 +72,36 @@ middleware = [
     Middleware(
         TraceRequestMiddleware,
         sampler=AlwaysOnSampler(),
-        instrumentation_key=Settings.instrumentation_key,
-        cloud_role_name=add_cloud_role_name,
         extra_attrs=dict(
             environment=Settings.ENVIRONMENT,
             server_location=Settings.server_location
-        ),
-        logging_instances=logging_instances
+        )
     ),
 ]
 
 
 async def lifespan(application: Starlette):
+    exporter = Exporter(connection_string=Settings.instrumentation_key)
+    exporter.add_telemetry_processor(add_cloud_role_name)
+    application.state.azure_exporter = exporter
+
+    handler = AzureLogHandler(connection_string=Settings.instrumentation_key)
+
+    handler.add_telemetry_processor(add_cloud_role_name)
+
+    for log, level in logging_instances:
+        log.addHandler(handler)
+        log.setLevel(level)
+
     pool = await redis.instantiate_redis_pool()
     application.state.redis = pool
+
     yield
+
     pool.close()
     await pool.wait_closed()
+    handler.flush()
+    handler.close()
 
 
 app = Starlette(
@@ -99,7 +115,7 @@ app = Starlette(
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
-    response = await call_next(request)
+    response: Response = await call_next(request)
 
     last_modified = datetime.now()
     expires = last_modified + timedelta(minutes=1, seconds=30)
@@ -107,8 +123,11 @@ async def add_process_time_header(request: Request, call_next):
     response.headers['last-modified'] = last_modified.strftime(HTTP_DATE_FORMAT)
     response.headers['expires'] = expires.strftime(HTTP_DATE_FORMAT)
 
+    if response.status_code == 503:
+        response.headers['retry-after'] = '300'
+
     if "cache-control" not in response.headers:
-        response.headers['cache-control'] = 'public, must-revalidate, max-age=30, s-maxage=90'
+        response.headers['cache-control'] = 'public, must-revalidate, max-age=60, s-maxage=90'
 
     response.headers['PHE-Server-Loc'] = Settings.server_location
 
