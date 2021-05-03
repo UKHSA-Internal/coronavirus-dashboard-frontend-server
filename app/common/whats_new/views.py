@@ -62,7 +62,7 @@ async def get_whats_new_banners(request, timestamp):
     response = from_cache_or_func(
         request=request,
         func=_get_whats_new_banners,
-        prefix="FRONTEND::BN::",
+        prefix="FRONTEND::CL::",
         expire=300,
         timestamp=timestamp
     )
