@@ -66,7 +66,7 @@ with open(join_path(queries_dir, "locations.sql")) as fp:
 
 
 @from_cache_or_db("FRONTEND::PC::")
-async def get_data(request, partition_name, area_type, area_id, timestamp):
+async def get_data(request, partition_name, area_type, area_id, timestamp, loop=None):
     numeric_metrics = ["%Percentage%", "%Rate%"]
     local_metrics = query_data["local_data"]["metrics"]
     msoa_metric = [f'{query_data["local_data"]["msoa_metric"]}%']
@@ -87,7 +87,7 @@ async def get_data(request, partition_name, area_type, area_id, timestamp):
         ]
 
     query = query.format(partition_id=f"{timestamp}_{partition_name}")
-    async with Connection() as conn:
+    async with Connection(loop=loop) as conn:
         result = await conn.fetch(query, *args)
 
     df = DataFrame(
