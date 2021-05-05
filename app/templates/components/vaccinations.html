@@ -19,11 +19,11 @@
 					People vaccinated&nbsp;in {{ firstDoseDaily.areaName }}
 				</h4>
 			{%- endif %}
-			<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+			<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-0 govuk-!-margin-top-2">
 				Up to and including&nbsp;<span style="white-space: nowrap">{{ firstDoseDaily.date }}</span>
 			</p>
 		</div>
-		<a class="govuk-link govuk-link--no-visited-state bottom-aligned"
+		<a class="govuk-link govuk-link--no-visited-state bottom-aligned govuk-!-margin-top-2 ext-link"
 		   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType=nation&areaName={{ firstDoseDaily.areaName }}{% endif %}">
 			All vaccination data
 		</a>
@@ -165,4 +165,15 @@
 
 	</figure>
 
+	<div class="mob-link additional-info">
+		<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>
+		<p class="bottom-aligned govuk-!-margin-top-2 govuk-!-font-size-16 govuk-!-margin-bottom-0">
+			<a class="govuk-link govuk-link--no-visited-state"
+			   rel="next"
+			   style="text-decoration: none"
+			   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType=nation&areaName={{ firstDoseDaily.areaName }}{% endif %}">
+				<b>All vaccination data</b>
+			</a>
+		</p>
+	</div>
 </div>
