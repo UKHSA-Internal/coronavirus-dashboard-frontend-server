@@ -8,6 +8,7 @@ from hashlib import blake2b
 from random import randint
 from functools import wraps
 from pickle import loads, dumps
+from asyncio import Future, get_event_loop
 
 # 3rd party:
 from pandas import DataFrame
@@ -95,8 +96,8 @@ class Redis:
 
 async def from_cache_or_func(request, func, prefix, expire, with_request=False, *args, **kwargs):
     key = [*args, *kwargs.values()]
-    raw_key = prefix + str.join("|", map(str, key))
-    cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
+    raw_key = str.join("|", map(str, key))
+    cache_key = prefix + blake2b(raw_key.encode(), digest_size=6).hexdigest()
 
     async with Redis(request, raw_key) as redis:
         redis_result = await redis.get(cache_key)
@@ -114,6 +115,30 @@ async def from_cache_or_func(request, func, prefix, expire, with_request=False, 
     return result
 
 
+async def from_cache(request, future: Future, key, raw_key):
+    async with Redis(request, raw_key) as redis:
+        if (result := await redis.get(key)) is not None and not future.done():
+            result = loads(result)
+            future.set_result(result)
+            future.done()
+
+
+async def from_db(request, future: Future, func, key, raw_key, *args, **kwargs):
+    result: DataFrame = await func(request, *args, **kwargs, loop=future.get_loop())
+
+    if not future.done():
+        async with Redis(request, raw_key) as redis:
+            await redis.set(
+                key=key,
+                value=dumps(result),
+                expire=randint(5 * 60, 8 * 60) * 60  # Between 5 and 8 hours
+            )
+
+    if not future.done():
+        future.set_result(result)
+        future.done()
+
+
 def from_cache_or_db(prefix):
     def outer(func):
         sig = signature(func)
@@ -123,26 +148,26 @@ def from_cache_or_db(prefix):
             bound_inputs = sig.bind(*args, **kwargs)
             request = bound_inputs.arguments.pop("request")
             key = [*bound_inputs.args, *bound_inputs.kwargs.values()]
-            raw_key = prefix + str.join("|", map(str, key))
+            raw_key = str.join("|", map(str, key))
 
-            cache_key = blake2b(raw_key.encode(), digest_size=6).hexdigest()
+            cache_key = prefix + blake2b(raw_key.encode(), digest_size=6).hexdigest()
 
-            async with Redis(request, raw_key) as redis:
-                redis_result = await redis.get(cache_key)
+            loop = get_event_loop()
+            future = loop.create_future()
 
-                if redis_result is not None:
-                    result = loads(redis_result)
-                    return result
+            loop.create_task(
+                from_cache(request, future, cache_key, prefix + raw_key)
+            )
 
-                result: DataFrame = await func(request, *bound_inputs.args, **bound_inputs.kwargs)
-
-                await redis.set(
-                    key=cache_key,
-                    value=dumps(result),
-                    expire=randint(5 * 60, 8 * 60) * 60  # Between 5 and 8 hours
+            loop.create_task(
+                from_db(
+                    request, future, func, cache_key, prefix + raw_key,
+                    *bound_inputs.args, **bound_inputs.kwargs
                 )
+            )
 
-            return result
+            await future
+            return future.result()
 
         return inner
     return outer
