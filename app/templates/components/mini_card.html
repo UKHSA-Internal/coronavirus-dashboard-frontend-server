@@ -37,13 +37,12 @@
 						<div class="number-container">
 							<div class="float tooltip">
 								<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-									<a href="#"
-									   class="govuk-link--no-visited-state number-link number">
+									<span class="govuk-link--no-visited-state number-link number">
 										{{ main.value }}
 										<span class="tooltiptext govuk-!-font-size-16">
 											Daily number of {{ card.heading | lower }} reported on {{ main.date }}
 									</span>
-									</a>
+									</span>
 								</div>
 							</div>
 						</div>
@@ -71,7 +70,7 @@
 					<div class="number-container">
 						<div class="float tooltip">
 							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-								<span href="#" class="govuk-link--no-visited-state number-link-red" style="border: none">
+								<span class="govuk-link--no-visited-state number-link-red" style="border: none">
 									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1 change-box {{ colour }}">
 										{%- set change = ((card.metric + "Change") | get_data(data)) -%}
 										{%- set changePercentage = ((card.metric + "ChangePercentage") | get_data(data)) -%}
