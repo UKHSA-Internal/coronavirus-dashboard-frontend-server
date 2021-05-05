@@ -62,8 +62,8 @@
 			, {{ data.loc[data.areaType.isin(["utla", "ltla"])].sort_values("rank").areaName.values[0] }}
 		{%- endif -%}.
 	</p>
-	{%- include "components/vaccination.html" -%}
 	{%- include "components/r_number.html" -%}
+	{%- include "components/vaccinations.html" -%}
 	<div class="card-container">
 		{%- for card in cards -%}
 			{{ create_card(cards[card], True) }}
