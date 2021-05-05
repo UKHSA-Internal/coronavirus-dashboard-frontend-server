@@ -15,6 +15,7 @@ Contributors:  Pouria Hadjibagheri
 from typing import Any
 from logging import getLogger
 from os import getenv
+from asyncio import get_event_loop
 
 # 3rd party:
 from asyncpg import connect, Connection as BaseConnection
@@ -78,9 +79,14 @@ class Connection:
     _name = "postgresql"
     _account_name = DB_NAME
 
-    def __init__(self, conn_str=CONN_STR):
+    def __init__(self, loop=None, conn_str=CONN_STR):
         self.conn_str = conn_str
-        self._connection = connect(self.conn_str, statement_cache_size=0, timeout=20)
+        self._connection = connect(
+            self.conn_str,
+            statement_cache_size=0,
+            timeout=20,
+            loop=loop or get_event_loop()
+        )
 
     def __await__(self):
         yield from self._connection.__await__()
