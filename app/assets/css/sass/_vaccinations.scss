@@ -187,3 +187,20 @@
     background-color: #017168;
   }
 }
+
+
+.ext-link {
+  display: none;
+
+  @include govuk-media-query($from: 520px) {
+    display: block;
+  }
+}
+
+.mob-link {
+  display: block;
+
+  @include govuk-media-query($from: 520px) {
+    display: none;
+  }
+}
