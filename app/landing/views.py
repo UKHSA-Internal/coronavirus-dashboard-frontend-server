@@ -48,8 +48,12 @@ metrics = [
     'newAdmissionsRollingSum',
     'newAdmissionsDirection',
 
-    'cumPeopleVaccinatedFirstDoseByPublishDate',
-    'cumPeopleVaccinatedSecondDoseByPublishDate',
+    "newPeopleVaccinatedFirstDoseByPublishDate",
+    "newPeopleVaccinatedSecondDoseByPublishDate",
+    "cumPeopleVaccinatedFirstDoseByPublishDate",
+    "cumPeopleVaccinatedSecondDoseByPublishDate",
+    "cumVaccinationFirstDoseUptakeByPublishDatePercentage",
+    "cumVaccinationSecondDoseUptakeByPublishDatePercentage",
 
     'newDeaths28DaysByPublishDate',
     'newDeaths28DaysByPublishDateChange',
@@ -102,7 +106,7 @@ def is_improving(metric, value):
 
 
 async def get_home_page(request, timestamp: str, invalid_postcode=None) -> render_template:
-    response = from_cache_or_func(
+    response = await from_cache_or_func(
         request=request,
         func=get_landing_data,
         prefix="FRONTEND::LP::",
@@ -112,8 +116,7 @@ async def get_home_page(request, timestamp: str, invalid_postcode=None) -> rende
 
     context = {
         "timestamp": timestamp,
-        "date": timestamp.split("T")[0],
-        "data": await response,
+        "data": response,
         "base": request.url.hostname,
         "cards": DestinationMetrics,
         "is_improving": is_improving,
