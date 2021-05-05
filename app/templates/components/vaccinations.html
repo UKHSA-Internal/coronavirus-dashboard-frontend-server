@@ -24,8 +24,10 @@
 			</p>
 		</div>
 		<a class="govuk-link govuk-link--no-visited-state bottom-aligned govuk-!-margin-top-2 ext-link"
+       rel="next"
+		   style="text-decoration: none"
 		   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType=nation&areaName={{ firstDoseDaily.areaName }}{% endif %}">
-			All vaccination data
+			<b>All vaccination data</b>
 		</a>
 	</div>
 
