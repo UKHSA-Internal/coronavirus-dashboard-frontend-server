@@ -1,0 +1,168 @@
+{% set urlPath = "/details/vaccinations" %}
+{% set firstDoseCum = "cumPeopleVaccinatedFirstDoseByPublishDate" | get_data(data) %}
+{% set secondDoseCum = "cumPeopleVaccinatedSecondDoseByPublishDate" | get_data(data) %}
+{% set firstDoseDaily = "newPeopleVaccinatedFirstDoseByPublishDate" | get_data(data) %}
+{% set secondDoseDaily = "newPeopleVaccinatedSecondDoseByPublishDate" | get_data(data) %}
+{% set firstDosePer = "cumVaccinationFirstDoseUptakeByPublishDatePercentage" | get_data(data) %}
+{% set secondDosePer = "cumVaccinationSecondDoseUptakeByPublishDatePercentage" | get_data(data) %}
+
+<div class="vaccinations">
+	<div class="topic">
+		<div>
+			<span class="govuk-caption-m govuk-!-font-weight-regular">Vaccinations</span>
+		</div>
+		<div>
+			{% if postcode is undefined -%}
+				<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">People vaccinated</h3>
+			{% else %}
+				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
+					People vaccinated&nbsp;in {{ firstDoseDaily.areaName }}
+				</h4>
+			{%- endif %}
+			<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+				Up to and including&nbsp;<span style="white-space: nowrap">{{ firstDoseDaily.date }}</span>
+			</p>
+		</div>
+		<a class="govuk-link govuk-link--no-visited-state bottom-aligned"
+		   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType=nation&areaName={{ firstDoseDaily.areaName }}{% endif %}">
+			All vaccination data
+		</a>
+	</div>
+
+	<div class="first">
+		<div>
+			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
+				Daily&nbsp;&mdash;&nbsp;1st&nbsp;dose
+			</div>
+			<div class="number-group">
+				<div class="number-container govuk-!-padding-right-4">
+					<div class="float tooltip">
+						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+							<span href="#" class="govuk-link--no-visited-state number-link">
+							{{ firstDoseDaily.value }}
+							<span class="tooltiptext govuk-!-font-size-16">
+									Number of adults vaccinated (first dose) on {{ firstDoseDaily.date }}
+							</span></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div>
+			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
+				Total&nbsp;&mdash;&nbsp;1st&nbsp;dose
+			</div>
+			<div class="number-group">
+				<div class="number-container govuk-!-padding-right-4">
+					<div class="float tooltip">
+						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+							<span href="#" class="govuk-link--no-visited-state number-link">
+							{{ firstDoseCum.value }}
+							<span class="tooltiptext govuk-!-font-size-16">
+								Total number of adults vaccinated (first dose) up to and including {{ firstDoseCum.date }}
+							</span></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="second">
+		<div>
+			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
+				Daily&nbsp;&mdash;&nbsp;2nd&nbsp;dose
+			</div>
+			<div class="number-group">
+				<div class="number-container govuk-!-padding-right-4">
+					<div class="float tooltip">
+						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+							<span href="#" class="govuk-link--no-visited-state number-link">
+							{{ secondDoseDaily.value }}
+							<span class="tooltiptext govuk-!-font-size-16">
+								Number of adults vaccinated (second dose) on {{ secondDoseDaily.date }}
+							</span></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="">
+			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
+				Total&nbsp;&mdash;&nbsp;2nd&nbsp;dose
+			</div>
+			<div class="number-group">
+				<div class="number-container govuk-!-padding-right-4">
+					<div class="float tooltip">
+						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+							<span href="#" class="govuk-link--no-visited-state number-link">
+							{{ secondDoseCum.value }}
+							<span class="tooltiptext govuk-!-font-size-16">
+								Total number of adults vaccinated (second dose) up to and including {{ secondDoseCum.date }}
+							</span></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<figure class="visaulisation">
+		<div class="bottom-aligned govuk-!-margin-top-1 main-caption narrow">
+			Percentage of adult population
+		</div>
+		<figcaption>
+			<div class="bottom-aligned govuk-!-margin-top-1 main-caption">
+				Percentage of adult population
+			</div>
+
+			<div class="item">
+				<div class="number-group">
+					<div class="number-container">
+						<div class="float tooltip">
+							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+							<span href="#" class="govuk-link--no-visited-state number-link">
+							{{ firstDosePer.value }}%
+							<span class="tooltiptext govuk-!-font-size-16">
+								Percentage of adults vaccinated (first dose) up to and including {{ firstDosePer.date }}
+							</span></span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+					<span class="square lightgreen"></span>&nbsp;1st&nbsp;dose
+				</div>
+			</div>
+
+			<div class="item">
+				<div class="number-group">
+					<div class="number-container">
+						<div class="float tooltip">
+							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+							<span href="#" class="govuk-link--no-visited-state number-link">
+							{{ secondDosePer.value }}%
+							<span class="tooltiptext govuk-!-font-size-16">
+								Percentage of adults vaccinated (first dose) up to and including {{ secondDosePer.date }}
+							</span></span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+					<span class="square darkgreen"></span>&nbsp;2nd&nbsp;dose
+				</div>
+			</div>
+		</figcaption>
+		<div class="graph">
+			<img src="https://coronavirus.data.gov.uk/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"
+			     alt="Chart displaying the percentage of adult population vaccinated in {{ firstDoseDaily.areaName }}"/>
+		</div>
+
+	</figure>
+
+</div>
