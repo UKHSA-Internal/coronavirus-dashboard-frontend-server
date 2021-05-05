@@ -35,13 +35,12 @@
 						See the <a class="govuk-link govuk-link--no-visited-state"
 						           href="/easy_read" rel="next">simple summary</a> for the UK.
 					</p>
-					{% include "components/vaccination.html" %}
-					{# % include "components/r_number.html" % #}
 				</div>
 			</div>
 		</div>
 
 		<div class="card-container">
+			{% include "components/vaccinations.html" %}
 			{% for card in cards %}
 				{{ create_card(cards[card], False) }}
 			{% endfor %}
