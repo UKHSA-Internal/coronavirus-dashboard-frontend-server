@@ -63,7 +63,7 @@ async def get_whats_new_banners(request, timestamp):
         request=request,
         func=_get_whats_new_banners,
         prefix="FRONTEND::CL::",
-        expire=300,
+        expire=60 * 15,
         timestamp=timestamp
     )
 

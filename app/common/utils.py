@@ -90,7 +90,7 @@ async def get_release_timestamp(request):
         request=request,
         func=get_from_storage,
         prefix="FRONTEND::TS::",
-        expire=40,
+        expire=60 * 60,
         **Settings.latest_published_timestamp
     )
 
@@ -102,7 +102,7 @@ async def get_website_timestamp(request):
         request=request,
         func=get_from_storage,
         prefix="FRONTEND::TS::",
-        expire=40,
+        expire=60 * 60,
         **Settings.latest_published_timestamp
     )
 

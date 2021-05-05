@@ -84,7 +84,7 @@ async def get_banners(request, timestamp):
         request=request,
         func=_get_banners,
         prefix="FRONTEND::BN::",
-        expire=300,
+        expire=60 * 15,
         with_request=True,
         timestamp=timestamp
     )
