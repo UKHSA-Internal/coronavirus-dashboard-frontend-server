@@ -117,7 +117,6 @@ async def get_home_page(request, timestamp: str, invalid_postcode=None) -> rende
     context = {
         "timestamp": timestamp,
         "data": response,
-        "base": request.url.hostname,
         "cards": DestinationMetrics,
         "is_improving": is_improving,
         "invalid_postcode": invalid_postcode
