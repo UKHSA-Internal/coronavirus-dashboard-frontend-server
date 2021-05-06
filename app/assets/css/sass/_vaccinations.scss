@@ -42,7 +42,7 @@
   grid-template-rows: 1fr;
   grid-template-columns: repeat(2, 1fr);
   grid-gap: .5rem;
-  align-items: start;
+  align-items: end;
 
   @include govuk-media-query($from: 1100px) {
     grid-template-rows: repeat(2, 1fr);
@@ -58,7 +58,6 @@
   @include govuk-media-query($from: 1100px) {
     grid-column: 2;
     grid-row: 2 / -1;
-    align-items: end;
   }
 }
 
@@ -69,7 +68,6 @@
   @include govuk-media-query($from: 1100px) {
     grid-column: 3;
     grid-row: 2 / -1;
-    align-items: end;
   }
 }
 
@@ -111,7 +109,7 @@
 
   & > figcaption {
     display: grid;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: auto 1fr 1fr;
     justify-items: right;
     align-items: start;
     text-align: right !important;
@@ -146,6 +144,8 @@
       grid-column: 1;
       grid-auto-flow: row;
       justify-items: right;
+      justify-self: end;
+      align-self: end;
     }
   }
 
@@ -175,9 +175,9 @@
 
 .square {
   display: inline-block;
-  width: 15px !important;
-  height: 15px !important;
-  margin-bottom: -2px;
+  width: 12px !important;
+  height: 12px !important;
+  margin-bottom: -1px;
 
   &.lightgreen {
     background-color: #54B3AB;
