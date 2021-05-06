@@ -88,6 +88,7 @@ async def render_template(request, template_name: str, context: Optional[Dict[st
         context["despatch"] = await get_website_timestamp(request)
 
     context["date"] = context["despatch"].split("T")[0]
+    context["base"] = request.url.hostname
 
     return template.TemplateResponse(
         template_name,
