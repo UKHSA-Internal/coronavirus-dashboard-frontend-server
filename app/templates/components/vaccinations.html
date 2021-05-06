@@ -161,8 +161,13 @@
 			</div>
 		</figcaption>
 		<div class="graph">
-			<img src="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"
-			     alt="Chart displaying the percentage of adult population vaccinated in {{ firstDoseDaily.areaName }}"/>
+			<a href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType=nation&areaName={{ firstDoseDaily.areaName }}{% endif %}"
+				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
+				   style="text-decoration: none;"
+				   rel="next">
+				<img src="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"
+				     alt="Chart displaying the percentage of adult population vaccinated in {{ firstDoseDaily.areaName }}"/>
+			</a>
 		</div>
 
 	</figure>
