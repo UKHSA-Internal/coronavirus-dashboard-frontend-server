@@ -25,7 +25,7 @@
 		</div>
 		<a class="govuk-link govuk-link--no-visited-state bottom-aligned govuk-!-margin-top-2 ext-link"
        rel="next"
-		   style="text-decoration: none"
+		   style="text-decoration: none; justify-self: start"
 		   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType=nation&areaName={{ firstDoseDaily.areaName }}{% endif %}">
 			<b>All vaccination data</b>
 		</a>
@@ -163,7 +163,7 @@
 		<div class="graph">
 			<a href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType=nation&areaName={{ firstDoseDaily.areaName }}{% endif %}"
 				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
-				   style="text-decoration: none;"
+				   style="text-decoration: none"
 				   rel="next">
 				<img src="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"
 				     alt="Chart displaying the percentage of adult population vaccinated in {{ firstDoseDaily.areaName }}"/>
