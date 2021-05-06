@@ -167,6 +167,7 @@ def from_cache_or_db(prefix):
             )
 
             await future
+            future.cancel()
             return future.result()
 
         return inner

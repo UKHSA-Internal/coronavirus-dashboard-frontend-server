@@ -18,5 +18,5 @@ class ServerUvicornWorker(UvicornWorker):
         "proxy_headers": True,
         "access_log": True,
         "reload": False,
-        "backlog": 8,
+        "backlog": 4,
     }

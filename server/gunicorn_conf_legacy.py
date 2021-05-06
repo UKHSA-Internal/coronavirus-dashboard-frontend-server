@@ -53,25 +53,25 @@ accesslog_var = getenv("ACCESS_LOG", "-")
 use_accesslog = accesslog_var or None
 errorlog_var = getenv("ERROR_LOG", "-")
 use_errorlog = errorlog_var or None
-graceful_timeout_str = getenv("GRACEFUL_TIMEOUT", "30")
-timeout_str = getenv("TIMEOUT", "120")
+graceful_timeout_str = getenv("GRACEFUL_TIMEOUT", "15")
+timeout_str = getenv("TIMEOUT", "60")
 keepalive_str = getenv("KEEP_ALIVE", "5")
 
 # Gunicorn config variables
 loglevel = 'INFO'
-workers = 1
+workers = 8
 threads = 2
 host = "0.0.0.0"
 port = "5200"
-max_requests = 10
+max_requests = 50
 bind = "0.0.0.0:5100"
 # bind = "unix:///opt/server.sock"
 errorlog = use_errorlog
 worker_tmp_dir = "/dev/shm"
 accesslog = use_accesslog
-graceful_timeout = 20
-timeout = 30
-keepalive = 20
+graceful_timeout = 10
+timeout = 45
+keepalive = 10
 proxy_protocol = True
 secure_scheme_headers = {
     'X-FORWARDED-PROTO': 'https'
