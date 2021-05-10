@@ -15,6 +15,7 @@ Contributors:  Pouria Hadjibagheri
 from datetime import datetime
 from os.path import abspath, split as split_path, join as join_path
 from random import randint
+from asyncio import get_running_loop, Lock
 
 # 3rd party:
 from pandas import DataFrame
@@ -81,7 +82,9 @@ async def get_landing_data(timestamp):
     ts = datetime.fromisoformat(timestamp.replace("5Z", ""))
     query = overview_data_query.format(partition=f"{ts:%Y_%-m_%-d}_other")
 
-    async with Connection() as conn:
+    loop = get_running_loop()
+
+    async with Connection() as conn, Lock(loop=loop):
         values = await conn.fetch(query, ts, metrics)
 
     df = DataFrame(

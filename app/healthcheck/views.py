@@ -5,7 +5,7 @@
 # Python:
 from typing import Union
 from http import HTTPStatus
-from asyncio import gather
+from asyncio import gather, get_running_loop, Lock
 
 # 3rd party:
 from starlette.requests import Request
@@ -45,7 +45,10 @@ async def test_redis(request):
 
 
 async def run_healthcheck(request: Request) -> Union[JSONResponse, Response]:
-    response = await gather(test_db(), test_storage(), test_redis(request))
+    loop = get_running_loop()
+
+    async with Lock(loop=loop):
+        response = await gather(test_db(), test_storage(), test_redis(request))
 
     if request.method == 'GET':
         return JSONResponse(response, status_code=HTTPStatus.OK.real)
