@@ -44,7 +44,7 @@ use_bind = getenv("BIND", f"{host}:{port}")
 
 cores = cpu_count()
 workers_per_core = float(workers_per_core_str)
-default_web_concurrency = workers_per_core * cores
+default_web_concurrency = workers_per_core * cores + 1
 
 web_concurrency = max(int(default_web_concurrency), 2)
 
