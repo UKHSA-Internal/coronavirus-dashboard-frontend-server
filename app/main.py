@@ -56,12 +56,8 @@ routes = [
 logging_instances = [
     [logging.getLogger("app"), logging.INFO],
     [logging.getLogger('uvicorn'), logging.INFO],
-    [logging.getLogger('uvicorn.access'), logging.INFO],
-    [logging.getLogger('uvicorn.error'), logging.WARNING],
     [logging.getLogger('azure'), logging.WARNING],
     [logging.getLogger('gunicorn'), logging.INFO],
-    [logging.getLogger('gunicorn.access'), logging.INFO],
-    [logging.getLogger('gunicorn.error'), logging.WARNING],
     [logging.getLogger('asyncpg'), logging.WARNING],
 ]
 
@@ -101,7 +97,6 @@ async def lifespan(application: Starlette):
     pool.close()
     await pool.wait_closed()
     handler.flush()
-    handler.close()
 
 
 app = Starlette(
