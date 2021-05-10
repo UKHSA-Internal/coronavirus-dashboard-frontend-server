@@ -67,37 +67,40 @@ class TraceRequestMiddleware(BaseHTTPMiddleware):
 
         try:
             # tracer.span_context.trace_options.set_enabled(True)
-            with tracer.span(f"[{request.method}] {request.url.path}") as span:
-                span.span_kind = SpanKind.SERVER
-                # if "traceparent" not in request.headers:
-                #     trace_ctx = span.context_tracer
-                #     trace_options = tracer.span_context.trace_options.trace_options_byte
-                #     trace_id = trace_ctx.trace_id
-                #     trace_parent = f"00-{trace_id}-{span.span_id}-0{trace_options}"
-                # else:
-                #     trace_parent = request.headers['traceparent']
+            span = tracer.start_span()
+            span.name = f"[{request.method}] {request.url.path}"
+            span.span_kind = SpanKind.SERVER
+            # if "traceparent" not in request.headers:
+            #     trace_ctx = span.context_tracer
+            #     trace_options = tracer.span_context.trace_options.trace_options_byte
+            #     trace_id = trace_ctx.trace_id
+            #     trace_parent = f"00-{trace_id}-{span.span_id}-0{trace_options}"
+            # else:
+            #     trace_parent = request.headers['traceparent']
 
-                span.add_attribute(HTTP_URL, str(request.url))
-                span.add_attribute(HTTP_HOST, request.url.hostname)
-                span.add_attribute(HTTP_METHOD, request.method)
-                span.add_attribute(HTTP_PATH, request.url.path)
-                if not len(request.query_params):
-                    span.add_attribute(HTTP_ROUTE, request.url.path)
-                else:
-                    span.add_attribute(HTTP_ROUTE, f"{request.url.path}?{request.url.query}")
+            span.add_attribute(HTTP_URL, str(request.url))
+            span.add_attribute(HTTP_HOST, request.url.hostname)
+            span.add_attribute(HTTP_METHOD, request.method)
+            span.add_attribute(HTTP_PATH, request.url.path)
+            if not len(request.query_params):
+                span.add_attribute(HTTP_ROUTE, request.url.path)
+            else:
+                span.add_attribute(HTTP_ROUTE, f"{request.url.path}?{request.url.query}")
 
-                span.add_attribute("x_forwarded_host", request.headers.get("x_forwarded_host"))
+            span.add_attribute("x_forwarded_host", request.headers.get("x_forwarded_host"))
 
-                for key, value in self.extra_attrs.items():
-                    span.add_attribute(key, value)
+            for key, value in self.extra_attrs.items():
+                span.add_attribute(key, value)
 
-                try:
-                    response = await call_next(request)
-                    span.add_attribute(HTTP_STATUS_CODE, response.status_code)
-                    return response
-                except Exception as err:
-                    span.add_attribute(HTTP_STATUS_CODE, "500")
-                    raise err
+            try:
+                response = await call_next(request)
+                span.add_attribute(HTTP_STATUS_CODE, response.status_code)
+                return response
+            except Exception as err:
+                span.add_attribute(HTTP_STATUS_CODE, "500")
+                raise err
+            finally:
+                tracer.end_span()
 
         except Exception as err:
             logger.error(err, exc_info=True)
