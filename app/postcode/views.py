@@ -9,7 +9,7 @@ from os.path import abspath, split as split_path, join as join_path
 from operator import itemgetter
 from json import load
 from typing import Union
-from asyncio import gather
+from asyncio import gather, get_running_loop, Lock
 import ssl
 
 # 3rd party:
@@ -113,7 +113,8 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
         "msoa": "msoa",
     }
 
-    async with Connection() as conn:
+    loop = get_running_loop()
+    async with Connection(loop=loop) as conn, Lock():
         area_codes = await conn.fetch(locations_query, postcode)
 
     if not len(area_codes):
@@ -132,7 +133,9 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
 
         tasks.append(task)
 
-    data = await gather(*tasks)
+    async with Lock(loop=loop):
+        data = await gather(*tasks, loop=loop)
+
     result = concat(data).reset_index(drop=True)
     result["rank"] = result.groupby("metric")[["priority", "date"]].rank(ascending=True)
     filters = (
