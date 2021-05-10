@@ -6,6 +6,7 @@
 import re
 from json import loads
 from datetime import datetime
+from asyncio import get_running_loop, Lock
 
 # 3rd party:
 
@@ -30,7 +31,9 @@ to_underscore_pattern = re.compile(r"[\s.(&,]+")
 
 
 async def _get_whats_new_banners(timestamp: str):
-    async with AsyncStorageClient(**BANNER_DATA) as client:
+    loop = get_running_loop()
+
+    async with AsyncStorageClient(**BANNER_DATA) as client, Lock(loop=loop):
         data_io = await client.download()
         raw_data = await data_io.readall()
 
