@@ -12,15 +12,13 @@ Contributors:  Pouria Hadjibagheri
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-from os import getenv
 from datetime import datetime
 from operator import itemgetter
-from typing import Dict
+from asyncio import get_running_loop, Lock
 
 # 3rd party:
 
 # Internal:
-from .visualisation import plot_thumbnail
 from .data.variables import DestinationMetrics
 from app.storage import AsyncStorageClient
 from app.config import Settings
@@ -32,7 +30,6 @@ get_value = itemgetter("value")
 get_area_type = itemgetter("areaType")
 
 
-# @cache_client.memoize(60 * 60 * 12)
 def get_og_image_names(latest_timestamp: str) -> list:
     ts_python_iso = latest_timestamp[:-2]
     ts = datetime.fromisoformat(ts_python_iso)
@@ -78,7 +75,9 @@ def add_cloud_role_name(envelope):
 
 
 async def get_from_storage(*args, **kwargs):
-    async with AsyncStorageClient(*args, **kwargs) as client:
+    loop = get_running_loop()
+
+    async with AsyncStorageClient(*args, **kwargs) as client, Lock(loop=loop):
         data_io = await client.download()
         data_bytes = await data_io.readall()
 
