@@ -5,6 +5,7 @@
 # Python:
 from json import loads
 from datetime import datetime
+from asyncio import Lock, get_running_loop
 
 # 3rd party:
 from markdown import markdown
@@ -54,7 +55,9 @@ def filter_fn(request, timestamp):
 
 
 async def _get_banners(request, timestamp: str):
-    async with AsyncStorageClient(**BANNER_DATA) as client:
+    loop = get_running_loop()
+
+    async with AsyncStorageClient(**BANNER_DATA) as client, Lock(loop=loop):
         data_io = await client.download()
         raw_data = await data_io.readall()
 
