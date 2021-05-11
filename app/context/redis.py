@@ -31,23 +31,15 @@ ssl_context.load_default_certs()
 ssl_context.load_verify_locations(certifi.where())
 
 
-# conn = create_redis_pool(
-#     **Settings.redis,
-#     minsize=10,
-#     loop=get_event_loop(),
-#     ssl=ssl_context,
-# )
-
-
 async def instantiate_redis_pool():
     if (pool := get_redis_pool()) is not None:
         return pool
 
     conn = await create_redis_pool(
         **Settings.redis,
-        minsize=5,
+        minsize=10,
         loop=get_event_loop(),
-        ssl=ssl_context,
+        ssl=ssl_context if Settings.DEBUG else None,  # Prod goes via VNet
     )
 
     return conn
