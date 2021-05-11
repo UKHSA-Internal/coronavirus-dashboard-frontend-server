@@ -45,7 +45,7 @@ async def instantiate_redis_pool():
 
     conn = await create_redis_pool(
         **Settings.redis,
-        minsize=15,
+        minsize=5,
         loop=get_event_loop(),
         ssl=ssl_context,
     )
