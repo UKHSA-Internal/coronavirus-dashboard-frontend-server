@@ -11,13 +11,29 @@
 		<meta name="twitter:description" content="Daily summary | Coronavirus in the UK">
 		<meta name="twitter:title" content="Official UK Coronavirus Dashboard">
 		<meta property="og:url" content="https://coronavirus.data.gov.uk">
+		<link rel="shortcut icon" href="/assets/icon/favicon.ico">
 		{%- for path in og_images -%}
 			{%- if "summary" in path -%}
 				<meta name="twitter:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
 				<meta property="og:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
 			{%- endif -%}
 				<meta property="og:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
-			{%- endfor -%}
+		{%- endfor -%}
+		<script type="application/ld+json">
+	    {
+	      "@context": "https://schema.org",
+	      "@type": "WebSite",
+          "name": "UK Coronavirus Dashboard",
+	      "url": "https://coronavirus.data.gov.uk/",
+		    "logo": "https://coronavirus.data.gov.uk/assets/icon/favicon.png",
+	      "potentialAction": {
+	        "@type": "SearchAction",
+            "name": "Search postcode",
+	        "target": "https://coronavirus.data.gov.uk/search?postcode={postcode}",
+	        "query-input": "required maxlength=10 name=postcode"
+	      }
+	    }
+    </script>
 {% endblock %}
 
 {%- block main -%}
