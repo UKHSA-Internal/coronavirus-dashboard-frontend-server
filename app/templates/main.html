@@ -5,7 +5,6 @@
 {%- block page_title -%}Daily update{% endblock %}
 
 {% block head %}
-{#	{% cache 43200, 'head-home', timestamp, "main-summary" -%}#}
 		<title>Daily summary | Coronavirus in the UK</title>
 		<meta property="og:title" content="Official UK Coronavirus Dashboard">
 		<meta property="og:description" content="Daily summary | Coronavirus in the UK">
@@ -19,11 +18,9 @@
 			{%- endif -%}
 				<meta property="og:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
 			{%- endfor -%}
-{#		{% endcache -%}#}
 {% endblock %}
 
 {%- block main -%}
-{#	{% cache 43200, 'main-body', timestamp, "uk-summary" -%}#}
 		<div>
 			<div class="govuk-grid-row">
 				<div class="govuk-grid-column-full ">
@@ -45,7 +42,6 @@
 				{{ create_card(cards[card], False) }}
 			{% endfor %}
 		</div>
-{#	{% endcache %}#}
 {%- endblock -%}
 
 {% block lower_section %}
