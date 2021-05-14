@@ -107,8 +107,7 @@
 		{%- if not is_postcode -%}
 			<a href="/details/{{ card.caption | lower }}"
 				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
-				   style="text-decoration: none;"
-				   rel="next">
+				   style="text-decoration: none;">
 				<figure class="graph mini-card-figure">
 					<img src="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg" alt="Graph - click for more details">
 				</figure>
@@ -119,8 +118,7 @@
 				<p class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 govuk-!-font-size-16">
 				<a href="/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"
 				   class="govuk-link govuk-link--no-visited-state"
-				   style="text-decoration: none"
-				   rel="next"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ main.areaName }}{% endif %}</b></a>
+				   style="text-decoration: none"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ main.areaName }}{% endif %}</b></a>
 				</p>
 		</div>
 	</div>

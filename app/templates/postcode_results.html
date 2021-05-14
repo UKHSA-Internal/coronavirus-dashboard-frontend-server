@@ -56,7 +56,7 @@
 
 	<p class="govuk-body-m govuk-!-margin-bottom-3">
 		See the <a class="govuk-link govuk-link--no-visited-state"
-		           href="/easy_read?postcode={{ postcode }}" rel="next">simple summary</a> for
+		           href="/easy_read?postcode={{ postcode }}">simple summary</a> for
 		{{ area_data.areaName }}
 		{%- if area_data.areaType == "msoa" -%}
 			, {{ data.loc[data.areaType.isin(["utla", "ltla"])].sort_values("rank").areaName.values[0] }}
