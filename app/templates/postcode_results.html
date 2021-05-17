@@ -3,9 +3,13 @@
 {%- from "components/default_tail.html" import tail_banners with context -%}
 {%- set postcode = area_data.postcode -%}
 {%- block head -%}
-	<title>Daily summary | {{ area_data.areaName }}</title>
-	<meta property="og:description" content="Daily summary | {{ area_data.areaName }}">
-	<meta name="twitter:description" content="Daily summary | {{ area_data.areaName }}">
+	<title itemprop="name">{{ area_data.areaName }} | Daily summary</title>
+	<meta property="og:title" content="{{ area_data.areaName }} | Daily summary">
+	<meta name="twitter:title" content="{{ area_data.areaName }} | Daily summary">
+	<meta name="twitter:title" content="{{ area_data.areaName }} | Daily summary">
+	<meta name="description" content="Daily summary of COVID-19 disease situation in {{ area_data.areaName }}.">
+	<meta property="og:description" content="Daily summary of COVID-19 disease situation in {{ area_data.areaName }}.">
+	<meta name="twitter:description" content="Daily summary of COVID-19 disease situation in {{ area_data.areaName }}.">
 	<meta property="og:url" content="https://coronavirus.data.gov.uk/search?postcode={{ postcode }}">
 	<meta name="twitter:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">
 	<meta property="og:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">

@@ -221,3 +221,10 @@ def format_date(date: datetime) -> str:
 def subtract_days(date: datetime, days: int) -> datetime:
     return date - timedelta(days=days)
 
+
+@as_template_filter
+def add_days(date: Union[datetime, str], days: int) -> datetime:
+    if isinstance(date, datetime):
+        return date + timedelta(days=days)
+
+    return datetime.fromisoformat(date.removesuffix("5Z")) + timedelta(days=1)

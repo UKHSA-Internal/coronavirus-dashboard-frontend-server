@@ -12,8 +12,18 @@
 		{% set image = "images/arrow-up-red.png" %}
 		{% set colour = 'bad' %}
 	{%- endif -%}
-	<div class="mini-card">
+{#	<span itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea">#}
+{#			<meta name="name" content="{{ main.areaName | trim_area_name }}"/>#}
+{#			<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/{{ main.areaName }}" />#}
+{#	</span>#}
+	<div class="mini-card" itemtype="https://schema.org/WebContent" itemprop="WebContent" itemscope>
 		<div>
+			<span itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea" itemscope>
+				<meta itemprop="name" content="{{ main.areaName | trim_area_name }}"/>
+				<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/{{ main.areaName }}" />
+			</span>
+			<meta itemprop="datePosted" content="{{ despatch }}"/>
+			<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
 			<span class="govuk-caption-m govuk-!-font-weight-regular">{{ card.caption }}</span>
 			{%- if is_postcode -%}
 				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
@@ -29,9 +39,18 @@
 			Latest data {% if is_postcode -%}at <strong>{{ main.areaType | to_full_area_type | lower }}</strong> level{%- endif %}
 			provided on&nbsp;<span style="white-space: nowrap">{{ main.date }}</span>
 		</p>
+
 		<div class="govuk-grid-row bottom-aligned">
 			<div class="govuk-grid-column-full">
-				<div class="data-metric2">
+				<div class="data-metric2" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+					<meta itemprop="name" content="{{ card.heading }} - daily"/>
+					<meta itemprop="observationDate" content="{{ main.rawDate }}"/>
+					<span itemprop="measuredValue">
+						<span itemtype="https://schema.org/Number" itemprop="Number">
+							<meta itemprop="QuantitativeValue" content="{{ main.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+						</span>
+					</span>
+
 					<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">Daily</div>
 					<div class="number-group">
 						<div class="number-container">
@@ -39,16 +58,29 @@
 								<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 									<span class="govuk-link--no-visited-state number-link number">
 										{{ main.value }}
-										<span class="tooltiptext govuk-!-font-size-16">
-											Daily number of {{ card.heading | lower }} reported on {{ main.date }}
-									</span>
+										<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+											Daily number of {{ card.heading | lower }} reported on {{ main.data }}
+										</span>
 									</span>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div class="data-metric2">
+
+				{%- set rollingSum = (card.metric + "RollingSum") | get_data(data) -%}
+				<div class="data-metric2" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+					<meta itemprop="name" content="{{ card.heading }} - sum of the last 7 days"/>
+					<span itemprop="observationDate">
+						<meta itemtype="https://schema.org/DateTime" itemprop="startDate" content="{{ rollingSum.rawDate | subtract_days(7) }}"/>
+						<meta itemtype="https://schema.org/DateTime" itemprop="endDate" content="{{ rollingSum.rawDate }}"/>
+					</span>
+					<span itemprop="measuredValue">
+						<span itemtype="https://schema.org/Number" itemprop="Number">
+							<meta itemprop="QuantitativeValue" content="{{ rollingSum.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+						</span>
+					</span>
+
 					<div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0" style="width:80%;">
 						Last 7 days
 					</div>
@@ -56,24 +88,36 @@
 						<div class="number-container govuk-!-padding-right-4">
 							<div class="float tooltip">
 								<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-									{%- set rollingSum = (card.metric + "RollingSum") | get_data(data) -%}
 									<span href="#" class="govuk-link--no-visited-state number-link">
 										{{ rollingSum.value }}
-										<span class="tooltiptext govuk-!-font-size-16">
+										<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
 											Total number of {{ card.heading | lower }} reported in the last 7 days
 											({{ rollingSum.rawDate | subtract_days(6) | format_date }} &ndash; {{ rollingSum.date }})
-										</span></span>
+										</span>
+									</span>
 								</div>
 							</div>
 						</div>
 					</div>
-					<div class="number-container">
+
+					{%- set change = ((card.metric + "Change") | get_data(data)) -%}
+					{%- set changePercentage = ((card.metric + "ChangePercentage") | get_data(data)) -%}
+					<div class="number-container" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+						<meta itemprop="name" content="{{ card.heading }} - change in the last 7 days"/>
+						<span itemprop="observationDate">
+							<meta itemtype="https://schema.org/DateTime" itemprop="startDate" content="{{ change.rawDate | subtract_days(14) }}"/>
+							<meta itemtype="https://schema.org/DateTime" itemprop="endDate" content="{{ change.rawDate }}"/>
+						</span>
+						<span itemprop="measuredValue">
+							<span itemtype="https://schema.org/Number" itemprop="Number">
+								<meta itemprop="QuantitativeValue" content="{{ change.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+							</span>
+						</span>
+
 						<div class="float tooltip">
 							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 								<span class="govuk-link--no-visited-state number-link-red" style="border: none">
 									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1 change-box {{ colour }}">
-										{%- set change = ((card.metric + "Change") | get_data(data)) -%}
-										{%- set changePercentage = ((card.metric + "ChangePercentage") | get_data(data)) -%}
 										{%- if changePercentage.value != 0 -%}
 											<img src="{{ url_for("static", path=image) }}"
 											     width="12px"
@@ -85,7 +129,7 @@
 											<span>No change</span>
 										{%- endif -%}
 									</strong>
-									<span class="tooltiptext govuk-!-font-size-16">
+									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
 										Change from previous 7 days
 										({{ change.rawDate | subtract_days(13) | format_date }} &ndash; {{ change.rawDate | subtract_days(7) | format_date }})
 									</span>
@@ -97,6 +141,7 @@
 				</div>
 			</div>
 		</div>
+
 		{%- if card.caption.lower() == "cases" -%}
 			{{ details(card.rate | get_data(data), "by date of specimen as of") }}
 		{%- elif card.caption.lower() == "deaths" and not is_postcode -%}
@@ -106,10 +151,11 @@
 		{%- endif -%}
 		{%- if not is_postcode -%}
 			<a href="/details/{{ card.caption | lower }}"
+           itemprop="thumbnailUrl"
 				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
 				   style="text-decoration: none;">
 				<figure class="graph mini-card-figure">
-					<img src="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg" alt="Graph - click for more details">
+					<img itemprop="image" src="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg" alt="Graph - click for more details">
 				</figure>
 			</a>
 		{% endif %}

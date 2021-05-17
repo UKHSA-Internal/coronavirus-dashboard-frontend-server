@@ -5,9 +5,18 @@
 {% set secondDoseDaily = "newPeopleVaccinatedSecondDoseByPublishDate" | get_data(data) %}
 {% set firstDosePer = "cumVaccinationFirstDoseUptakeByPublishDatePercentage" | get_data(data) %}
 {% set secondDosePer = "cumVaccinationSecondDoseUptakeByPublishDatePercentage" | get_data(data) %}
-
-<div class="vaccinations">
-	<div class="topic">
+{#<span itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea">#}
+{#	<meta name="name" content="{{ firstDoseDaily.areaName }}"/>#}
+{#	<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/{{ firstDoseDaily.areaName }}" />#}
+{#</span>#}
+<div class="vaccinations" itemtype="https://schema.org/WebContent" itemprop="WebContent" itemscope>
+	<span itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea" itemscope>
+		<meta itemprop="name" content="{{ firstDoseDaily.areaName }}"/>
+		<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/{{ firstDoseDaily.areaName }}" />
+	</span>
+	<meta itemprop="datePosted" content="{{ despatch }}"/>
+	<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
+	<div>
 		<div>
 			<span class="govuk-caption-m govuk-!-font-weight-regular">Vaccinations</span>
 		</div>
@@ -32,7 +41,15 @@
 	</div>
 
 	<div class="first">
-		<div>
+		<div itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+			<meta itemprop="name" content="Daily vaccinations - 1st dose"/>
+			<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ firstDoseDaily.rawDate }}"/>
+			<span itemprop="measuredValue">
+				<span itemtype="https://schema.org/Number" itemprop="Number">
+					<meta itemprop="QuantitativeValue" content="{{ firstDoseDaily.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+				</span>
+			</span>
+
 			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
 				Daily&nbsp;&mdash;&nbsp;1st&nbsp;dose
 			</div>
@@ -41,17 +58,26 @@
 					<div class="float tooltip">
 						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 							<span href="#" class="govuk-link--no-visited-state number-link">
-							{{ firstDoseDaily.value }}
-							<span class="tooltiptext govuk-!-font-size-16">
+								{{ firstDoseDaily.value }}
+								<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
 									Number of adults vaccinated (first dose) on {{ firstDoseDaily.date }}
-							</span></span>
+								</span>
+							</span>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<div>
+		<div itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+			<meta itemprop="name" content="Total vaccinations - 1st dose"/>
+			<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ firstDoseCum.rawDate }}"/>
+			<span itemprop="measuredValue">
+				<span itemtype="https://schema.org/Number" itemprop="Number">
+					<meta itemprop="QuantitativeValue" content="{{ firstDoseCum.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+				</span>
+			</span>
+
 			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
 				Total&nbsp;&mdash;&nbsp;1st&nbsp;dose
 			</div>
@@ -61,7 +87,7 @@
 						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 							<span href="#" class="govuk-link--no-visited-state number-link">
 							{{ firstDoseCum.value }}
-							<span class="tooltiptext govuk-!-font-size-16">
+							<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
 								Total number of adults vaccinated (first dose) up to and including {{ firstDoseCum.date }}
 							</span></span>
 						</div>
@@ -73,7 +99,15 @@
 	</div>
 
 	<div class="second">
-		<div>
+		<div itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+			<meta itemprop="name" content="Daily vaccinations - 2nd dose"/>
+			<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ secondDoseDaily.rawDate }}"/>
+			<span itemprop="measuredValue">
+				<span itemtype="https://schema.org/Number" itemprop="Number">
+					<meta itemprop="QuantitativeValue" content="{{ secondDoseDaily.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+				</span>
+			</span>
+
 			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
 				Daily&nbsp;&mdash;&nbsp;2nd&nbsp;dose
 			</div>
@@ -82,17 +116,26 @@
 					<div class="float tooltip">
 						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 							<span href="#" class="govuk-link--no-visited-state number-link">
-							{{ secondDoseDaily.value }}
-							<span class="tooltiptext govuk-!-font-size-16">
-								Number of adults vaccinated (second dose) on {{ secondDoseDaily.date }}
-							</span></span>
+								{{ secondDoseDaily.value }}
+								<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+									Number of adults vaccinated (second dose) on {{ secondDoseDaily.date }}
+								</span>
+							</span>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<div class="">
+		<div itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+			<meta itemprop="name" content="Total vaccinations - 2nd dose"/>
+			<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ secondDoseCum.rawDate }}"/>
+			<span itemprop="measuredValue">
+				<span itemtype="https://schema.org/Number" itemprop="Number">
+					<meta itemprop="QuantitativeValue" content="{{ secondDoseCum.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+				</span>
+			</span>
+
 			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
 				Total&nbsp;&mdash;&nbsp;2nd&nbsp;dose
 			</div>
@@ -101,10 +144,11 @@
 					<div class="float tooltip">
 						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 							<span href="#" class="govuk-link--no-visited-state number-link">
-							{{ secondDoseCum.value }}
-							<span class="tooltiptext govuk-!-font-size-16">
-								Total number of adults vaccinated (second dose) up to and including {{ secondDoseCum.date }}
-							</span></span>
+								{{ secondDoseCum.value }}
+								<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+									Total number of adults vaccinated (second dose) up to and including {{ secondDoseCum.date }}
+								</span>
+							</span>
 						</div>
 					</div>
 				</div>
@@ -122,16 +166,24 @@
 				Percentage of adult population
 			</div>
 
-			<div class="item">
+			<div class="item" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+				<meta itemprop="name" content="Percentage of adults vaccinated - first dose"/>
+				<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ firstDosePer.rawDate }}"/>
+				<span itemprop="measuredValue">
+					<span itemtype="https://schema.org/Number" itemprop="Number">
+						<meta itemprop="QuantitativeValue" content="{{ firstDosePer.raw }}%" itemtype="https://schema.org/QuantitativeValue"/>
+					</span>
+				</span>
 				<div class="number-group">
 					<div class="number-container">
 						<div class="float tooltip">
 							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-							<span href="#" class="govuk-link--no-visited-state number-link">
-							{{ firstDosePer.value }}%
-							<span class="tooltiptext govuk-!-font-size-16">
-								Percentage of adults vaccinated (first dose) up to and including {{ firstDosePer.date }}
-							</span></span>
+								<span href="#" class="govuk-link--no-visited-state number-link">
+									{{ firstDosePer.value }}%
+									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+										Percentage of adults vaccinated (first dose) up to and including {{ firstDosePer.date }}
+									</span>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -141,16 +193,24 @@
 				</div>
 			</div>
 
-			<div class="item">
+			<div class="item" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+				<meta itemprop="name" content="Percentage of adults vaccinated - second dose"/>
+				<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ secondDosePer.rawDate }}"/>
+				<span itemprop="measuredValue">
+					<span itemtype="https://schema.org/Number" itemprop="Number">
+						<meta itemprop="QuantitativeValue" content="{{ secondDosePer.raw }}%" itemtype="https://schema.org/QuantitativeValue"/>
+					</span>
+				</span>
 				<div class="number-group">
 					<div class="number-container">
 						<div class="float tooltip">
 							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-							<span href="#" class="govuk-link--no-visited-state number-link">
-							{{ secondDosePer.value }}%
-							<span class="tooltiptext govuk-!-font-size-16">
-								Percentage of adults vaccinated (second dose) up to and including {{ secondDosePer.date }}
-							</span></span>
+								<span href="#" class="govuk-link--no-visited-state number-link">
+									{{ secondDosePer.value }}%
+									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+										Percentage of adults vaccinated (second dose) up to and including {{ secondDosePer.date }}
+									</span>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -174,9 +234,10 @@
 
 	<div class="mob-link additional-info">
 		<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>
-		<p class="bottom-aligned govuk-!-margin-top-2 govuk-!-font-size-16 govuk-!-margin-bottom-0">
+		<p class="bottom-aligned govuk-!-margin-top-2 govuk-!-font-size-16 govuk-!-margin-bottom-0" itemtype="https://schema.org/URL" itemprop="url" scope>
 			<a class="govuk-link govuk-link--no-visited-state"
 			   style="text-decoration: none"
+			   itemprop="url"
 			   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType=nation&areaName={{ firstDoseDaily.areaName }}{% endif %}">
 				<b>All vaccination data</b>
 			</a>
