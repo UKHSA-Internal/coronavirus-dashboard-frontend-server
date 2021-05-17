@@ -12,10 +12,7 @@
 		{% set image = "images/arrow-up-red.png" %}
 		{% set colour = 'bad' %}
 	{%- endif -%}
-{#	<span itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea">#}
-{#			<meta name="name" content="{{ main.areaName | trim_area_name }}"/>#}
-{#			<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/{{ main.areaName }}" />#}
-{#	</span>#}
+
 	<div class="mini-card" itemtype="https://schema.org/WebContent" itemprop="WebContent" itemscope>
 		<div>
 			<span itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea" itemscope>
@@ -24,7 +21,7 @@
 			</span>
 			<meta itemprop="datePosted" content="{{ despatch }}"/>
 			<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
-			<span class="govuk-caption-m govuk-!-font-weight-regular">{{ card.caption }}</span>
+			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">{{ card.caption }}</span>
 			{%- if is_postcode -%}
 				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
 					{{ card.heading }} in {{ main.areaName | trim_area_name }}

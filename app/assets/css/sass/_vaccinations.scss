@@ -57,7 +57,7 @@
 
   @include govuk-media-query($from: 1100px) {
     grid-column: 2;
-    grid-row: 1 / -1;
+    grid-row: 1 / -1 !important;
   }
 }
 
@@ -67,7 +67,7 @@
 
   @include govuk-media-query($from: 1100px) {
     grid-column: 3;
-    grid-row: 1 / -1;
+    grid-row: 1 / -1 !important;
   }
 }
 

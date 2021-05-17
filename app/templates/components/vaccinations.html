@@ -5,12 +5,9 @@
 {% set secondDoseDaily = "newPeopleVaccinatedSecondDoseByPublishDate" | get_data(data) %}
 {% set firstDosePer = "cumVaccinationFirstDoseUptakeByPublishDatePercentage" | get_data(data) %}
 {% set secondDosePer = "cumVaccinationSecondDoseUptakeByPublishDatePercentage" | get_data(data) %}
-{#<span itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea">#}
-{#	<meta name="name" content="{{ firstDoseDaily.areaName }}"/>#}
-{#	<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/{{ firstDoseDaily.areaName }}" />#}
-{#</span>#}
+
 <div class="vaccinations" itemtype="https://schema.org/WebContent" itemprop="WebContent" itemscope>
-	<span style="grid-column: -1" itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea" itemscope>
+	<span style="grid-column: -1; display: none" itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea" itemscope>
 		<meta itemprop="name" content="{{ firstDoseDaily.areaName }}"/>
 		<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/{{ firstDoseDaily.areaName }}" />
 	</span>
@@ -18,7 +15,7 @@
 	<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
 	<div>
 		<div>
-			<span class="govuk-caption-m govuk-!-font-weight-regular">Vaccinations</span>
+			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">Vaccinations</span>
 		</div>
 		<div>
 			{% if postcode is undefined -%}
