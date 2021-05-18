@@ -26,7 +26,7 @@
 				</h4>
 			{%- endif %}
 			<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-0 govuk-!-margin-top-2">
-				Up to and including&nbsp;<span style="white-space: nowrap">{{ firstDoseDaily.date }}</span>
+				Latest data provided on&nbsp;<span style="white-space: nowrap">{{ firstDoseDaily.date }}</span>
 			</p>
 		</div>
 		<a class="govuk-link govuk-link--no-visited-state bottom-aligned govuk-!-margin-top-2 ext-link"
@@ -57,7 +57,7 @@
 							<span href="#" class="govuk-link--no-visited-state number-link">
 								{{ firstDoseDaily.value }}
 								<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
-									Number of adults vaccinated (first dose) on {{ firstDoseDaily.date }}
+									Number of adults vaccinated (first dose) reported on {{ firstDoseDaily.date }}
 								</span>
 							</span>
 						</div>
@@ -85,7 +85,7 @@
 							<span href="#" class="govuk-link--no-visited-state number-link">
 							{{ firstDoseCum.value }}
 							<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
-								Total number of adults vaccinated (first dose) up to and including {{ firstDoseCum.date }}
+								Total number of adults vaccinated (first dose) reported on {{ firstDoseCum.date }}
 							</span></span>
 						</div>
 					</div>
@@ -115,7 +115,7 @@
 							<span href="#" class="govuk-link--no-visited-state number-link">
 								{{ secondDoseDaily.value }}
 								<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
-									Number of adults vaccinated (second dose) on {{ secondDoseDaily.date }}
+									Number of adults vaccinated (second dose) reported on {{ secondDoseDaily.date }}
 								</span>
 							</span>
 						</div>
@@ -143,7 +143,7 @@
 							<span href="#" class="govuk-link--no-visited-state number-link">
 								{{ secondDoseCum.value }}
 								<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
-									Total number of adults vaccinated (second dose) up to and including {{ secondDoseCum.date }}
+									Total number of adults vaccinated (second dose) reported on {{ secondDoseCum.date }}
 								</span>
 							</span>
 						</div>
@@ -178,7 +178,7 @@
 								<span href="#" class="govuk-link--no-visited-state number-link">
 									{{ firstDosePer.value }}%
 									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
-										Percentage of adults vaccinated (first dose) up to and including {{ firstDosePer.date }}
+										Percentage of adults vaccinated (first dose) reported on {{ firstDosePer.date }}
 									</span>
 								</span>
 							</div>
@@ -205,7 +205,7 @@
 								<span href="#" class="govuk-link--no-visited-state number-link">
 									{{ secondDosePer.value }}%
 									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
-										Percentage of adults vaccinated (second dose) up to and including {{ secondDosePer.date }}
+										Percentage of adults vaccinated (second dose) reported on {{ secondDosePer.date }}
 									</span>
 								</span>
 							</div>
@@ -231,7 +231,7 @@
 
 	<div class="mob-link additional-info">
 		<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>
-		<p class="bottom-aligned govuk-!-margin-top-2 govuk-!-font-size-16 govuk-!-margin-bottom-0" itemtype="https://schema.org/URL" itemprop="url" scope>
+		<p class="bottom-aligned govuk-!-margin-top-2 govuk-!-font-size-16 govuk-!-margin-bottom-0" itemtype="https://schema.org/URL" itemprop="url" itemscope>
 			<a class="govuk-link govuk-link--no-visited-state"
 			   style="text-decoration: none"
 			   itemprop="url"
