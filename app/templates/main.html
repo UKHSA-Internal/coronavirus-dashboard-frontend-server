@@ -15,6 +15,16 @@
 		<meta name="keywords"
 		      content="official,COVID19,COVID-19,Coronavirus,Public Health England,United Kingdom,Data,Charts,Statistics,Testing,Cases,Vaccinations,Deaths,Healthcare,Download,Coronavirus tracker,PHE,UK,API,MSOA,postcode,dashboard">
 		<meta property="og:url" content="https://coronavirus.data.gov.uk">
+	  {% if environment != "PRODUCTION" %}
+			<meta name="robots" content="noindex,nofollow" />
+			<meta name="googlebot" content="noindex,nofollow" />
+			<meta name="googlebot-news" content="noindex,nosnippet,nofollow" />
+			<meta name="AdsBot-Google" content="noindex,nofollow" />
+		{% else %}
+			<meta name="robots" content="all" />
+			<meta name="googlebot" content="all" />
+			<meta name="googlebot-news" content="all" />
+		{% endif %}
 		<link rel="shortcut icon" href="/assets/icon/favicon.ico">
 		{%- for path in og_images -%}
 			{%- if "summary" in path -%}
