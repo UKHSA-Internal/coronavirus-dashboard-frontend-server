@@ -235,7 +235,7 @@
 			<a class="govuk-link govuk-link--no-visited-state"
 			   style="text-decoration: none"
 			   itemprop="url"
-			   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType=nation&areaName={{ firstDoseDaily.areaName }}{% endif %}">
+			   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}">
 				<b>All vaccination data</b>
 			</a>
 		</p>
