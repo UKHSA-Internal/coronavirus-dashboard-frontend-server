@@ -32,7 +32,7 @@
 		<a class="govuk-link govuk-link--no-visited-state bottom-aligned govuk-!-margin-top-2 ext-link"
        rel="next"
 		   style="text-decoration: none; justify-self: start"
-		   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType=nation&areaName={{ firstDoseDaily.areaName }}{% endif %}">
+		   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}">
 			<b>All vaccination data</b>
 		</a>
 	</div>
@@ -218,7 +218,7 @@
 			</div>
 		</figcaption>
 		<div class="graph">
-			<a href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType=nation&areaName={{ firstDoseDaily.areaName }}{% endif %}"
+			<a href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"
 				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
 				   style="text-decoration: none"
 				   rel="next">
