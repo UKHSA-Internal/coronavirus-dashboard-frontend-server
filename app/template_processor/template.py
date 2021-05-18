@@ -95,6 +95,7 @@ async def render_template(request, template_name: str, context: Optional[Dict[st
         status_code=status_code,
         context=dict(
             request=request,
+            environment=Settings.ENVIRONMENT,
             banners=await get_banners(request, context["timestamp"]),
             whatsnew_banners=await get_whats_new_banners(request, context["timestamp"]),
             app_insight_token=Settings.instrumentation_key,
