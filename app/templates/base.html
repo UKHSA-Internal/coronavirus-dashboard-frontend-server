@@ -16,6 +16,16 @@
 		<link rel="apple-touch-icon" href="https://coronavirus.data.gov.uk/favicon.png">
 		<link rel="icon" href="https://coronavirus.data.gov.uk/favicon.ico">
 		<link rel="manifest" href="https://coronavirus.data.gov.uk/manifest.json">
+		{% if environment != "PRODUCTION" %}
+			<meta name="robots" content="noindex,nofollow" />
+			<meta name="googlebot" content="noindex,nofollow" />
+			<meta name="googlebot-news" content="noindex,nosnippet,nofollow" />
+			<meta name="AdsBot-Google" content="noindex,nofollow" />
+		{% else %}
+			<meta name="robots" content="all" />
+			<meta name="googlebot" content="all" />
+			<meta name="googlebot-news" content="all" />
+		{% endif %}
 		{% if DEBUG -%}
 			<link rel="stylesheet" type="text/css" href="{{ url_for("static", path="css/application.css") }}?tm={{ timestamp }}">
 		{%- else -%}
