@@ -55,7 +55,7 @@ additional information.
 We have a [public project management board](https://github.com/orgs/PublicHealthEngland/projects/1) that 
 shows outstanding issues to which everyone can contribute. Pick a ticket, assign it to 
 yourself and move it to the **Doing** column, and you will be all set to start. There is 
-also the [outstanding issues](https://github.com/PublicHealthEngland/coronavirus-dashboard/issues) from 
+also the [outstanding issues](https://github.com/PublicHealthEngland/coronavirus-dashboard-frontend-server/issues) from 
 which you can choose, but let us know that you are working on it so that multiple people 
 don't end. up doing the same task.
 
