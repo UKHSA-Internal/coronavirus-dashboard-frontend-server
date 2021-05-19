@@ -1,4 +1,4 @@
-# Coronavirus (COVID-19) in the UK
+# Coronavirus (COVID-19) in the UK - Frontend Server
 
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/publichealthengland/coronavirus-dashboard-frontend-server)
 
