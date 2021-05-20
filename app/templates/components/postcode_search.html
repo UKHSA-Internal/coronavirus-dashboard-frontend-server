@@ -1,10 +1,13 @@
-<form action="/search" name="postcode-search" method="GET" id="regionform" rel="next" target="_self" enctype="application/x-www-form-urlencoded">
+<form action="https://{{ base }}/search" name="postcode-search" method="GET"
+      itemprop="potentialAction" itemscope itemtype="https://schema.org/SearchAction"
+      id="regionform" rel="next" target="_self" enctype="application/x-www-form-urlencoded">
+    <meta itemprop="target" content="https://{{ base }}/search?postcode={postcode}"/>
 	<div class="govuk-form-group govuk-!-margin-bottom-0{% if invalid_postcode %} govuk-form-group--error{% endif %}">
 	  <fieldset class="govuk-fieldset" role="group" aria-describedby="postcode-hint">
 			<label class="govuk-label govuk-!-font-weight-bold" for="postcode">
 				Enter a postcode
 			</label>
-	    <div class="govuk-hint govuk-!-margin-bottom-3">
+	    <div class="govuk-hint govuk-!-margin-bottom-3" itemprop="description">
 		    For example SW1A 0AA
 	    </div>
 			{% if invalid_postcode %}
@@ -15,9 +18,9 @@
 			<p class="govuk-!-margin-bottom-0">
 				<input form="regionform"
 				       class="govuk-input govuk-input--width-10{% if invalid_postcode %} govuk-input--error{% endif %}"
-				       id="postcode" name="postcode" type="text"
+				       id="postcode" name="postcode" type="text" itemprop="query-input"
 				       pattern="[A-Za-z]{1,2}\d{1,2}[A-Za-z]?\s?\d{1,2}[A-Za-z]{1,2}\s{0,2}"
-				       style="text-transform: uppercase; max-width: 15ex;" maxlength="10">
+				       style="text-transform: uppercase; max-width: 15ex;" maxlength="10" required>
 				<label for="submit-postcode" class="govuk-visually-hidden">Submit</label>
 				<input class="govuk-button govuk-!-margin-bottom-0" id="submit-postcode"
 				       data-module="govuk-button" type="submit" value=""/>

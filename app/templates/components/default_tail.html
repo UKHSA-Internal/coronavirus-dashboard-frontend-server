@@ -6,10 +6,14 @@
 	{%- endif -%}
 	<h2 class="govuk-heading-l govuk-!-margin-top-4 govuk-!-margin-bottom-0">{{ header }}</h2>
 	<div class="card-container double-row">
-		<div class="mini-card">
+		<div class="mini-card" itemscope itemtype="https://schema.org/WebSite">
+			<meta itemprop="url" content="https://{{ base }}/"/>
+			<meta itemprop="name" content="Search by postcode"/>
 			<h3 class="govuk-heading-m govuk-!-margin-bottom-2">
 				Search by postcode
-				<small class="govuk-caption-m govuk-!-margin-top-1">View data for your local area</small>
+				<small class="govuk-caption-m govuk-!-margin-top-1" itemprop="description">
+					View data for your local area
+				</small>
 			</h3>
 			{%- include "components/postcode_search.html" -%}
 		</div>
