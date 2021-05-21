@@ -21,6 +21,10 @@
 			</span>
 			<meta itemprop="datePosted" content="{{ despatch }}"/>
 			<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
+			<meta itemprop="mainEntityOfPage" content="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
+			<meta itemprop="thumbnailUrl" content="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg"/>
+			<meta itemprop="description"
+			      content="Latest data on {{ card.caption | lower }} for {{ main.areaName }} {% if is_postcode -%}at {{ main.areaType | to_full_area_type | lower }} level{%- endif %}provided on {{ main.date }}"/>
 			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">{{ card.caption }}</span>
 			{%- if is_postcode -%}
 				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
@@ -148,20 +152,21 @@
 		{%- endif -%}
 		{%- if not is_postcode -%}
 			<a href="/details/{{ card.caption | lower }}"
-           itemprop="thumbnailUrl"
 				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
 				   style="text-decoration: none;">
 				<figure class="graph mini-card-figure">
-					<img itemprop="image" src="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg" alt="Graph - click for more details">
+					<img src="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg" alt="Graph - click for more details">
 				</figure>
 			</a>
 		{% endif %}
 		<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>
 		<div class="additional-info bottom-aligned" style="margin-top: 5px">
 				<p class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 govuk-!-font-size-16">
-				<a href="/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"
-				   class="govuk-link govuk-link--no-visited-state"
-				   style="text-decoration: none"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ main.areaName }}{% endif %}</b></a>
+					<meta itemprop="name" content="{{ card.caption }}"/>
+					<meta itemprop="url" content="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
+					<a href="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"
+					   class="govuk-link govuk-link--no-visited-state"
+					   style="text-decoration: none"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ main.areaName }}{% endif %}</b></a>
 				</p>
 		</div>
 	</div>

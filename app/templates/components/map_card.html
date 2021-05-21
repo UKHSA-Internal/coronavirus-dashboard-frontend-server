@@ -1,15 +1,25 @@
-<div class="mini-card map-view">
+<div class="mini-card map-view" itemtype="https://schema.org/WebContent" itemprop="WebContent" itemscope>
 	<div>
+			<span itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea" itemscope>
+				<meta itemprop="name" content="United Kingdom"/>
+				<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/United Kingdom" />
+			</span>
+			<meta itemprop="datePosted" content="{{ despatch }}"/>
+			<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
+			<meta itemprop="mainEntityOfPage" content="https://{{ base }}/details/interactive-map"/>
+			<meta itemprop="thumbnailUrl" content="https://{{ base }}/public/assets/frontpage/images/map.png"/>
+			<meta itemprop="description"
+			      content="Interactive map of the UK showing latest rate of cases at local authority and small area levels."/>
 		<h3 class="govuk-heading-m govuk-heading-m govuk-!-margin-bottom-3">
 			UK interactive cases map
 			<small class="govuk-caption-m govuk-!-margin-top-1">View case rates across the UK</small>
 		</h3>
-		<a href="/details/interactive-map" class="govuk-button" style="width: max-content">
+		<a href="https:://{{ base }}/details/interactive-map" class="govuk-button" style="width: max-content">
 				View map
 		</a>
 
 	</div>
-	<div class="" style="text-align: center">
+	<div style="text-align: center">
 		<img src="https://{{ base }}/public/assets/frontpage/images/map.png"
 		     class="map-img"
 		     alt="Map of the UK showing latest rate of new cases by specimen date for Upper Tier Local Authorities">
