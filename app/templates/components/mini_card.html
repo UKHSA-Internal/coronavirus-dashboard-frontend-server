@@ -13,18 +13,21 @@
 		{% set colour = 'bad' %}
 	{%- endif -%}
 
-	<div class="mini-card" itemtype="https://schema.org/WebContent" itemprop="WebContent" itemscope>
+	<div class="mini-card" itemscope itemprop="SpecialAnnouncement" itemtype="https://schema.org/SpecialAnnouncement">
 		<div>
-			<span itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea" itemscope>
+			<span itemprop="spatialCoverage" itemtype="http://schema.org/{% if main.areaName != 'United Kingdom' %}AdministrativeArea{% else %}Country{% endif %}" itemscope>
 				<meta itemprop="name" content="{{ main.areaName | trim_area_name }}"/>
 				<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/{{ main.areaName }}" />
 			</span>
+			<meta itemprop="category" content="https://www.wikidata.org/wiki/Q81068910" />
 			<meta itemprop="datePosted" content="{{ despatch }}"/>
 			<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
 			<meta itemprop="mainEntityOfPage" content="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
 			<meta itemprop="thumbnailUrl" content="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg"/>
 			<meta itemprop="description"
 			      content="Latest data on {{ card.caption | lower }} for {{ main.areaName }} {% if is_postcode -%}at {{ main.areaType | to_full_area_type | lower }} level{%- endif %}provided on {{ main.date }}"/>
+			<meta itemprop="text"
+	          content="Daily {{ card.caption }} as of {{ main.date }}: {{ main.value }}"/>
 			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">{{ card.caption }}</span>
 			{%- if is_postcode -%}
 				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
@@ -162,7 +165,6 @@
 		<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>
 		<div class="additional-info bottom-aligned" style="margin-top: 5px">
 				<p class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 govuk-!-font-size-16">
-					<meta itemprop="name" content="{{ card.caption }}"/>
 					<meta itemprop="url" content="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
 					<a href="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"
 					   class="govuk-link govuk-link--no-visited-state"

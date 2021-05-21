@@ -6,17 +6,20 @@
 {% set firstDosePer = "cumVaccinationFirstDoseUptakeByPublishDatePercentage" | get_data(data) %}
 {% set secondDosePer = "cumVaccinationSecondDoseUptakeByPublishDatePercentage" | get_data(data) %}
 
-<div class="vaccinations" itemtype="https://schema.org/WebContent" itemprop="WebContent" itemscope>
-	<span style="grid-column: -1; display: none" itemprop="contentLocation" itemtype="http://schema.org/AdministrativeArea" itemscope>
+<div class="vaccinations"  itemscope itemprop="SpecialAnnouncement" itemtype="https://schema.org/SpecialAnnouncement">
+	<span style="grid-column: -1; display: none" itemprop="spatialCoverage" itemtype="http://schema.org/{% if firstDoseDaily.areaName != 'United Kingdom' %}AdministrativeArea{% else %}Country{% endif %}" itemscope>
 		<meta itemprop="name" content="{{ firstDoseDaily.areaName }}"/>
 		<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/{{ firstDoseDaily.areaName }}" />
 	</span>
+	<meta itemprop="category" content="https://www.wikidata.org/wiki/Q81068910" />
 	<meta itemprop="datePosted" content="{{ despatch }}"/>
 	<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
 	<meta itemprop="mainEntityOfPage" content="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"/>
 	<meta itemprop="thumbnailUrl" content="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"/>
 	<meta itemprop="description"
 	      content="Latest data on vaccinations for {{ firstDoseDaily.areaName }} {% if is_postcode -%}at {{ firstDoseDaily.areaType | to_full_area_type | lower }} level{%- endif %}provided on {{ firstDoseDaily.date }}"/>
+	<meta itemprop="text"
+	      content="Percentage of adults vaccinated by the end of {{ firstDoseDaily.date }} - first dose: {{ firstDosePer.raw }}% | second dose: {{ secondDosePer.raw }}%"/>
 	<div class="topic">
 		<div>
 			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">Vaccinations</span>
