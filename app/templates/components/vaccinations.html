@@ -19,7 +19,7 @@
 	<meta itemprop="description"
 	      content="Latest data on vaccinations for {{ firstDoseDaily.areaName }} {% if is_postcode -%}at {{ firstDoseDaily.areaType | to_full_area_type | lower }} level{%- endif %}provided on {{ firstDoseDaily.date }}"/>
 	<meta itemprop="text"
-	      content="Percentage of adults vaccinated by the end of {{ firstDoseDaily.date }} - first dose: {{ firstDosePer.raw }}% | second dose: {{ secondDosePer.raw }}%"/>
+	      content="Vaccines are currently given in 2 doses, at least 21 days apart. By the end of {{ firstDoseDaily.date }}, {{ firstDoseDaily.value }} people had been given a first dose and {{ secondDoseDaily.value }} a second dose. In total, {{ firstDoseCum.value }} people ({{ firstDosePer.raw }}% of the adult population) have received a first dose and {{ secondDoseCum.value }} people ({{ secondDosePer.raw }}% of the adult population) a second dose of a vaccine."/>
 	<div class="topic">
 		<div>
 			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">Vaccinations</span>

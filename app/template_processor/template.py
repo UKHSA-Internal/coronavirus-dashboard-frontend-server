@@ -215,7 +215,7 @@ def format_timestamp(latest_timestamp: str) -> str:
 
 @as_template_filter
 def format_date(date: datetime) -> str:
-    return do_mark_safe(f"{date:%-d %B %Y}".replace(" ", "&nbsp;"))
+    return do_mark_safe(f"{date:%-d %B %Y}")
 
 
 @as_template_filter
@@ -229,3 +229,28 @@ def add_days(date: Union[datetime, str], days: int) -> datetime:
         return date + timedelta(days=days)
 
     return datetime.fromisoformat(date.removesuffix("5Z")) + timedelta(days=1)
+
+
+@as_template_filter
+def pluralise(number, singular, plural, null=str()):
+    if abs(number) > 1:
+        return plural
+
+    if abs(number) == 1:
+        return singular
+
+    if number == 0 and not len(null):
+        return plural
+
+    return null
+
+
+@as_template_filter
+def comparison_verb(number, greater, smaller, same):
+    if number > 0:
+        return greater
+
+    if number < 0:
+        return smaller
+
+    return same

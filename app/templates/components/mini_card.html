@@ -13,6 +13,10 @@
 		{% set colour = 'bad' %}
 	{%- endif -%}
 
+	{%- set rollingSum = (card.metric + "RollingSum") | get_data(data) -%}
+	{%- set change = ((card.metric + "Change") | get_data(data)) -%}
+	{%- set changePercentage = ((card.metric + "ChangePercentage") | get_data(data)) -%}
+
 	<div class="mini-card" itemscope itemprop="SpecialAnnouncement" itemtype="https://schema.org/SpecialAnnouncement">
 		<div>
 			<span itemprop="spatialCoverage" itemtype="http://schema.org/{% if main.areaName != 'United Kingdom' %}AdministrativeArea{% else %}Country{% endif %}" itemscope>
@@ -25,9 +29,17 @@
 			<meta itemprop="mainEntityOfPage" content="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
 			<meta itemprop="thumbnailUrl" content="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg"/>
 			<meta itemprop="description"
-			      content="Latest data on {{ card.caption | lower }} for {{ main.areaName }} {% if is_postcode -%}at {{ main.areaType | to_full_area_type | lower }} level{%- endif %}provided on {{ main.date }}"/>
-			<meta itemprop="text"
-	          content="Daily {{ card.caption }} as of {{ main.date }}: {{ main.value }}"/>
+			      content="Latest data on {{ card.caption | lower }} for {{ main.areaName }} {% if is_postcode -%}at {{ main.areaType | to_full_area_type | lower }} level {%- endif %}provided on {{ main.date }}"/>
+			<meta itemprop="text" content="
+{%- if card.caption == 'Cases' -%}
+  A confirmed case is someone who has tested positive for coronavirus. There were {{ main.value }} new {{ main.raw | pluralise("person", "people") }} with a confirmed positive test result for coronavirus on {{ main.date }}. Between {{ main.rawDate | subtract_days(6) | format_date }} and {{ main.date }}, there were {{ rollingSum.value }} {{ rollingSum.raw | pluralise("person", "people") }} who had a confirmed positive test result. This shows {{ change.raw | comparison_verb("an increase", "a decrease", "no change" ) }} {% if change.raw != 0 -%}of {{ changePercentage.value }}% {% endif -%} compared to the previous 7 days.
+{%- elif card.caption == 'Deaths' -%}
+	There {{ main.raw | pluralise("was", "were", "were") }} {{ main.value }} death{{ main.raw | pluralise("", "s", "s") }} within 28 days of a positive test for coronavirus reported on {{ main.date }}. Between {{ main.rawDate | subtract_days(6) | format_date }} and {{ main.date }}, there {{ rollingSum.raw | pluralise("has", "have") }} been {{ rollingSum.value }} deaths within 28 days of a positive test. This shows {{ change.raw | comparison_verb("an increase", "a decrease", "no change" ) }} {% if change.raw != 0 -%}of {{ changePercentage.value }}% {% endif -%} compared to the previous 7 days.
+{%- elif card.caption == 'Healthcare' -%}
+  Some people with coronavirus have to go into hospital. There were {{ main.value }} {{ main.raw | pluralise("person", "people", "people") }} with coronavirus who were admitted into hospital on {{ main.date }}. Between {{ main.rawDate | subtract_days(6) | format_date }} and {{ main.date }}, {{ rollingSum.value }} {{ rollingSum.raw | pluralise("was", "were") }} admitted into hospital with coronavirus. This shows {{ change.raw | comparison_verb("an increase", "a decrease", "no change" ) }} {% if change.raw != 0 -%}of {{ changePercentage.value }}% {% endif -%} compared to the previous 7 days.
+{%- elif card.caption == 'Testing' -%}
+  Testing is where we do a test to see who has coronavirus. Some people are tested more than once. There {{ main.raw | pluralise("was", "were", "were") }} {{ main.value }} test{{ main.raw | pluralise("", "s", "s") }} reported on {{ main.date }}. This shows {{ change.raw | comparison_verb("an increase", "a decrease", "no change" ) }} {% if change.raw != 0 -%}of {{ changePercentage.value }}%{%- endif %} compared to the previous 7 days. Between {{ main.rawDate | subtract_days(6) | format_date }} and {{ main.date }}, there have been {{ rollingSum.value }} tests. This shows {{ change.raw | comparison_verb("an increase", "a decrease", "no change" ) }} {% if change.raw != 0 -%}of {{ changePercentage.value }}% {% endif -%} compared to the previous 7 days.
+{%- endif -%}"/>
 			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">{{ card.caption }}</span>
 			{%- if is_postcode -%}
 				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
@@ -72,7 +84,6 @@
 					</div>
 				</div>
 
-				{%- set rollingSum = (card.metric + "RollingSum") | get_data(data) -%}
 				<div class="data-metric2" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
 					<meta itemprop="name" content="{{ card.heading }} - sum of the last 7 days"/>
 					<span itemprop="observationDate">
@@ -104,8 +115,6 @@
 						</div>
 					</div>
 
-					{%- set change = ((card.metric + "Change") | get_data(data)) -%}
-					{%- set changePercentage = ((card.metric + "ChangePercentage") | get_data(data)) -%}
 					<div class="number-container" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
 						<meta itemprop="name" content="{{ card.heading }} - change in the last 7 days"/>
 						<span itemprop="observationDate">
