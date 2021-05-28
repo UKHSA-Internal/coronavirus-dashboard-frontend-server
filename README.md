@@ -1,7 +1,8 @@
 # Coronavirus (COVID-19) in the UK - Frontend Server
 
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/publichealthengland/coronavirus-dashboard-frontend-server)
-
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/publichealthengland/coronavirus-dashboard-frontend-server.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/publichealthengland/coronavirus-dashboard-frontend-server/context:javascript)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/publichealthengland/coronavirus-dashboard-frontend-server.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/publichealthengland/coronavirus-dashboard-frontend-server/context:python)
 
 This is the source code for the [Coronavirus Dashboard](https://coronavirus.data.gov.uk) serving the home page and postcode page.
 
