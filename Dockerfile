@@ -65,7 +65,7 @@ RUN mkdir -p /opt/log  && \
 
 ENV PYTHONPATH          /opt/
 
-RUN apt install -y openssh              && \
+RUN apt install -y openssh-server       && \
     echo "root:Docker!" | chpasswd
 
 COPY /server/sshd_config /etc/ssh/
