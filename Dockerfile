@@ -20,9 +20,10 @@ RUN bash /install-nginx.sh
 RUN rm /etc/nginx/conf.d/default.conf
 
 # Install Supervisord
-RUN apt-get update                             && \
-    apt-get upgrade -y --no-install-recommends && \
-    apt-get install -y supervisor              && \
+RUN apt-get update                                    && \
+    apt-get upgrade -y --no-install-recommends        && \
+    apt-get install -y supervisor openssh-server      && \
+    echo "root:Docker!" | chpasswd                    && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
@@ -64,9 +65,6 @@ RUN mkdir -p /opt/log  && \
     mkdir -p /opt/supervisor/
 
 ENV PYTHONPATH          /opt/
-
-RUN apt install -y openssh-server       && \
-    echo "root:Docker!" | chpasswd
 
 COPY /server/sshd_config /etc/ssh/
 
