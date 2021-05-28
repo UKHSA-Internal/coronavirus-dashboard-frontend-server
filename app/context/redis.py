@@ -3,6 +3,7 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+import logging
 from typing import Any
 from contextvars import ContextVar
 from asyncio import get_event_loop
@@ -31,7 +32,22 @@ ssl_context.load_default_certs()
 ssl_context.load_verify_locations(certifi.where())
 
 
+def nslookup(addr):
+    import socket
+    ip_list = set()
+    ais = socket.getaddrinfo(addr, 0, 0, 0, 0)
+
+    for result in ais:
+        ip_list.add(result[-1][0])
+
+    logging.info(f"NS lookup for {addr}: {ip_list}")
+    print(f"NS lookup for {addr}: {ip_list}")
+
+
 async def instantiate_redis_pool():
+    if Settings.ENVIRONMENT == "DEVELOPMENT":
+        nslookup(Settings.redis[0])
+
     if (pool := get_redis_pool()) is not None:
         return pool
 
@@ -39,8 +55,8 @@ async def instantiate_redis_pool():
         **Settings.redis,
         minsize=10,
         loop=get_event_loop(),
-        # ssl=ssl_context if Settings.DEBUG else None,  # Prod goes via VNet
-        ssl=ssl_context
+        ssl=ssl_context if Settings.DEBUG else None,  # Prod goes via VNet
+        # ssl=ssl_context
     )
 
     return conn
