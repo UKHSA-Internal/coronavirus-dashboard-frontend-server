@@ -34,8 +34,10 @@ ssl_context.load_verify_locations(certifi.where())
 
 def nslookup(addr):
     import socket
+    logging.info(f"{addr}")
+
     ip_list = set()
-    ais = socket.getaddrinfo(addr, 0, 0, 0, 0)
+    ais = socket.getaddrinfo(addr[0], 0, 0, 0, 0)
 
     for result in ais:
         ip_list.add(result[-1][0])
@@ -46,7 +48,7 @@ def nslookup(addr):
 
 async def instantiate_redis_pool():
     if Settings.ENVIRONMENT == "DEVELOPMENT":
-        nslookup(Settings.redis[0])
+        nslookup(Settings.redis["address"])
 
     if (pool := get_redis_pool()) is not None:
         return pool
