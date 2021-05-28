@@ -52,7 +52,6 @@ graceful_timeout_str = getenv("GRACEFUL_TIMEOUT", "8")
 timeout_str = getenv("TIMEOUT", "30")
 keepalive_str = getenv("KEEP_ALIVE", "10")
 
-from sys import stdout, stderr
 # Gunicorn config variables
 loglevel = 'info'
 workers = web_concurrency
@@ -77,8 +76,6 @@ log_data = {
     "graceful_timeout": graceful_timeout,
     "timeout": timeout,
     "keepalive": keepalive,
-    # "errorlog": errorlog,
-    # "accesslog": accesslog,
     # Additional, non-gunicorn variables
     "workers_per_core": workers_per_core,
     "use_max_workers": use_max_workers,
