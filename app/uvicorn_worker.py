@@ -19,4 +19,6 @@ class ServerUvicornWorker(UvicornWorker):
         "access_log": True,
         "reload": False,
         "backlog": 4,
+        "limit_max_requests": 2,
+        "timeout_notify": 5
     }
