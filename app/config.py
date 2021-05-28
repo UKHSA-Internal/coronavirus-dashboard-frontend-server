@@ -34,7 +34,7 @@ class Settings:
     }
     redis = dict(
         address=(getenv("AZURE_REDIS_HOST", ""), getenv("AZURE_REDIS_PORT", "")),
-        password=getenv("AZURE_REDIS_PASSWORD"),
+        password=getenv("AZURE_REDIS_PASSWORD") if DEBUG else None,
         maxsize=15
     )
 
