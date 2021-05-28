@@ -65,7 +65,12 @@ RUN mkdir -p /opt/log  && \
 
 ENV PYTHONPATH          /opt/
 
-EXPOSE 5100
+RUN apt install -y openssh              && \
+    echo "root:Docker!" | chpasswd
+
+COPY /server/sshd_config /etc/ssh/
+
+EXPOSE 5100 2222
 
 ENTRYPOINT ["./entrypoint.sh"]
 
