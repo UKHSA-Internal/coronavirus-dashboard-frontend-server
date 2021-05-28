@@ -62,7 +62,8 @@ COPY server/engine.nginx              /etc/nginx/conf.d/engine.conf
 RUN mkdir -p /opt/log  && \
     mkdir -p /opt/nginx && \
     mkdir -p /opt/nginx/cache && \
-    mkdir -p /opt/supervisor/
+    mkdir -p /opt/supervisor/ && \
+    mkdir -p /run/sshd
 
 ENV PYTHONPATH          /opt/
 
