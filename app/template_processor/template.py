@@ -5,6 +5,7 @@
 # Python:
 from functools import wraps
 from datetime import datetime, timedelta
+from asyncio import gather
 from typing import Union, Dict, Any, Optional
 import re
 
@@ -90,16 +91,20 @@ async def render_template(request, template_name: str, context: Optional[Dict[st
     context["date"] = context["despatch"].split("T")[0]
     context["base"] = request.url.hostname
 
+    kw_jobs = {
+        "banners": get_banners(request, context["timestamp"]),
+        "whatsnew_banners": get_whats_new_banners(request, context["timestamp"])
+    }
+
     return template.TemplateResponse(
         template_name,
         status_code=status_code,
         context=dict(
             request=request,
             environment=Settings.ENVIRONMENT,
-            banners=await get_banners(request, context["timestamp"]),
-            whatsnew_banners=await get_whats_new_banners(request, context["timestamp"]),
             app_insight_token=Settings.instrumentation_key,
             og_images=get_og_image_names(context["timestamp"]),
+            **dict(zip(kw_jobs, await gather(*kw_jobs.values()))),
             **context
         )
     )
