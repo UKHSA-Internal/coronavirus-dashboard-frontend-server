@@ -30,7 +30,7 @@ __license__ = "MIT"
 __version__ = "0.0.1"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-workers_per_core_str = getenv("WORKERS_PER_CORE", "2")
+workers_per_core_str = getenv("WORKERS_PER_CORE", "1")
 max_workers_str = getenv("MAX_WORKERS")
 use_max_workers = None
 

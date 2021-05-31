@@ -18,7 +18,7 @@ class ServerUvicornWorker(UvicornWorker):
         "proxy_headers": True,
         "access_log": True,
         "reload": False,
-        "backlog": 8,
-        "limit_max_requests": 64,
-        "timeout_notify": 5
+        "backlog": 16,
+        "limit_max_requests": 128,
+        "timeout_notify": 8
     }
