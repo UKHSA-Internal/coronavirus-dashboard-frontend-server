@@ -4,7 +4,7 @@ PyYAML
 jinja2~=2.11.3
 flask==1.1.2
 plotly~=4.14.3
-kaleido==0.0.3.post1
+kaleido==0.2.1.post1
 pandas~=1.2.4
 werkzeug==1.0.1
 redis==3.5.3
