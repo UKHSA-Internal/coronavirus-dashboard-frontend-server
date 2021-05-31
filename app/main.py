@@ -41,6 +41,15 @@ __all__ = [
 
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
+from os import environ
+from json import dumps
+
+print(Settings.instrumentation_key)
+print("ENV VARS: " + dumps({
+    key: value[:2] if value else None
+    for key, value in environ.items()
+}))
+
 
 routes = [
     Route('/', endpoint=home_page, methods=["GET"]),
