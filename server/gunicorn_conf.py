@@ -49,7 +49,7 @@ default_web_concurrency = workers_per_core * cores + 1
 web_concurrency = max(int(default_web_concurrency), 2)
 
 graceful_timeout_str = getenv("GRACEFUL_TIMEOUT", "8")
-timeout_str = getenv("TIMEOUT", "30")
+timeout_str = getenv("TIMEOUT", "20")
 keepalive_str = getenv("KEEP_ALIVE", "10")
 
 # Gunicorn config variables
