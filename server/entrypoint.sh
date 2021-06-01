@@ -7,7 +7,7 @@ exec uvicorn app.main:app --workers 8                 \
                           --loop uvloop               \
                           --port 5100                 \
                           --proxy-headers             \
-                          --timeout-keep-alive 3      \
+                          --timeout-keep-alive 12     \
                           --backlog 256               \
                           --limit-concurrency 32
 
