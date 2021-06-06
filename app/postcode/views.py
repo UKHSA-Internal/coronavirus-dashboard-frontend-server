@@ -115,27 +115,26 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
 
     loop = get_running_loop()
 
-    async with Lock():
-        async with Connection(loop=loop) as conn:
-            area_codes = await conn.fetch(locations_query, postcode)
+    async with Connection(loop=loop) as conn:
+        area_codes = await conn.fetch(locations_query, postcode)
 
-        if not len(area_codes):
-            return DataFrame()
+    if not len(area_codes):
+        return DataFrame()
 
-        tasks = list()
-        for area_data in area_codes:
-            area_type = area_data["area_type"]
-            task = get_data(
-                request,
-                partition_names[area_type],
-                area_type,
-                area_data["id"],
-                partition_ts
-            )
+    tasks = list()
+    for area_data in area_codes:
+        area_type = area_data["area_type"]
+        task = get_data(
+            request,
+            partition_names[area_type],
+            area_type,
+            area_data["id"],
+            partition_ts
+        )
 
-            tasks.append(task)
+        tasks.append(task)
 
-        data = await gather(*tasks, loop=loop)
+    data = await gather(*tasks, loop=loop)
 
     result = concat(data).reset_index(drop=True)
     result["rank"] = result.groupby("metric")[["priority", "date"]].rank(ascending=True)
