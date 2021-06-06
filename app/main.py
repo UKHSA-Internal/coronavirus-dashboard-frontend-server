@@ -121,8 +121,12 @@ async def add_process_time_header(request: Request, call_next):
     if response.status_code == 503:
         response.headers['retry-after'] = '300'
 
-    if "cache-control" not in response.headers:
+    is_asset = "assets" not in request.url.path.lower()
+
+    if "cache-control" not in response.headers and not is_asset:
         response.headers['cache-control'] = 'public, must-revalidate, max-age=60, s-maxage=90'
+    elif is_asset:
+        response.headers['cache-control'] = 'public, max-age=600, stale-while-revalidate=90, s-maxage=86400'
 
     response.headers['PHE-Server-Loc'] = Settings.server_location
 
