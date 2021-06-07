@@ -4,7 +4,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
 import logging
-from typing import Dict, Iterable, Union
+from typing import Dict
 
 # 3rd party:
 from starlette.requests import Request
@@ -16,11 +16,8 @@ from opencensus.trace.span import SpanKind
 from opencensus.trace.attributes_helper import COMMON_ATTRIBUTES
 from opencensus.trace import config_integration
 from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
-from opencensus.ext.azure.log_exporter import AzureLogHandler
-from opencensus.trace.execution_context import get_opencensus_tracer, get_current_span
 
 # Internal:
-from ..azure.exporter import Exporter
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

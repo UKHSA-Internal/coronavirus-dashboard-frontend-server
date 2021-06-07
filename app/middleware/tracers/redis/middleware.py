@@ -5,8 +5,6 @@
 # Python:
 
 # 3rd party:
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
-from starlette.requests import Request
 from asyncio import get_event_loop
 from aioredis import create_redis_pool
 
@@ -14,7 +12,6 @@ import ssl
 import certifi
 
 # Internal:
-from app.context.redis import set_redis_pool, get_redis_pool, shutdown_redis_pool
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -3,7 +3,6 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-import logging
 from datetime import datetime
 from os.path import abspath, split as split_path, join as join_path
 from operator import itemgetter
