@@ -45,10 +45,7 @@ async def test_redis(request):
 
 
 async def run_healthcheck(request: Request) -> Union[JSONResponse, Response]:
-    loop = get_running_loop()
-
-    async with Lock(loop=loop):
-        response = await gather(test_db(), test_storage(), test_redis(request))
+    response = await gather(test_db(), test_storage(), test_redis(request))
 
     if request.method == 'GET':
         return JSONResponse(response, status_code=HTTPStatus.OK.real)
