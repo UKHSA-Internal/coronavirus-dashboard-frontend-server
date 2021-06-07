@@ -1,47 +1,55 @@
-{% extends "base.html" %}
-{% from "components/mini_card.html" import create_card with context %}
-{% from "components/default_tail.html" import tail_banners with context %}
-
-{% if area_info.ltla.startswith("E") %}
-	{% set nameAttr = "msoaName" %}
-	{% set codeAttr = "msoa" %}
-	{% set areaType = "msoa" %}
-{% else %}
-	{% set nameAttr = "ltlaName" %}
-	{% set codeAttr = "ltla" %}
-	{% set areaType = "ltla" %}
-{% endif %}
-
-{% block head %}
-	{% cache 1800, 'head-postcode', timestamp, postcode -%}
-		<title>Daily summary | {{ area_info[nameAttr] }}</title>
-		<meta property="og:description" content="Daily summary | {{ area_info[nameAttr] }}">
-		<meta name="twitter:description" content="Daily summary | {{ area_info[nameAttr] }}">
-		<meta property="og:url" content="https://coronavirus.data.gov.uk/search?postcode={{ postcode }}">
-		<meta name="twitter:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">
-		<meta property="og:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">
-	{% endcache -%}
-{% endblock %}
-
-{%- block page_title -%}Daily update{% endblock %}
+{%- extends "base.html" -%}
+{%- from "components/mini_card.html" import create_card with context -%}
+{%- from "components/default_tail.html" import tail_banners with context -%}
+{%- set postcode = area_data.postcode -%}
+{%- block head -%}
+	<title itemprop="name">{{ area_data.areaName }} | Daily summary</title>
+	<meta property="og:title" content="{{ area_data.areaName }} | Daily summary">
+	<meta name="twitter:title" content="{{ area_data.areaName }} | Daily summary">
+	<meta name="twitter:title" content="{{ area_data.areaName }} | Daily summary">
+	<meta name="description" content="Daily summary of COVID-19 disease situation in {{ area_data.areaName }}.">
+	<meta property="og:description" content="Daily summary of COVID-19 disease situation in {{ area_data.areaName }}.">
+	<meta name="twitter:description" content="Daily summary of COVID-19 disease situation in {{ area_data.areaName }}.">
+	<meta property="og:url" content="https://coronavirus.data.gov.uk/search?postcode={{ postcode }}">
+	<meta name="twitter:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">
+	<meta property="og:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png">
+	<meta name="robots" content="noindex,nofollow" />
+	<meta name="googlebot" content="noindex,nofollow" />
+	<meta name="googlebot-news" content="noindex,nosnippet,nofollow" />
+	<meta name="AdsBot-Google" content="noindex,nofollow" />
+{%- endblock -%}
 {%- block main -%}
+		<div id="top">
+		<div class="sticky-header govuk-!-padding-top-3">
+			<div class="sticky-header govuk-grid-row govuk-!-margin-top-0" style="width: 100%">
+				<div class="govuk-grid-column-one-half">
+					<h1 class="govuk-caption-l govuk-!-margin-bottom-0 govuk-!-margin-top-0 panel-title-new">Daily update</h1>
+				</div>
+			</div>
+			<div class="govuk-grid-row govuk-!-margin-top-0">
+				<div class="govuk-grid-column-full">
+					<hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-2 govuk-!-margin-bottom-2 govuk-section-break--visible">
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="local-intro govuk-!-margin-left-0">
 		<h2 class="govuk-heading-l govuk-!-margin-bottom-2 govuk-!-margin-top-0 govuk-!-margin-left-0 govuk-!-padding-top-0 govuk-!-padding-left-0">
-			{{ postcode }} &ndash; {{ area_info[nameAttr] }}
+			{{ postcode }} &ndash; {{ area_data.areaName }}
 		</h2>
 	</div>
 
 	<div class="postcode-lead">
 		<figure class="graph govuk-!-margin-bottom-2"
 		        style="margin: 0;">
-			<img src="https://coronavirus.data.gov.uk/public/assets/frontpage/map_thumbnails/{{ area_info[codeAttr] }}.svg"
+			<img src="https://coronavirus.data.gov.uk/public/assets/frontpage/map_thumbnails/{{ area_data.areaCode }}.svg"
 			     style="max-width: min(400px, 100%); height: auto; border: 1px #f3f2f1 solid;"
 			     alt="Scale showing the comparison of {{ postcode }} compared to national average."/>
 		</figure>
 
 		<div>
 			{% include "components/comparison_scale.html" %}
-{#			{% include "components/alert_level.html" %}#}
 		</div>
 	</div>
 
@@ -56,20 +64,20 @@
 
 	<p class="govuk-body-m govuk-!-margin-bottom-3">
 		See the <a class="govuk-link govuk-link--no-visited-state"
-		           href="/easy_read?postcode={{ postcode }}" rel="next">easy read summary</a> for
-		{{ area_info[nameAttr] }}{% if nameAttr == "msoaName" %}, {{ area_info.utlaName }}{% endif %}.
+		           href="/easy_read?postcode={{ postcode }}">simple summary</a> for
+		{{ area_data.areaName }}
+		{%- if area_data.areaType == "msoa" -%}
+			, {{ data.loc[data.areaType.isin(["utla", "ltla"])].sort_values("rank").areaName.values[0] }}
+		{%- endif -%}.
 	</p>
-	{% include "components/vaccination.html" %}
-	{% include "components/r_number.html" %}
-
+	{%- include "components/r_number.html" -%}
+	{%- include "components/vaccinations.html" -%}
 	<div class="card-container">
-		{% for category, card in postcode_data.items() %}
-			{{ create_card(card, True) }}
-		{% endfor %}
+		{%- for card in cards -%}
+			{{ create_card(cards[card], True) }}
+		{%- endfor -%}
 	</div>
-
 {%- endblock -%}
-
-{% block lower_section %}
+{%- block lower_section -%}
 	{{ tail_banners("Search another location") }}
-{% endblock %}
+{%- endblock -%}

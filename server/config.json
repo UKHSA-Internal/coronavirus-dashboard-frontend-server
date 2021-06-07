@@ -1,0 +1,87 @@
+{
+  "listeners": {
+    "*:5100": {
+      "pass": "routes"
+    }
+  },
+  "routes": [
+    {
+      "match": {
+        "uri": "/favicon.*"
+      },
+      "action": {
+        "share": "/opt/assets/icon/",
+        "fallback": {
+          "pass": "applications/landing"
+        }
+      }
+    },
+    {
+      "match": {
+        "uri": "/assets/*"
+      },
+      "action": {
+        "share": "/opt/",
+        "fallback": {
+          "pass": "applications/landing"
+        }
+      }
+    },
+    {
+      "match": {
+        "uri": "/sitemap.xml"
+      },
+      "action": {
+        "return": 308,
+        "location": "https://coronavirus.data.gov.uk/public/assets/supplements/sitemap.xml"
+      }
+    },
+    {
+      "match": {
+        "uri": "/downloads/homepage/"
+      },
+      "action": {
+        "return": 308,
+        "location": "https://coronavirus.data.gov.uk/downloads/homepage/"
+      }
+    },
+    {
+      "match": {
+        "uri": [
+          "/",
+          "/search",
+          "/healthcheck"
+        ],
+        "method": [
+          "GET",
+          "HEAD"
+        ]
+      },
+      "action": {
+        "pass": "applications/landing"
+      }
+    }
+  ],
+  "applications": {
+    "landing": {
+      "type": "python 3.9",
+      "path": "/opt/",
+      "home": "/usr/local",
+      "module": "main",
+      "callable": "app",
+      "protocol": "asgi",
+      "environment": {
+        "IS_DEV": "0"
+      }
+    }
+  },
+  "settings": {
+        "http": {
+            "header_read_timeout": 15,
+            "body_read_timeout": 15,
+            "send_timeout": 15,
+            "idle_timeout": 60,
+            "discard_unsafe_fields": false
+        }
+    }
+}

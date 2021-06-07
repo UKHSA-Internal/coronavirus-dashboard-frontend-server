@@ -1,0 +1,251 @@
+{% set urlPath = "/details/vaccinations" %}
+{% set firstDoseCum = "cumPeopleVaccinatedFirstDoseByPublishDate" | get_data(data) %}
+{% set secondDoseCum = "cumPeopleVaccinatedSecondDoseByPublishDate" | get_data(data) %}
+{% set firstDoseDaily = "newPeopleVaccinatedFirstDoseByPublishDate" | get_data(data) %}
+{% set secondDoseDaily = "newPeopleVaccinatedSecondDoseByPublishDate" | get_data(data) %}
+{% set firstDosePer = "cumVaccinationFirstDoseUptakeByPublishDatePercentage" | get_data(data) %}
+{% set secondDosePer = "cumVaccinationSecondDoseUptakeByPublishDatePercentage" | get_data(data) %}
+
+<div class="vaccinations"  itemscope itemprop="SpecialAnnouncement" itemtype="https://schema.org/SpecialAnnouncement">
+	<span style="grid-column: -1; display: none" itemprop="spatialCoverage" itemtype="http://schema.org/{% if firstDoseDaily.areaName != 'United Kingdom' %}AdministrativeArea{% else %}Country{% endif %}" itemscope>
+		<meta itemprop="name" content="{{ firstDoseDaily.areaName }}"/>
+		<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/{{ firstDoseDaily.areaName }}" />
+	</span>
+	<meta itemprop="category" content="https://www.wikidata.org/wiki/Q81068910" />
+	<meta itemprop="datePosted" content="{{ despatch }}"/>
+	<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
+	<meta itemprop="mainEntityOfPage" content="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"/>
+	<meta itemprop="thumbnailUrl" content="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"/>
+	<meta itemprop="description"
+	      content="Latest data on vaccinations for {{ firstDoseDaily.areaName }} {% if is_postcode -%}at {{ firstDoseDaily.areaType | to_full_area_type | lower }} level{%- endif %}provided on {{ firstDoseDaily.date }}"/>
+	<meta itemprop="text"
+	      content="Vaccines are currently given in 2 doses, at least 21 days apart. By the end of {{ firstDoseDaily.date }}, {{ firstDoseDaily.value }} people had been given a first dose and {{ secondDoseDaily.value }} a second dose. In total, {{ firstDoseCum.value }} people ({{ firstDosePer.raw }}% of the adult population) have received a first dose and {{ secondDoseCum.value }} people ({{ secondDosePer.raw }}% of the adult population) a second dose of a vaccine."/>
+	<div class="topic">
+		<div>
+			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">Vaccinations</span>
+		</div>
+		<div>
+			{% if postcode is undefined -%}
+				<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">People vaccinated</h3>
+			{% else %}
+				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
+					People vaccinated&nbsp;in {{ firstDoseDaily.areaName }}
+				</h4>
+			{%- endif %}
+			<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-0 govuk-!-margin-top-2">
+				Up to and including&nbsp;<span style="white-space: nowrap">{{ firstDoseDaily.date }}</span>
+			</p>
+		</div>
+		<a class="govuk-link govuk-link--no-visited-state bottom-aligned govuk-!-margin-top-2 ext-link"
+       rel="next"
+		   style="text-decoration: none; justify-self: start"
+		   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}">
+			<b>All vaccination data</b>
+		</a>
+	</div>
+
+	<div class="first">
+		<div itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+			<meta itemprop="name" content="Daily vaccinations - 1st dose"/>
+			<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ firstDoseDaily.rawDate }}"/>
+			<span itemprop="measuredValue">
+				<span itemtype="https://schema.org/Number" itemprop="Number">
+					<meta itemprop="QuantitativeValue" content="{{ firstDoseDaily.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+				</span>
+			</span>
+
+			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
+				Daily&nbsp;&mdash;&nbsp;1st&nbsp;dose
+			</div>
+			<div class="number-group">
+				<div class="number-container govuk-!-padding-right-4">
+					<div class="float tooltip">
+						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+							<span href="#" class="govuk-link--no-visited-state number-link">
+								{{ firstDoseDaily.value }}
+								<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+									Number of people vaccinated (first dose) reported on {{ firstDoseDaily.date }}
+								</span>
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+			<meta itemprop="name" content="Total vaccinations - 1st dose"/>
+			<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ firstDoseCum.rawDate }}"/>
+			<span itemprop="measuredValue">
+				<span itemtype="https://schema.org/Number" itemprop="Number">
+					<meta itemprop="QuantitativeValue" content="{{ firstDoseCum.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+				</span>
+			</span>
+
+			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
+				Total&nbsp;&mdash;&nbsp;1st&nbsp;dose
+			</div>
+			<div class="number-group">
+				<div class="number-container govuk-!-padding-right-4">
+					<div class="float tooltip">
+						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+							<span href="#" class="govuk-link--no-visited-state number-link">
+							{{ firstDoseCum.value }}
+							<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+								Total number of people vaccinated (first dose) up to and including {{ firstDoseCum.date }}
+							</span></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="second">
+		<div itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+			<meta itemprop="name" content="Daily vaccinations - 2nd dose"/>
+			<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ secondDoseDaily.rawDate }}"/>
+			<span itemprop="measuredValue">
+				<span itemtype="https://schema.org/Number" itemprop="Number">
+					<meta itemprop="QuantitativeValue" content="{{ secondDoseDaily.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+				</span>
+			</span>
+
+			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
+				Daily&nbsp;&mdash;&nbsp;2nd&nbsp;dose
+			</div>
+			<div class="number-group">
+				<div class="number-container govuk-!-padding-right-4">
+					<div class="float tooltip">
+						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+							<span href="#" class="govuk-link--no-visited-state number-link">
+								{{ secondDoseDaily.value }}
+								<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+									Number of people vaccinated (second dose) reported on {{ secondDoseDaily.date }}
+								</span>
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+			<meta itemprop="name" content="Total vaccinations - 2nd dose"/>
+			<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ secondDoseCum.rawDate }}"/>
+			<span itemprop="measuredValue">
+				<span itemtype="https://schema.org/Number" itemprop="Number">
+					<meta itemprop="QuantitativeValue" content="{{ secondDoseCum.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+				</span>
+			</span>
+
+			<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">
+				Total&nbsp;&mdash;&nbsp;2nd&nbsp;dose
+			</div>
+			<div class="number-group">
+				<div class="number-container govuk-!-padding-right-4">
+					<div class="float tooltip">
+						<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+							<span href="#" class="govuk-link--no-visited-state number-link">
+								{{ secondDoseCum.value }}
+								<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+									Total number of people vaccinated (second dose) up to and including {{ secondDoseCum.date }}
+								</span>
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<figure class="visaulisation">
+		<div class="bottom-aligned main-caption narrow govuk-!-font-size-16">
+			Percentage of adult population
+		</div>
+		<figcaption>
+			<div class="bottom-aligned main-caption govuk-!-font-size-16">
+				Percentage of adult population
+			</div>
+
+			<div class="item" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+				<meta itemprop="name" content="Percentage of adults vaccinated - first dose"/>
+				<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ firstDosePer.rawDate }}"/>
+				<span itemprop="measuredValue">
+					<span itemtype="https://schema.org/Number" itemprop="Number">
+						<meta itemprop="QuantitativeValue" content="{{ firstDosePer.raw }}%" itemtype="https://schema.org/QuantitativeValue"/>
+					</span>
+				</span>
+				<div class="number-group">
+					<div class="number-container">
+						<div class="float tooltip">
+							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+								<span href="#" class="govuk-link--no-visited-state number-link">
+									{{ firstDosePer.value }}%
+									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+										Percentage of adults vaccinated (first dose) reported on {{ firstDosePer.date }}
+									</span>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+					<span class="square lightgreen"></span>&nbsp;1st&nbsp;dose
+				</div>
+			</div>
+
+			<div class="item" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+				<meta itemprop="name" content="Percentage of adults vaccinated - second dose"/>
+				<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ secondDosePer.rawDate }}"/>
+				<span itemprop="measuredValue">
+					<span itemtype="https://schema.org/Number" itemprop="Number">
+						<meta itemprop="QuantitativeValue" content="{{ secondDosePer.raw }}%" itemtype="https://schema.org/QuantitativeValue"/>
+					</span>
+				</span>
+				<div class="number-group">
+					<div class="number-container">
+						<div class="float tooltip">
+							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
+								<span href="#" class="govuk-link--no-visited-state number-link">
+									{{ secondDosePer.value }}%
+									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+										Percentage of adults vaccinated (second dose) reported on {{ secondDosePer.date }}
+									</span>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+					<span class="square darkgreen"></span>&nbsp;2nd&nbsp;dose
+				</div>
+			</div>
+		</figcaption>
+		<div class="graph">
+			<a href="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"
+				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
+				   style="text-decoration: none"
+				   rel="next">
+				<img src="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"
+				     alt="Chart displaying the percentage of adult population vaccinated in {{ firstDoseDaily.areaName }}"/>
+			</a>
+		</div>
+
+	</figure>
+
+	<div class="mob-link additional-info">
+		<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>
+		<p class="bottom-aligned govuk-!-margin-top-2 govuk-!-font-size-16 govuk-!-margin-bottom-0" itemtype="https://schema.org/URL" itemprop="url" itemscope>
+			<meta itemprop="name" content="Vaccinations"/>
+			<meta itemprop="url" content="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"/>
+			<a class="govuk-link govuk-link--no-visited-state"
+			   style="text-decoration: none"
+			   href="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}">
+				<b>All vaccination data</b>
+			</a>
+		</p>
+	</div>
+</div>

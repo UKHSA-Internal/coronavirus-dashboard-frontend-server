@@ -1,145 +1,184 @@
-{% from "components/rates.html" import details with context %}
-
-{% macro create_card(card, is_postcode=False) %}
-
-	{% set improving = is_improving(card.metric, card.change.value) %}
-	{% if improving == True %}
+{%- from "components/rates.html" import details with context -%}
+{%- macro create_card(card, is_postcode=False) -%}
+	{%- set main = card.metric | get_data(data) -%}
+	{%- set improving = is_improving(card.metric, ((card.metric + "Change") | get_data(data)).raw) -%}
+	{%- if improving == True %}
 		{% set image = "images/arrow-up-green.png" %}
 		{% set colour = 'good' %}
-	{% elif improving == None %}
+	{%- elif improving == None %}
 		{% set image = "images/arrow-up-grey.png" %}
 		{% set colour = 'neutral' %}
-	{% elif improving == False %}
+	{%- elif improving == False %}
 		{% set image = "images/arrow-up-red.png" %}
 		{% set colour = 'bad' %}
-	{% endif %}
+	{%- endif -%}
 
-	<div class="mini-card">
+	{%- set rollingSum = (card.metric + "RollingSum") | get_data(data) -%}
+	{%- set change = ((card.metric + "Change") | get_data(data)) -%}
+	{%- set changePercentage = ((card.metric + "ChangePercentage") | get_data(data)) -%}
 
+	<div class="mini-card" itemscope itemprop="SpecialAnnouncement" itemtype="https://schema.org/SpecialAnnouncement">
 		<div>
-			<span class="govuk-caption-m govuk-!-font-weight-regular">{{ card.caption }}</span>
+			<span itemprop="spatialCoverage" itemtype="http://schema.org/{% if main.areaName != 'United Kingdom' %}AdministrativeArea{% else %}Country{% endif %}" itemscope>
+				<meta itemprop="name" content="{{ main.areaName | trim_area_name }}"/>
+				<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/{{ main.areaName }}" />
+			</span>
+			<meta itemprop="category" content="https://www.wikidata.org/wiki/Q81068910" />
+			<meta itemprop="datePosted" content="{{ despatch }}"/>
+			<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
+			<meta itemprop="mainEntityOfPage" content="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
+			<meta itemprop="thumbnailUrl" content="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg"/>
+			<meta itemprop="description"
+			      content="Latest data on {{ card.caption | lower }} for {{ main.areaName }} {% if is_postcode -%}at {{ main.areaType | to_full_area_type | lower }} level {%- endif %}provided on {{ main.date }}"/>
+			<meta itemprop="text" content="
+{%- if card.caption == 'Cases' -%}
+  A confirmed case is someone who has tested positive for coronavirus. There were {{ main.value }} new {{ main.raw | pluralise("person", "people") }} with a confirmed positive test result for coronavirus on {{ main.date }}. Between {{ main.rawDate | subtract_days(6) | format_date }} and {{ main.date }}, there were {{ rollingSum.value }} {{ rollingSum.raw | pluralise("person", "people") }} who had a confirmed positive test result. This shows {{ change.raw | comparison_verb("an increase", "a decrease", "no change" ) }} {% if change.raw != 0 -%}of {{ changePercentage.value }}% {% endif -%} compared to the previous 7 days.
+{%- elif card.caption == 'Deaths' -%}
+	There {{ main.raw | pluralise("was", "were", "were") }} {{ main.value }} death{{ main.raw | pluralise("", "s", "s") }} within 28 days of a positive test for coronavirus reported on {{ main.date }}. Between {{ main.rawDate | subtract_days(6) | format_date }} and {{ main.date }}, there {{ rollingSum.raw | pluralise("has", "have") }} been {{ rollingSum.value }} deaths within 28 days of a positive test. This shows {{ change.raw | comparison_verb("an increase", "a decrease", "no change" ) }} {% if change.raw != 0 -%}of {{ changePercentage.value }}% {% endif -%} compared to the previous 7 days.
+{%- elif card.caption == 'Healthcare' -%}
+  Some people with coronavirus have to go into hospital. There were {{ main.value }} {{ main.raw | pluralise("person", "people", "people") }} with coronavirus who were admitted into hospital on {{ main.date }}. Between {{ main.rawDate | subtract_days(6) | format_date }} and {{ main.date }}, {{ rollingSum.value }} {{ rollingSum.raw | pluralise("was", "were") }} admitted into hospital with coronavirus. This shows {{ change.raw | comparison_verb("an increase", "a decrease", "no change" ) }} {% if change.raw != 0 -%}of {{ changePercentage.value }}% {% endif -%} compared to the previous 7 days.
+{%- elif card.caption == 'Testing' -%}
+  Testing is where we do a test to see who has coronavirus. Some people are tested more than once. There {{ main.raw | pluralise("was", "were", "were") }} {{ main.value }} test{{ main.raw | pluralise("", "s", "s") }} reported on {{ main.date }}. This shows {{ change.raw | comparison_verb("an increase", "a decrease", "no change" ) }} {% if change.raw != 0 -%}of {{ changePercentage.value }}%{%- endif %} compared to the previous 7 days. Between {{ main.rawDate | subtract_days(6) | format_date }} and {{ main.date }}, there have been {{ rollingSum.value }} tests. This shows {{ change.raw | comparison_verb("an increase", "a decrease", "no change" ) }} {% if change.raw != 0 -%}of {{ changePercentage.value }}% {% endif -%} compared to the previous 7 days.
+{%- endif -%}"/>
+			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">{{ card.caption }}</span>
 			{%- if is_postcode -%}
 				<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
-					{{ card.heading }} in {{ card.areaName | trim_area_name }}
+					{{ card.heading }} in {{ main.areaName | trim_area_name }}
 				</h4>
 			{%- else -%}
-				<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
+				<h2 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
 					{{ card.heading }}
-				</h3>
+				</h2>
 			{%- endif -%}
 		</div>
-
 		<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-0 govuk-!-margin-top-0">
-			Latest data
-			{% if is_postcode %}
-				at <strong>{{ card.areaType.formatted | lower }}</strong> level
-			{% endif %}
-			provided on&nbsp;<span style="white-space: nowrap">{{ card.latest_date }}</span>
+			Latest data {% if is_postcode -%}at <strong>{{ main.areaType | to_full_area_type | lower }}</strong> level{%- endif %}
+			provided on&nbsp;<span style="white-space: nowrap">{{ main.date }}</span>
 		</p>
 
 		<div class="govuk-grid-row bottom-aligned">
 			<div class="govuk-grid-column-full">
-				<div class="data-metric2">
+				<div class="data-metric2" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+					<meta itemprop="name" content="{{ card.heading }} - daily"/>
+					<meta itemprop="observationDate" content="{{ main.rawDate }}"/>
+					<span itemprop="measuredValue">
+						<span itemtype="https://schema.org/Number" itemprop="Number">
+							<meta itemprop="QuantitativeValue" content="{{ main.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+						</span>
+					</span>
+
 					<div class="govuk-body-s float govuk-!-margin-bottom-0" style="width:80%;">Daily</div>
 					<div class="number-group">
 						<div class="number-container">
 							<div class="float tooltip">
 								<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-									<a href="#"
-									   class="govuk-link--no-visited-state number-link number">
-										{{ card.data[0].value | format_number }}
-										<span class="tooltiptext govuk-!-font-size-16">
-											Daily number of {{ card.heading | lower }} reported on {{ card.data[0].formatted }}
+									<span class="govuk-link--no-visited-state number-link number">
+										{{ main.value }}
+										<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+											Daily number of {{ card.heading | lower }} reported on {{ main.date }}
+										</span>
 									</span>
-									</a>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div class="data-metric2">
+				<div class="data-metric2" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+					<meta itemprop="name" content="{{ card.heading }} - sum of the last 7 days"/>
+					<span itemprop="observationDate">
+						<meta itemtype="https://schema.org/DateTime" itemprop="startDate" content="{{ rollingSum.rawDate | subtract_days(7) }}"/>
+						<meta itemtype="https://schema.org/DateTime" itemprop="endDate" content="{{ rollingSum.rawDate }}"/>
+					</span>
+					<span itemprop="measuredValue">
+						<span itemtype="https://schema.org/Number" itemprop="Number">
+							<meta itemprop="QuantitativeValue" content="{{ rollingSum.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+						</span>
+					</span>
 
 					<div class="govuk-body-s float govuk-!-margin-top-2 govuk-!-margin-bottom-0" style="width:80%;">
 						Last 7 days
 					</div>
-
 					<div class="number-group">
 						<div class="number-container govuk-!-padding-right-4">
 							<div class="float tooltip">
 								<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-									<a href="#" class="govuk-link--no-visited-state number-link"
-									   onclick="showHelp()">{{ card.change.total | format_number }}
-										<span class="tooltiptext govuk-!-font-size-16">
-										Total number of {{ card.heading | lower }} reported in the
-										last 7 days ({{ card.data[6].formatted }} &ndash; {{ card.data[0].formatted }})</span></a>
+									<span href="#" class="govuk-link--no-visited-state number-link">
+										{{ rollingSum.value }}
+										<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+											Total number of {{ card.heading | lower }} reported in the last 7 days
+											({{ rollingSum.rawDate | subtract_days(6) | format_date }} &ndash; {{ rollingSum.date }})
+										</span>
+									</span>
 								</div>
 							</div>
 						</div>
-
 					</div>
-					<div class="number-container">
+
+					<div class="number-container" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
+						<meta itemprop="name" content="{{ card.heading }} - change in the last 7 days"/>
+						<span itemprop="observationDate">
+							<meta itemtype="https://schema.org/DateTime" itemprop="startDate" content="{{ change.rawDate | subtract_days(14) }}"/>
+							<meta itemtype="https://schema.org/DateTime" itemprop="endDate" content="{{ change.rawDate }}"/>
+						</span>
+						<span itemprop="measuredValue">
+							<span itemtype="https://schema.org/Number" itemprop="Number">
+								<meta itemprop="QuantitativeValue" content="{{ change.raw }}" itemtype="https://schema.org/QuantitativeValue"/>
+							</span>
+						</span>
+
 						<div class="float tooltip">
 							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-								<a href="#"
-								   class="govuk-link--no-visited-state number-link-red" style="border: none">
+								<span class="govuk-link--no-visited-state number-link-red" style="border: none">
 									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1 change-box {{ colour }}">
-										{%- if card.change.value != 0 -%}
-											<img src="{{ url_for("static", filename=image) }}"
+										{%- if changePercentage.value != 0 -%}
+											<img src="{{ url_for("static", path=image) }}"
 											     width="12px"
 											     alt="arrow"
-											     style="transform: rotate({{ card.change.trend }}deg)">
-											{{ card.change.value | format_number }}
-											<span class="govuk-!-font-weight-regular">({{ card.change.percentage }}%)</span>
+											     style="transform: rotate({{ ((card.metric + "Direction")| get_data(data)).raw }}deg)">
+											{{ change.value }}
+											<span class="govuk-!-font-weight-regular">({{ changePercentage.value }}%)</span>
 										{%- else -%}
 											<span>No change</span>
 										{%- endif -%}
 									</strong>
-									<span class="tooltiptext govuk-!-font-size-16">
-											Change from previous 7 days ({{ card.data[13].formatted }} &ndash; {{ card.data[7].formatted }})
+									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+										Change from previous 7 days
+										({{ change.rawDate | subtract_days(13) | format_date }} &ndash; {{ change.rawDate | subtract_days(7) | format_date }})
 									</span>
-								</a>
+								</span>
 							</div>
 						</div>
 					</div>
 
 				</div>
 			</div>
-
 		</div>
 
 		{%- if card.caption.lower() == "cases" -%}
-			{{ details(cases_rate, "by date of specimen as of") }}
+			{{ details(card.rate | get_data(data), "by date of specimen as of") }}
 		{%- elif card.caption.lower() == "deaths" and not is_postcode -%}
-			{{ details(deaths_rate, "by date of death as of") }}
-{# Currently not available #}
-{#		{%- elif card.caption.lower() == "healthcare" -%}#}
-{#			{{ details(admissions_rate, "as of") }}#}
+			{{ details(card.rate | get_data(data), "by date of death as of") }}
 		{% else %}
 			<hr class="govuk-section-break bottom-aligned"/>
 		{%- endif -%}
-
 		{%- if not is_postcode -%}
 			<a href="/details/{{ card.caption | lower }}"
 				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
-				   style="text-decoration: none;"
-				   rel="next">
+				   style="text-decoration: none;">
 				<figure class="graph mini-card-figure">
-					<img src="{{ card.graph }}" alt="Graph - click for more details">
+					<img src="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg" alt="Graph - click for more details">
 				</figure>
 			</a>
 		{% endif %}
-
 		<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>
 		<div class="additional-info bottom-aligned" style="margin-top: 5px">
-				<p class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 body-small">
-				<a href="/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ card.areaType.abbr | lower }}&areaName={{ card.areaName }}{% endif %}"
-				   class="govuk-link govuk-link--no-visited-state"
-				   style="text-decoration: none"
-				   rel="next"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ card.areaName | trim_area_name }}{% endif %}</b></a>
+				<p class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 govuk-!-font-size-16">
+					<meta itemprop="url" content="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
+					<a href="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"
+					   class="govuk-link govuk-link--no-visited-state"
+					   style="text-decoration: none"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ main.areaName }}{% endif %}</b></a>
 				</p>
 		</div>
-
 	</div>
-
-{% endmacro %}
+{%- endmacro -%}

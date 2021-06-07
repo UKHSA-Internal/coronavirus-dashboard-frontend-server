@@ -1,34 +1,27 @@
+{%- set rollingSum = ("newCasesBySpecimenDateRollingSum" | get_data(data, True)) -%}
 <h3 class="govuk-!-font-size-24 title-mobile govuk-!-margin-bottom-0 govuk-!-margin-top-0">
 	People tested positive by specimen date
 	<small class="govuk-caption-m govuk-!-font-size-19 govuk-!-font-weight-regular">
-		Seven days to {{ msoa.latestDate | default(cases_rate.date, true) }}
+		Seven days to {{ rollingSum.date }}
 	</small>
 	<span class="govuk-!-font-size-36 govuk-!-margin-bottom-0">
-		{%- if areaType == "msoa" and  msoa.latestSum -%}
-			{{ msoa.latestSum | format_number | safe }}
-		{% elif areaType != "msoa" %}
-			 {{ cases_rate.rollingSum | format_number | safe }}
-		{% else %}
-			0 &ndash; 2
-		{% endif %}
+		{{ rollingSum.value }}
 	</span>
 </h3>
 
+{%- set rollingRate = ("newCasesBySpecimenDateRollingRate" | get_data(data, True)) -%}
 <p class="govuk-body govuk-!-margin-bottom-2 govuk-!-margin-top-2">
-	Rate per 100k resident population:&nbsp;<strong>
-	{%- if areaType == "msoa" -%}
-		{{ msoa.latestRate | format_number }}
-	{%- else -%}
-		{{ cases_rate.rollingRate | format_number }}
-	{%- endif -%}
-	</strong>
+	Rate per 100,000 people:&nbsp;<strong>{{ rollingRate.value }}</strong>
 </p>
-
-{% if msoa.latestSum or areaType != "msoa" %}
+{%- if rollingRate.value != 'N/A' -%}
 	<p class="govuk-caption-m govuk-!-font-weight-regular govuk-!-margin-bottom-1 govuk-!-margin-top-1">
-		How does this compare to {% if areaType == "msoa" %}{{ area_info.nationName }}{% else %}UK{% endif %} average?
+		How does this compare to {% if areaType == "msoa" %}{{ area_data.nationName }}{% else %}UK{% endif %} average?
 	</p>
-	<img src="https://coronavirus.data.gov.uk/public/assets/frontpage/scales/{{ areaType }}/{{ area_info[codeAttr] }}.svg"
+	<img src="https://coronavirus.data.gov.uk/public/assets/frontpage/scales/{{ area_data.areaType }}/{{ area_data.areaCode }}.svg"
 	     style="max-width: min(400px, 100%); height: auto;"
 	     alt="Scale showing the comparison of {{ postcode }} relative to national median."/>
-{% endif %}
+{%- else -%}
+	<p class="govuk-caption-m govuk-!-font-weight-regular govuk-!-font-size-16 govuk-!-margin-bottom-1 govuk-!-margin-top-1 govuk-grid-column-one-half govuk-!-padding-left-0">
+		For smaller areas with fewer than 3 cases, we do not show data. This is to protect individuals' identities.
+	</p>
+{%- endif -%}

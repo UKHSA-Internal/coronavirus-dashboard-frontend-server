@@ -5,50 +5,70 @@
 {%- block page_title -%}Daily update{% endblock %}
 
 {% block head %}
-	{% cache 43200, 'head-home', timestamp, "main-summary" -%}
-		<title>Daily summary | Coronavirus in the UK</title>
-		<meta property="og:title" content="Official UK Coronavirus Dashboard">
-		<meta property="og:description" content="Daily summary | Coronavirus in the UK">
-		<meta name="twitter:description" content="Daily summary | Coronavirus in the UK">
-		<meta name="twitter:title" content="Official UK Coronavirus Dashboard">
-		<meta property="og:url" content="https://coronavirus.data.gov.uk">
+		<title itemprop="name">Daily summary | Coronavirus in the UK</title>
+		<meta property="og:title" content="Daily summary | Coronavirus in the UK">
+		<meta name="twitter:title" content="Daily summary | Coronavirus in the UK">
+		<meta name="twitter:title" content="Daily summary | Coronavirus in the UK">
+		<meta name="description" itemprop="abstract" content="Official Coronavirus (COVID-19) disease situation dashboard with latest data in the UK.">
+		<meta property="og:description" content="Official Coronavirus (COVID-19) disease situation dashboard with latest data in the UK.">
+		<meta name="twitter:description" content="Official Coronavirus (COVID-19) disease situation dashboard with latest data in the UK.">
+		<meta name="keywords"
+		      content="official,COVID19,COVID-19,Coronavirus,Public Health England,United Kingdom,Data,Charts,Statistics,Testing,Cases,Vaccinations,Deaths,Healthcare,Download,Coronavirus tracker,PHE,UK,API,MSOA,postcode,dashboard">
+		<meta property="url" itemprop="url" content="https://{{ base }}/">
+		<meta property="og:url" content="https://{{ base }}/">
+	  {% if environment != "PRODUCTION" %}
+			<meta name="robots" content="noindex,nofollow" />
+			<meta name="googlebot" content="noindex,nofollow" />
+			<meta name="googlebot-news" content="noindex,nosnippet,nofollow" />
+			<meta name="AdsBot-Google" content="noindex,nofollow" />
+		{% else %}
+			<meta name="robots" content="all" />
+			<meta name="googlebot" content="all" />
+			<meta name="googlebot-news" content="all" />
+		{% endif %}
+		<link rel="shortcut icon" href="/assets/icon/favicon.ico">
 		{%- for path in og_images -%}
 			{%- if "summary" in path -%}
 				<meta name="twitter:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
 				<meta property="og:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
 			{%- endif -%}
 				<meta property="og:image" content="https://coronavirus.data.gov.uk{{ path }}?tm={{ timestamp }}">
-			{%- endfor -%}
-		{% endcache -%}
+		{%- endfor -%}
 {% endblock %}
 
 {%- block main -%}
-	{% cache 43200, 'main-body', timestamp, "uk-summary" -%}
 		<div>
 			<div class="govuk-grid-row">
 				<div class="govuk-grid-column-full ">
+					<h1 class="govuk-heading-l govuk-!-margin-bottom-2 govuk-!-margin-top-2" data-nosnippet="true">UK summary</h1>
 					<p class="govuk-body-m govuk-!-margin-bottom-1 govuk-!-margin-top-3">
-						The official UK Government website for data and insights on Coronavirus (COVID-19).
+						The official UK government website for data and insights on coronavirus (COVID-19).
 					</p>
-					<h2 class="govuk-heading-l govuk-!-margin-bottom-2">UK Summary</h2>
-
-					<p class="govuk-body-m govuk-!-margin-bottom-3">
-						See the <a class="govuk-link govuk-link--no-visited-state"
-						           href="/easy_read" rel="next">easy read summary</a> for the UK.
-					</p>
-
-					{% include "components/vaccination.html" %}
-					{% include "components/r_number.html" %}
 				</div>
 			</div>
 		</div>
+	<div>
+{#	  <div itemprop="spatialCoverage" itemtype="http://schema.org/Country" itemscope>#}
+{#      <meta itemprop="name" content="United Kingdom" />#}
+{#    </div>#}
+{#		<meta itemprop="datePosted" content="{{ despatch }}"/>#}
+{#		<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>#}
+{#		<meta itemprop="sameAs" content="https://en.wikipedia.org/wiki/United Kingdom" />#}
+{#		<meta itemprop="category" content="https://www.wikidata.org/wiki/Q81068910" />#}
+{#		<meta itemprop="name" content="UK summary" />#}
+		<div>
+			<p class="govuk-body-m govuk-!-margin-bottom-3 govuk-!-margin-top-2">
+				See the <a class="govuk-link govuk-link--no-visited-state" href="https://{{ base }}/easy_read">simple summary</a> for the UK.
+			</p>
+		</div>
 
 		<div class="card-container">
+			{% include "components/vaccinations.html" %}
 			{% for card in cards %}
-				{{ create_card(card, False) }}
+				{{ create_card(cards[card], False) }}
 			{% endfor %}
 		</div>
-	{% endcache %}
+	</div>
 {%- endblock -%}
 
 {% block lower_section %}

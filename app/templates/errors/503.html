@@ -1,0 +1,9 @@
+{% extends 'errors/error.html' %}
+{%- block status_code -%}{{ status_code }}{%- endblock -%}
+{%- block error_message -%}{{ status_detail }}{%- endblock -%}
+{%- block error_body -%}
+	<h2 class="govuk-heading-l">Sorry, the service is too busy.</h2>
+  <p class="govuk-body">
+	  We cannot serve your request right now due to high load. Please try again later.
+  </p>
+{%- endblock -%}

@@ -6,13 +6,13 @@
 import re
 from json import loads
 from datetime import datetime
+from asyncio import get_running_loop, Lock
 
 # 3rd party:
-from markdown import markdown
-from flask import request, current_app as app
 
 # Internal:
-from ...storage import StorageClient
+from app.storage import AsyncStorageClient
+from app.caching import from_cache_or_func
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -30,9 +30,14 @@ special_chars_pattern = re.compile(r"[\"')]")
 to_underscore_pattern = re.compile(r"[\s.(&,]+")
 
 
-def get_whats_new_banners(timestamp: str):
-    with StorageClient(**BANNER_DATA) as client:
-        full_data = loads(client.download().readall().decode())
+async def _get_whats_new_banners(timestamp: str):
+    loop = get_running_loop()
+
+    async with AsyncStorageClient(**BANNER_DATA) as client, Lock(loop=loop):
+        data_io = await client.download()
+        raw_data = await data_io.readall()
+
+    full_data = loads(raw_data.decode())
 
     if full_data is None:
         full_data = dict()
@@ -45,9 +50,24 @@ def get_whats_new_banners(timestamp: str):
         data
     )
 
+    results = list()
+
     for banner in filtered_data:
         banner['anchor'] = special_chars_pattern.sub("", banner["headline"].lower())
         banner['anchor'] = to_underscore_pattern.sub("_", banner["anchor"])
         banner['formatted_date'] = f"{datetime.strptime(banner['date'], '%Y-%m-%d'):%-d %B %Y}"
+        results.append(banner)
 
-        yield banner
+    return results
+
+
+async def get_whats_new_banners(request, timestamp):
+    response = from_cache_or_func(
+        request=request,
+        func=_get_whats_new_banners,
+        prefix="FRONTEND::CL::",
+        expire=60 * 15,
+        timestamp=timestamp
+    )
+
+    return await response

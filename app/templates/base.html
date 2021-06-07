@@ -1,79 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemtype="https://schema.org/WebSite" itemscope>
 	<head>
-		{%- cache 43200, 'head-v2', timestamp, 'main-head' %}
-			<meta charset="utf-8">
-			<meta http-equiv="x-ua-compatible" content="ie=edge">
-			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-			<meta name="theme-color" content="#0b0c0c">
-			<meta property="og:title" content="Official UK Coronavirus Dashboard">
-			<meta name="twitter:title" content="Official UK Coronavirus Dashboard">
-			<meta name="description"
-			      content="Official Coronavirus (COVID-19) disease situation dashboard with latest data in the UK.">
-			<meta name="keywords"
-			      content="official,COVID19,COVID-19,Coronavirus,Public Health England,United Kingdom,Data,Charts,Download,Coronavirus tracker,PHE,UK,API,MSOA,postcode,dashboard">
-			<meta name="twitter:card" content="summary_large_image">
-			<meta name="twitter:site" content="@PHE_uk">
-			<meta property="og:type" content="website">
-			<meta property="og:locale" content="en_GB"/>
-			<meta property="og:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png?tm={{ timestamp }}">
-			<link rel="preload" href="{{ url_for("static", filename="govuk-frontend/govuk/assets/fonts/light-94a07e06a1-v2.woff2") }}" as="font" type="font/woff2" crossorigin>
-			<link rel="preload" href="{{ url_for("static", filename="govuk-frontend/govuk/assets/fonts/bold-b542beb274-v2.woff2") }}" as="font" type="font/woff2" crossorigin>
-			<link rel="preload" href="{{ url_for("static", filename="application.css") }}?tm={{ timestamp }}" as="style" type="text/css">
-			<link rel="apple-touch-icon" href="https://coronavirus.data.gov.uk/favicon.png">
-			<link rel="icon" href="https://coronavirus.data.gov.uk/favicon.ico">
-			<link rel="manifest" href="https://coronavirus.data.gov.uk/manifest.json">
-			<link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="application.css") }}?tm={{ timestamp }}">
-		{% endcache %}
+		<meta charset="utf-8">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="theme-color" content="#0b0c0c">
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:site" content="@PHE_uk">
+		<meta property="og:type" content="website">
+		<meta property="og:locale" content="en_GB"/>
+		<meta property="og:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png?tm={{ timestamp }}">
+		<meta itemprop="copyrightNotice" content="All content is available under the Open Government Licence v3.0, except where otherwise stated.">
+		<meta itemprop="logo" content="https://{{ base }}/assets/icon/favicon.png">
+		<link rel="preload" href="{{ url_for("static", path="govuk-frontend/govuk/assets/fonts/light-94a07e06a1-v2.woff2") }}" as="font" type="font/woff2" crossorigin>
+		<link rel="preload" href="{{ url_for("static", path="govuk-frontend/govuk/assets/fonts/bold-b542beb274-v2.woff2") }}" as="font" type="font/woff2" crossorigin>
+		<link rel="preload" href="{{ url_for("static", path="application.css") }}?tm={{ timestamp }}" as="style" type="text/css">
+		<link rel="apple-touch-icon" href="https://coronavirus.data.gov.uk/favicon.png">
+		<link rel="icon" href="https://coronavirus.data.gov.uk/favicon.ico">
+		<link rel="manifest" href="https://coronavirus.data.gov.uk/manifest.json">
+		{% if DEBUG -%}
+			<link rel="stylesheet" type="text/css" href="{{ url_for("static", path="css/application.css") }}?tm={{ timestamp }}">
+		{%- else -%}
+			<link rel="stylesheet" type="text/css" href="{{ url_for("static", path="application.css") }}?tm={{ timestamp }}">
+		{%- endif -%}
 		{% block head %}{% endblock %}
 		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-161400643-2"></script>
 		<script type="application/javascript">!function(e,t,n){var a=e.location,i="script",r="instrumentationKey",o="ingestionendpoint",s="disableExceptionTracking",c="ai.device.",p="toLowerCase",l="crossOrigin",u="POST",d="appInsightsSDK",f=n.name||"appInsights";(n.name||e[d])&&(e[d]=f);var g=e[f]||function(d){var f=!1,g=!1,m={initialize:!0,queue:[],sv:"4",version:2,config:d};function v(e,t){var n={},i="Browser";return n[c+"id"]=i[p](),n[c+"type"]=i,n["ai.operation.name"]=a&&a.pathname||"_unknown_",n["ai.internal.sdkVersion"]="javascript:snippet_"+(m.sv||m.version),{time:function(){var e=new Date;function t(e){var t=""+e;return 1===t.length&&(t="0"+t),t}return e.getUTCFullYear()+"-"+t(1+e.getUTCMonth())+"-"+t(e.getUTCDate())+"T"+t(e.getUTCHours())+":"+t(e.getUTCMinutes())+":"+t(e.getUTCSeconds())+"."+((e.getUTCMilliseconds()/1e3).toFixed(3)+"").slice(2,5)+"Z"}(),iKey:e,name:"Microsoft.ApplicationInsights."+e.replace(/-/g,"")+"."+t,sampleRate:100,tags:n,data:{baseData:{ver:2}}}}var h=d.url||n.src;if(h){function y(t){var i,s,c,l,y,T,S,k,D,C,b;f=!0,m.queue=[],g||(g=!0,i=h,S=function(){var e={},t=d.connectionString;if(t)for(var n=t.split(";"),a=0;a<n.length;a++){var i=n[a].split("=");2===i.length&&(e[i[0][p]()]=i[1])}if(!e[o]){var r=e.endpointsuffix,s=r?e.location:null;e[o]="https://"+(s?s+".":"")+"dc."+(r||"services.visualstudio.com")}return e}(),k=S[r]||d[r]||"",C=(D=S[o])?D+"/v2/track":config.endpointUrl,(b=[]).push((s="SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details)",c=i,l=C,(T=(y=v(k,"Exception")).data).baseType="ExceptionData",T.baseData.exceptions=[{typeName:"SDKLoadFailed",message:s.replace(/\./g,"-"),hasFullStack:!1,stack:s+"\nSnippet failed to load ["+c+"] -- Telemetry is disabled\nHelp Link: https://go.microsoft.com/fwlink/?linkid=2128109\nHost: "+(a&&a.pathname||"_unknown_")+"\nEndpoint: "+l,parsedStack:[]}],y)),b.push(function(e,t,n,a){var i=v(k,"Message"),r=i.data;r.baseType="MessageData";var o=r.baseData;return o.message='AI (Internal): 99 message:"'+("SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details) ("+n+")").replace(/\"/g,"")+'"',o.properties={endpoint:a},i}(0,0,i,C)),function(t,a){if(JSON){var i=e.fetch;if(i&&!n.useXhr)i(a,{method:u,body:JSON.stringify(t),mode:"cors"});else if(XMLHttpRequest){var r=new XMLHttpRequest;r.open(u,a),r.setRequestHeader("Content-type","application/json"),r.send(JSON.stringify(t))}}}(b,C))}function T(e,t){g||setTimeout(function(){!t&&m.core||y()},500)}var S=function(){var e=t.createElement(i);e.src=h;var a=n[l];return!a&&""!==a||"undefined"==e[l]||(e[l]=a),e.onload=T,e.onerror=y,e.onreadystatechange=function(t,n){"loaded"!==e.readyState&&"complete"!==e.readyState||T(0,n)},e}();n.ld<0?t.getElementsByTagName("head")[0].appendChild(S):setTimeout(function(){t.getElementsByTagName(i)[0].parentNode.appendChild(S)},n.ld||0)}try{m.cookie=t.cookie}catch(e){}function k(e){for(;e.length;)!function(e){m[e]=function(){var t=arguments;f||m.queue.push(function(){m[e].apply(m,t)})}}(e.pop())}var D="track",C="TrackPage",b="TrackEvent";k([D+"Event",D+"PageView",D+"Exception",D+"Trace",D+"DependencyData",D+"Metric",D+"PageViewPerformance","start"+C,"stop"+C,"start"+b,"stop"+b,"addTelemetryInitializer","setAuthenticatedUserContext","clearAuthenticatedUserContext","flush"]),m.SeverityLevel={Verbose:0,Information:1,Warning:2,Error:3,Critical:4};var w=(d.extensionConfig||{}).ApplicationInsightsAnalytics||{};if(!0!==d[s]&&!0!==w[s]){method="onerror",k(["_"+method]);var E=e[method];e[method]=function(e,t,n,a,i){var r=E&&E(e,t,n,a,i);return!0!==r&&m["_"+method]({message:e,url:t,lineNumber:n,columnNumber:a,error:i}),r},d.autoExceptionInstrumented=!0}return m}(n.cfg);(e[f]=g).queue&&0===g.queue.length&&g.trackPageView({})}(window,document,{src:"https://az416426.vo.msecnd.net/scripts/b/ai.2.min.js",cfg:{name:"frontend",distributedTracingMode:2,instrumentationKey:"{{ app_insight_token }}"}});</script>
     <script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}</script>
+		<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i+"?ref=bwt";y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "6r17g7ix0s");</script>
 	</head>
 <body class="govuk-template__body">
 <script>document.body.className = ((document.body.className) ? document.body.className + ' js-enabled' : 'js-enabled');</script>
 	{%- include "components/header.html" -%}
 	{%- include "components/mobile_nav.html" -%}
-
-{%- cache 300, 'banner', timestamp -%}
 	{%- include "components/banners.html" -%}
-{%- endcache -%}
 
 <div class="govuk-width-container">
-	{%- cache 600, 'timestamp', timestamp -%}
-		<div class="govuk-!-margin-top-5 govuk-!-margin-bottom-5" role="region" aria-labelledby="last-update">
-			<p class="govuk-body-s" id="last-update">
-				Last updated on&nbsp;<time datetime="{{ timestamp }}">{{ timestamp | format_timestamp }}</time>
-			</p>
-		</div>
-	{%- endcache -%}
+	{%- block lead_timestamp %}
+	<div class="govuk-!-margin-top-5 govuk-!-margin-bottom-5" role="region" aria-labelledby="last-update">
+		<p class="govuk-body-s" id="last-update">
+			Last updated on&nbsp;<time itemprop="datePosted" content="{{ despatch }}" datetime="{{ despatch }}">{{ despatch | format_timestamp }}</time>
+			<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
+			<span itemprop="maintainer" itemscope>
+				<span itemprop="organization" itemtype="https://schema.org/Organization">
+					<meta itemprop="legalName" content="Public Health England">
+					<meta itemprop="email" content="coronavirus-tracker@phe.gov.uk">
+				</span>
+      </span>
+		</p>
+	</div>
+	{% endblock -%}
 	<main class="govuk-main-wrapper" id="main-content" role="main">
 		<div class="dashboard-container">
 			{%- include "components/nav.html" -%}
 			<div class="main">
-				<div id="top">
-					<div class="sticky-header govuk-!-padding-top-3">
-						<div class="sticky-header govuk-grid-row govuk-!-margin-top-0" style="width: 100%">
-							<div class="govuk-grid-column-one-half">
-								<h1 class="govuk-caption-l govuk-!-margin-bottom-0 govuk-!-margin-top-0 panel-title-new">{%- block page_title -%}{%- endblock -%}</h1>
-							</div>
-						</div>
-						<div class="govuk-grid-row govuk-!-margin-top-0">
-							<div class="govuk-grid-column-full">
-								<hr class="govuk-section-break govuk-section-break--m govuk-!-margin-top-2 govuk-!-margin-bottom-2 govuk-section-break--visible">
-							</div>
-						</div>
-					</div>
-				</div>
 				{%- block main -%}{%- endblock -%}
 				{%- block lower_section -%}{%- endblock -%}
 			</div>
 		</div>
 	</main>
 </div>
-{%- cache 43200, 'footer', timestamp -%}
-	{% include "components/footer.html" %}
-{%- endcache -%}
+{% include "components/footer.html" %}
 <script type="application/javascript">function initMobileButtons() {document.querySelector("#mobile-menu-btn").onclick = function mobileMenu(){var ms = document.getElementById("mobile-navigation").style;ms.display = ms.display === "none" ? "inline-block" : "none";}} document.readyState !== 'loading' ? initMobileButtons() : document.addEventListener('DOMContentLoaded', initMobileButtons)</script>
 <script type="application/javascript">function trimCode() {var elm = document.querySelector("form[name=postcode-search] input[name=postcode]");elm.value = elm.value.trim().toUpperCase()} function postcodeProcessorInit() {document.querySelector("form[name=postcode-search]").addEventListener("submit", trimCode)} document.readyState !== 'loading' ? postcodeProcessorInit() : document.addEventListener('DOMContentLoaded', postcodeProcessorInit);</script>
 <script>"use strict";function gtag(){window.dataLayer.push(arguments)}var setCookies=function(){window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","UA-161400643-2",{anonymize_ip:!0,allowAdFeatures:!1}),window.ga("create","UA-145652997-1","auto","govuk_shared",{allowLinker:!0}),window.ga("govuk_shared.require","linker"),window.ga("govuk_shared.set","anonymizeIp",!0),window.ga("govuk_shared.set","allowAdFeatures",!1),window.ga("govuk_shared.linker:autoLink",["www.gov.uk"]),window.ga("send","pageview"),window.ga("govuk_shared.send","pageview")},removeCookies=function(){document.cookie="_ga=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;",document.cookie="_gid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;",document.cookie="_gat_gtag_UA_161400643_2=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;",document.cookie="LocationBanner=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"},determineCookieState=function(){var e=document.cookie.split(";").find(function(e){return e.trim().startsWith("cookies_preferences_set_21_3")});if(!e||"true"!==e.split("=")[1]){var o=document.querySelector("#cookie-banner");o.style.display="block",o.style.visibility="visible"}};function showElement(e){e.style.display="block",e.style.visibility="visible"}function hideElement(e){e.remove()}function runCookieJobs(){var e=document.querySelector("#global-cookie-message");document.querySelector("#accept-cookies").onclick=function(){var o=new Date,t=o.getFullYear(),n=o.getMonth(),i=o.getDate(),c=new Date(t,n+1,i).toUTCString();document.cookie="cookies_policy_21_3="+encodeURIComponent('{"essential":true,"usage":true,"preferences":true}')+"; expires="+c+";",document.cookie="cookies_preferences_set_21_3=true; expires="+c+";",setCookies(),showElement(e),hideElement(document.querySelector("#cookie-banner")),document.querySelector("#hide-cookie-decision").onclick=function(){hideElement(e)}},document.querySelector("#reject-cookies").onclick=function(){var o=new Date,t=o.getFullYear(),n=o.getMonth(),i=o.getDate(),c=new Date(t,n+1,i).toUTCString();document.cookie="cookies_policy_21_3="+encodeURIComponent('{"essential":true,"usage":false,"preferences":false}')+"; expires="+c+";",document.cookie="cookies_preferences_set_21_3=true; expires="+c+";",removeCookies(),e.innerHTML=e.innerHTML.replace("accepted","rejected"),showElement(e),hideElement(document.querySelector("#cookie-banner")),document.querySelector("#hide-cookie-decision").onclick=function(){hideElement(e)}},determineCookieState()}"loading"!==document.readyState?runCookieJobs():document.addEventListener("DOMContentLoaded",runCookieJobs);</script>

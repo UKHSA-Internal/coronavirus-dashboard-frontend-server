@@ -1,21 +1,22 @@
+{% set main = "alertLevel" | get_data(data) %}
+{% set alert = process_alert(main) %}
+
 	<h3 class="govuk-!-font-size-36 title-mobile govuk-!-margin-bottom-0 govuk-!-margin-top-0">
 		<small class="govuk-heading-m govuk-!-font-size-24 govuk-!-margin-bottom-1">
 			Current alert level {%- if alert_level -%}&nbsp;in {{ area_info.ltlaName }}{%- endif -%}
 		</small>
-		{%- if alert_level -%}
-			{{ alert_level.value | upper }}
+		{%- if alert.url is defined -%}
+			{{ alert.value | upper }}
 		{%- else -%}
-			<span class="govuk-!-font-size-24">{{ national_adjectives[area_info.nationName] }} restrictions apply.</span>
+			<span class="govuk-!-font-size-24">{{ main.adjective }} restrictions apply.</span>
 		{% endif %}
 	</h3>
 	<p class="govuk-body govuk-!-margin-top-2">
-		{%- if alert_level.url -%}
-			{%- set alert_url = alert_level.url -%}
-		{%- elif area_info.ltla.startswith("S") -%}
-			{%- set alert_url = "https://www.gov.scot/coronavirus-covid-19/" -%}
-		{%- elif area_info.ltla.startswith("W") -%}
+		{%- if alert.url is defined -%}
+			{%- set alert_url = alert.url -%}
+		{%- elif main.areaCode.startswith("W") -%}
 			{%- set alert_url = "https://gov.wales/coronavirus" -%}
-		{%- elif area_info.ltla.startswith("N") -%}
+		{%- elif main.areaCode.startswith("N") -%}
 			{%- set alert_url = "https://www.nidirect.gov.uk/articles/coronavirus-covid-19-regulations-and-localised-restrictions" -%}
 		{%- endif -%}
 		<a class="govuk-link govuk-link--no-visited-state govuk-!-font-weight-regular"

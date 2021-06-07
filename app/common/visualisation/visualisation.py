@@ -11,7 +11,6 @@ from plotly import graph_objects as go
 from pandas import Series
 
 # Internal:
-from ..caching import cache_client
 from ..data.variables import IsImproving
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,7 +69,7 @@ COLOURS = {
 
 
 def get_colour(change, metric_name) -> dict:
-    change_value = float(change["value"] or 0)
+    change_value = float(change or 0)
     improving = IsImproving[metric_name](change_value)
 
     trend_colour = COLOURS["neutral"]
@@ -85,18 +84,20 @@ def get_colour(change, metric_name) -> dict:
 
 
 def svg_to_url(svg):
-    return "data:image/svg+xml;utf8," + quote(svg)
+    return f"data:image/svg+xml;utf8,{quote(svg)}"
 
 
-@cache_client.memoize(60 * 60 * 6)
-def plot_thumbnail(timeseries, change, metric_name):
+async def plot_thumbnail(timeseries, change, metric_name):
     get_date = itemgetter("date")
     get_value = itemgetter("value")
 
-    trend_colour = get_colour(change, metric_name)
+    change_data = await change
 
-    x = list(map(get_date, timeseries))
-    y = Series(list(map(get_value, timeseries))).rolling(7, center=True).mean()
+    trend_colour = get_colour(get_value(change_data), metric_name)
+    data = await timeseries
+
+    x = list(map(get_date, data))
+    y = Series(list(map(get_value, data))).rolling(7, center=True).mean()
     fig = go.Figure(
         go.Scatter(
             x=x[13:],
