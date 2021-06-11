@@ -24,7 +24,7 @@ from app.postcode.views import postcode_page
 from app.landing.views import home_page
 from app.healthcheck.views import run_healthcheck
 from app.config import Settings
-from app.common.utils import add_cloud_role_name
+from app.common.utils import add_cloud_role_name, add_instance_role_id
 from app.middleware.tracers.starlette import TraceRequestMiddleware
 from app.middleware.headers import ProxyHeadersHostMiddleware
 from app.middleware.tracers.azure.exporter import Exporter
@@ -79,11 +79,13 @@ middleware = [
 async def lifespan(application: Starlette):
     exporter = Exporter(connection_string=Settings.instrumentation_key)
     exporter.add_telemetry_processor(add_cloud_role_name)
+    exporter.add_telemetry_processor(add_instance_role_id)
     application.state.azure_exporter = exporter
 
     handler = AzureLogHandler(connection_string=Settings.instrumentation_key)
 
     handler.add_telemetry_processor(add_cloud_role_name)
+    handler.add_telemetry_processor(add_instance_role_id)
 
     for log, level in logging_instances:
         log.addHandler(handler)
