@@ -74,6 +74,11 @@ def add_cloud_role_name(envelope):
     return True
 
 
+def add_instance_role_id(envelope):
+    envelope.tags['ai.cloud.roleInstance'] = Settings.cloud_instance_id
+    return True
+
+
 async def get_from_storage(*args, **kwargs):
     loop = get_running_loop()
 
