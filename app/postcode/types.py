@@ -3,7 +3,7 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-from typing import TypedDict, List, Dict, Union
+from typing import TypedDict, List, Dict
 
 # 3rd party:
 
