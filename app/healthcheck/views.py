@@ -45,7 +45,11 @@ async def test_redis(request):
 
 
 async def run_healthcheck(request: Request) -> Union[JSONResponse, Response]:
-    response = await gather(test_db(), test_storage(), test_redis(request))
+    response = await gather(
+        # test_db(),  # To frequent - needs to be revised.
+        test_storage(),
+        test_redis(request)
+    )
 
     if request.method == 'GET':
         return JSONResponse(response, status_code=HTTPStatus.OK.real)
