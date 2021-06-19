@@ -16,6 +16,7 @@
 	<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
 	<meta itemprop="mainEntityOfPage" content="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"/>
 	<meta itemprop="thumbnailUrl" content="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"/>
+	<meta itemprop="image" content="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"/>
 	<meta itemprop="description"
 	      content="Latest data on vaccinations for {{ firstDoseDaily.areaName }} {% if is_postcode -%}at {{ firstDoseDaily.areaType | to_full_area_type | lower }} level{%- endif %}provided on {{ firstDoseDaily.date }}"/>
 	<meta itemprop="text"
