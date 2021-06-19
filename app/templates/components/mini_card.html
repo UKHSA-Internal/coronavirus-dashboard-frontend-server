@@ -28,6 +28,7 @@
 			<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
 			<meta itemprop="mainEntityOfPage" content="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
 			<meta itemprop="thumbnailUrl" content="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg"/>
+			<meta itemprop="image" content="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg"/>
 			<meta itemprop="description"
 			      content="Latest data on {{ card.caption | lower }} for {{ main.areaName }} {% if is_postcode -%}at {{ main.areaType | to_full_area_type | lower }} level {%- endif %}provided on {{ main.date }}"/>
 			<meta itemprop="text" content="
