@@ -4,6 +4,8 @@ services:
   covid19-landing:
     build: .
     restart: always
+    volumes:
+      - ./app/assets/css:/opt/assets
     ports:
       - 5100:5100
     env_file:
