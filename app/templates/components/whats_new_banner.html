@@ -2,11 +2,12 @@
 	{% for banner in whatsnew_banners %}
 		<div class="change-log-banner">
 			<div class="govuk-body-s govuk-!-font-weight-bold govuk-!-margin-bottom-0">
-					<time datetime="{{ banner.date }}">{{ banner.formatted_date }}</time> &mdash; {{ banner.headline }}
-	        <a href="/details/whats-new#{{ banner.anchor }}"
-	           class={{ "govuk-link govuk-link--no-visited-state govuk-!-margin-left-1" }}>
-		        More
-	        </a>
+				<strong class="govuk-tag" style="background:white;color: #1d70b8 !important;margin:0 1rem 0 0;line-height:initial;">{{ banner.type }}</strong>
+				<time datetime="{{ banner.date }}">{{ banner.formatted_date }}</time> &mdash; {{ banner.heading }}
+        <a href="/details/whats-new#{{ banner.id }}"
+           class={{ "govuk-link govuk-link--no-visited-state govuk-!-margin-left-1" }}>
+	        More
+        </a>
 	    </div>
 		</div>
 	{% endfor %}

@@ -4,15 +4,16 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
 import re
-from json import loads
 from datetime import datetime
-from asyncio import get_running_loop, Lock
+from asyncio import get_running_loop
+from pathlib import Path
 
 # 3rd party:
 
 # Internal:
-from app.storage import AsyncStorageClient
 from app.caching import from_cache_or_func
+from app.database.postgres import Connection
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -20,11 +21,15 @@ __all__ = [
     'get_whats_new_banners'
 ]
 
-
 BANNER_DATA = dict(
     container="publicdata",
     path="assets/cms/changeLog.json"
 )
+
+query_path = Path(__file__).parent.joinpath("query.sql").absolute()
+
+with open(query_path) as fp:
+    query = fp.read()
 
 special_chars_pattern = re.compile(r"[\"')]")
 to_underscore_pattern = re.compile(r"[\s.(&,]+")
@@ -33,29 +38,13 @@ to_underscore_pattern = re.compile(r"[\s.(&,]+")
 async def _get_whats_new_banners(timestamp: str):
     loop = get_running_loop()
 
-    async with AsyncStorageClient(**BANNER_DATA) as client, Lock(loop=loop):
-        data_io = await client.download()
-        raw_data = await data_io.readall()
-
-    full_data = loads(raw_data.decode())
-
-    if full_data is None:
-        full_data = dict()
-
-    data = full_data.get("changeLog", list())
-    datestamp = timestamp.split("T")[0]
-
-    filtered_data = filter(
-        lambda b: b["date"] == datestamp and b.get("displayBanner", False),
-        data
-    )
+    async with Connection(loop=loop) as conn:
+        response = await conn.fetch(query, datetime.fromisoformat(timestamp[:-2]))
 
     results = list()
-
-    for banner in filtered_data:
-        banner['anchor'] = special_chars_pattern.sub("", banner["headline"].lower())
-        banner['anchor'] = to_underscore_pattern.sub("_", banner["anchor"])
-        banner['formatted_date'] = f"{datetime.strptime(banner['date'], '%Y-%m-%d'):%-d %B %Y}"
+    for banner in map(dict, response):
+        banner["formatted_date"] = f"{banner['date']:%-d %B %Y}"
+        banner["date"] = banner['date'].isoformat()
         results.append(banner)
 
     return results
