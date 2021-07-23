@@ -1,4 +1,4 @@
-SELECT cl.id::TEXT,
+SELECT DISTINCT cl.id::TEXT,
 	   cl.date,
        cl.high_priority,
        t.tag           AS type,
