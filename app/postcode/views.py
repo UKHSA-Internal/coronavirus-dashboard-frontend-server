@@ -44,9 +44,6 @@ curr_dir, _ = split_path(abspath(__file__))
 queries_dir = join_path(curr_dir, "queries")
 assets_dir = join_path(curr_dir, "assets")
 
-with open(join_path(queries_dir, "local_data_se.sql")) as fp:
-    local_data_query = fp.read()
-
 
 with open(join_path(assets_dir, "query_params.json")) as fp:
     query_data: QueryDataType = load(fp)
