@@ -17,7 +17,7 @@
 	<p class="govuk-caption-m govuk-!-font-weight-regular govuk-!-margin-bottom-1 govuk-!-margin-top-1">
 		How does this compare to {% if areaType == "msoa" %}{{ area_data.nationName }}{% else %}UK{% endif %} average?
 	</p>
-	<img src="https://coronavirus.data.gov.uk/public/assets/frontpage/scales/{{ area_data.areaType }}/{{ area_data.areaCode }}.svg"
+	<img src="https://coronavirus.data.gov.uk/public/assets/frontpage/scales/{{ area_data.areaType }}/{{ area_data.areaCode }}.jpg"
 	     style="max-width: min(400px, 100%); height: auto;"
 	     alt="Scale showing the comparison of {{ postcode }} relative to national median."/>
 {%- else -%}
