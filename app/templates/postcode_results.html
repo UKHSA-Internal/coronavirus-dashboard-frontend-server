@@ -42,8 +42,10 @@
 
 	<div class="postcode-lead">
 		<figure class="graph govuk-!-margin-bottom-2"
+		        aria-hidden="true"
 		        style="margin: 0;">
 			<img src="https://coronavirus.data.gov.uk/public/assets/frontpage/map_thumbnails/{{ area_data.areaCode }}.svg"
+			     loading="lazy"
 			     style="max-width: min(400px, 100%); height: auto; border: 1px #f3f2f1 solid;"
 			     alt="Scale showing the comparison of {{ postcode }} compared to national average."/>
 		</figure>
