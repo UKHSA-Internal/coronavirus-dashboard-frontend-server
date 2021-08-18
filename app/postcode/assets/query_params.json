@@ -50,9 +50,7 @@
       "newVirusTestsRollingSum",
       "newVirusTestsDirection",
       "transmissionRateMin",
-      "transmissionRateMax",
-      "transmissionRateGrowthRateMin",
-      "transmissionRateGrowthRateMax"
+      "transmissionRateMax"
     ]
   }
 }
