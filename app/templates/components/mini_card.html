@@ -133,9 +133,7 @@
 								<span class="govuk-link--no-visited-state number-link-red" style="border: none">
 									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1 change-box {{ colour }}">
 										{%- if changePercentage.value != 0 -%}
-											<img src="{{ url_for("static", path=image) }}"
-											     width="12px"
-											     alt="arrow"
+											<img src="{{ url_for("static", path=image) }}" width="12px" loading="lazy" alt="arrow" aria-hidden="true"
 											     style="transform: rotate({{ ((card.metric + "Direction")| get_data(data)).raw }}deg)">
 											{{ change.value }}
 											<span class="govuk-!-font-weight-regular">({{ changePercentage.value }}%)</span>
@@ -164,11 +162,11 @@
 			<hr class="govuk-section-break bottom-aligned"/>
 		{%- endif -%}
 		{%- if not is_postcode -%}
-			<a href="/details/{{ card.caption | lower }}"
+			<a href="/details/{{ card.caption | lower }}" tabindex="0"
 				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
 				   style="text-decoration: none;">
-				<figure class="graph mini-card-figure">
-					<img src="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg" alt="Graph - click for more details">
+				<figure class="graph mini-card-figure" aria-hidden="true">
+					<img src="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg" alt="Graph - click for more details" loading="lazy">
 				</figure>
 			</a>
 		{% endif %}
