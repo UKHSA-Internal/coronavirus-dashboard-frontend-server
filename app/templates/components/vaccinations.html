@@ -41,7 +41,7 @@
        rel="next"
 		   style="text-decoration: none; justify-self: start"
 		   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}">
-			<b>All vaccination data</b>
+			<b>All vaccination data{% if firstDoseDaily.areaType != "overview" %} in {{ firstDoseDaily.areaName }}{% endif %}</b>
 		</a>
 	</div>
 
@@ -227,11 +227,11 @@
 		</figcaption>
 		<div class="graph">
 			<a href="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"
-				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
+				   class="govuk-link govuk-link--no-visited-state bottom-aligned" tabindex="0"
 				   style="text-decoration: none"
 				   rel="next">
 				<img src="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"
-				     alt="Chart displaying the percentage of adult population vaccinated in {{ firstDoseDaily.areaName }}"/>
+				     alt="Chart displaying the percentage of adult population vaccinated in {{ firstDoseDaily.areaName }}" aria-hidden="true" loading="lazy"/>
 			</a>
 		</div>
 
@@ -244,7 +244,7 @@
 			<a class="govuk-link govuk-link--no-visited-state"
 			   style="text-decoration: none"
 			   href="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}">
-				<b>All vaccination data</b>
+				<b>All vaccination data{% if firstDoseDaily.areaType != "overview" %} in {{ firstDoseDaily.areaName }}{% endif %}</b>
 			</a>
 		</p>
 	</div>
