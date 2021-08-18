@@ -387,7 +387,7 @@ main {
 
   & > .content {
     display: flex;
-    justify-content: space-around;
+    justify-content: flex-start;
     flex-wrap: wrap;
     flex: 3 1 33.3333%;
 
@@ -412,6 +412,11 @@ main {
     justify-content: stretch;
     flex-direction: column;
     width: max(300px, 33.3333333%);
+
+    &:not(&:first-of-type) {
+      //@extend .govuk-\!-margin-top-2;
+      align-self: flex-end;
+    }
 
     @media only screen and (max-width: 520px) {
       &.link {
