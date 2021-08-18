@@ -6,9 +6,9 @@
 			</span>
 			<meta itemprop="datePosted" content="{{ despatch }}"/>
 			<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
-			<meta itemprop="url" content="https://{{ base }}/details/interactive-map/cases"/>
-			<meta itemprop="url" content="https://{{ base }}/details/interactive-map/vaccinations"/>
-			<meta itemprop="thumbnailUrl" content="https://{{ base }}/public/assets/frontpage/images/map.png"/>
+			<meta itemprop="url" content="{{ base }}/details/interactive-map/cases"/>
+			<meta itemprop="url" content="{{ base }}/details/interactive-map/vaccinations"/>
+			<meta itemprop="thumbnailUrl" content="{{ base }}/public/assets/frontpage/images/map.png"/>
 			<meta itemprop="description"
 			      content="Interactive map of the UK showing latest rate of cases at local authority and small area levels."/>
 		<h3 class="govuk-heading-m govuk-heading-m govuk-!-margin-bottom-3">
@@ -24,20 +24,20 @@
 			</ul>
 		</div>
 
-		<a href="https://{{ base }}/details/interactive-map/cases" class="govuk-button" rel="nofollow" style="width: max-content">
+		<a href="{{ base }}/details/interactive-map/cases" class="govuk-button" rel="nofollow" style="width: max-content">
 				View maps
 		</a>
 		<div class="govuk-visually-hidden">
-			<a href="https://{{ base }}/details/interactive-map/cases" class="govuk-button" style="width: max-content">
+			<a href="{{ base }}/details/interactive-map/cases" class="govuk-button" style="width: max-content">
 					View map of cases
 			</a>
-			<a href="https://{{ base }}/details/interactive-map/vaccinations" class="govuk-button" style="width: max-content">
+			<a href="{{ base }}/details/interactive-map/vaccinations" class="govuk-button" style="width: max-content">
 					View map of vaccinations
 			</a>
 		</div>
 	</div>
 	<div style="text-align: center" aria-hidden="true">
-		<img src="https://{{ base }}/public/assets/frontpage/images/map.png"
+		<img src="{{ base }}/public/assets/frontpage/images/map.png"
 		     class="map-img"
          loading="lazy"
 		     alt="Map of the UK showing latest rate of new cases by specimen date for Upper Tier Local Authorities">

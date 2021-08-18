@@ -1,7 +1,7 @@
-<form action="https://{{ base }}/search" name="postcode-search" method="GET"
+<form action="{{ base }}/search" name="postcode-search" method="GET"
       itemprop="potentialAction" itemscope itemtype="https://schema.org/SearchAction"
       id="regionform" rel="next" target="_self" enctype="application/x-www-form-urlencoded">
-    <meta itemprop="target" content="https://{{ base }}/search?postcode={postcode}"/>
+    <meta itemprop="target" content="{{ base }}/search?postcode={postcode}"/>
 	<div class="govuk-form-group govuk-!-margin-bottom-0{% if invalid_postcode %} govuk-form-group--error{% endif %}">
 	  <fieldset class="govuk-fieldset" role="group" aria-describedby="postcode-hint">
 			<label class="govuk-label govuk-!-font-weight-bold" for="postcode">

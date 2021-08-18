@@ -9,9 +9,9 @@
 		<meta name="twitter:site" content="@PHE_uk">
 		<meta property="og:type" content="website">
 		<meta property="og:locale" content="en_GB"/>
-		<meta property="og:image" content="https://coronavirus.data.gov.uk/assets/public/images/opengraph-image.png?tm={{ timestamp }}">
+		<meta property="og:image" content="{{ base }}/assets/public/images/opengraph-image.png?tm={{ timestamp }}">
 		<meta itemprop="copyrightNotice" content="All content is available under the Open Government Licence v3.0, except where otherwise stated.">
-		<meta itemprop="logo" content="https://{{ base }}/assets/icon/favicon.png">
+		<meta itemprop="logo" content="{{ base }}/assets/icon/favicon.png">
 		<link rel="preload" href="{{ url_for("static", path="govuk-frontend/govuk/assets/fonts/light-94a07e06a1-v2.woff2") }}" as="font" type="font/woff2" crossorigin>
 		<link rel="preload" href="{{ url_for("static", path="govuk-frontend/govuk/assets/fonts/bold-b542beb274-v2.woff2") }}" as="font" type="font/woff2" crossorigin>
 		<link rel="preload" href="{{ url_for("static", path="application.css") }}?tm={{ timestamp }}" as="style" type="text/css">
