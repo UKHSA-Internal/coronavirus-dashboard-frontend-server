@@ -72,13 +72,13 @@
 			, {{ data.loc[data.areaType.isin(["utla", "ltla"])].sort_values("rank").areaName.values[0] }}
 		{%- endif -%}.
 	</p>
-	{%- include "components/r_number.html" -%}
 	{%- include "components/vaccinations.html" -%}
 	<div class="card-container">
 		{%- for card in cards -%}
 			{{ create_card(cards[card], True) }}
 		{%- endfor -%}
 	</div>
+	{%- include "components/r_number.html" -%}
 {%- endblock -%}
 {%- block lower_section -%}
 	{{ tail_banners("Search another location") }}

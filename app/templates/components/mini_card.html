@@ -26,9 +26,9 @@
 			<meta itemprop="category" content="https://www.wikidata.org/wiki/Q81068910" />
 			<meta itemprop="datePosted" content="{{ despatch }}"/>
 			<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
-			<meta itemprop="mainEntityOfPage" content="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
-			<meta itemprop="thumbnailUrl" content="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg"/>
-			<meta itemprop="image" content="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg"/>
+			<meta itemprop="mainEntityOfPage" content="{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
+			<meta itemprop="thumbnailUrl" content="{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg"/>
+			<meta itemprop="image" content="{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg"/>
 			<meta itemprop="description"
 			      content="Latest data on {{ card.caption | lower }} for {{ main.areaName }} {% if is_postcode -%}at {{ main.areaType | to_full_area_type | lower }} level {%- endif %}provided on {{ main.date }}"/>
 			<meta itemprop="text" content="
@@ -133,9 +133,7 @@
 								<span class="govuk-link--no-visited-state number-link-red" style="border: none">
 									<strong class="govuk-tag govuk-tag--red number govuk-!-margin-top-1 change-box {{ colour }}">
 										{%- if changePercentage.value != 0 -%}
-											<img src="{{ url_for("static", path=image) }}"
-											     width="12px"
-											     alt="arrow"
+											<img src="{{ url_for("static", path=image) }}" width="12px" loading="lazy" alt="arrow" aria-hidden="true"
 											     style="transform: rotate({{ ((card.metric + "Direction")| get_data(data)).raw }}deg)">
 											{{ change.value }}
 											<span class="govuk-!-font-weight-regular">({{ changePercentage.value }}%)</span>
@@ -164,19 +162,19 @@
 			<hr class="govuk-section-break bottom-aligned"/>
 		{%- endif -%}
 		{%- if not is_postcode -%}
-			<a href="/details/{{ card.caption | lower }}"
+			<a href="/details/{{ card.caption | lower }}" tabindex="0"
 				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
 				   style="text-decoration: none;">
-				<figure class="graph mini-card-figure">
-					<img src="https://{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg" alt="Graph - click for more details">
+				<figure class="graph mini-card-figure" aria-hidden="true">
+					<img src="{{ base }}/downloads/homepage/{{ date }}/thumbnail_{{ card.metric }}.svg" alt="Graph - click for more details" loading="lazy">
 				</figure>
 			</a>
 		{% endif %}
 		<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>
 		<div class="additional-info bottom-aligned" style="margin-top: 5px">
 				<p class="govuk-!-margin-bottom-0 govuk-!-margin-top-0 govuk-!-font-size-16">
-					<meta itemprop="url" content="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
-					<a href="https://{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"
+					<meta itemprop="url" content="{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"/>
+					<a href="{{ base }}/details/{{ card.caption | lower }}{%- if is_postcode -%}?areaType={{ main.areaType | lower }}&areaName={{ main.areaName }}{% endif %}"
 					   class="govuk-link govuk-link--no-visited-state"
 					   style="text-decoration: none"><b>All {{ card.caption | lower }} data{%- if is_postcode %}&nbsp;in {{ main.areaName }}{% endif %}</b></a>
 				</p>

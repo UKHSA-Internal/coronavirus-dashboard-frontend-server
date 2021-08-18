@@ -3,16 +3,15 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
-from json import loads
-from datetime import datetime
-from asyncio import Lock, get_running_loop
+from asyncio import get_running_loop
+from pathlib import Path
 
 # 3rd party:
 from markdown import markdown
 
 # Internal:
-from app.storage import AsyncStorageClient
 from app.caching import from_cache_or_func
+from app.database.postgres import Connection
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -23,63 +22,31 @@ __all__ = [
 
 BANNER_DATA = dict(
     container="publicdata",
-    path="assets/cms/banner.json"
+    path="assets/cms/changeLog.json"
 )
 
+query_path = Path(__file__).parent.joinpath("query.sql").absolute()
 
-def prep_data(item):
-    item['appearByUpdate'] = datetime.strptime(item['appearByUpdate'], "%Y-%m-%d")
-    item['disappearByUpdate'] = datetime.strptime(item['disappearByUpdate'], "%Y-%m-%d")
-
-    if (datestamp := item.get("date")) is not None:
-        item['date'] = datetime.strptime(datestamp, "%Y-%m-%d")
-    else:
-        item['date'] = item['appearByUpdate']
-
-    return item
-
-
-def filter_fn(request, timestamp):
-    def func(item):
-        path = request.scope["path"]
-        is_published = item['appearByUpdate'] <= timestamp < item['disappearByUpdate']
-
-        display_uri = item.get("displayUri", list())
-
-        if len(display_uri) > 0:
-            return is_published and path.lower() in display_uri
-
-        return is_published
-
-    return func
+with open(query_path) as fp:
+    query = fp.read()
 
 
 async def _get_banners(request, timestamp: str):
     loop = get_running_loop()
 
-    async with AsyncStorageClient(**BANNER_DATA) as client, Lock(loop=loop):
-        data_io = await client.download()
-        raw_data = await data_io.readall()
+    async with Connection(loop=loop) as conn:
+        response = await conn.fetch(query)
 
-    full_data = loads(raw_data.decode())
-
-    if full_data is None:
-        full_data = list()
-
-    data = map(prep_data, full_data)
-    timestamp = datetime.fromisoformat(timestamp[:26])
-    banners = filter(filter_fn(request, timestamp), data)
-
-    results = (
+    results = [
         {
-            "timestamp": banner["appearByUpdate"].date(),
+            "timestamp": banner["date"],
             "display_timestamp": f"{banner['date']:%-d %B %Y}",
             "body": markdown(banner["body"])
         }
-        for banner in banners
-    )
+        for banner in response
+    ]
 
-    return list(results)
+    return results
 
 
 async def get_banners(request, timestamp):

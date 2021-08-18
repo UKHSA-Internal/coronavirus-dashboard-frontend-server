@@ -315,7 +315,7 @@ main {
 }
 
 .bottom-aligned {
-  align-self: end;
+  align-self: flex-end;
 }
 
 .top-aligned {
@@ -375,4 +375,54 @@ main {
     }
   }
 
+}
+
+
+.card-wide {
+  padding: 20px;
+  background-color: #f8f8f8;
+  border: 1px #f3f2f1 solid;
+  display: flex;
+  flex-direction: column;
+
+  & > .content {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    flex: 3 1 33.3333%;
+
+    @media only screen and (max-width: 902px) {
+      justify-content: flex-start;
+    }
+    @media only screen and (max-width: 520px) {
+      grid-template-columns: 1fr;
+      grid-auto-flow: row;
+      grid-gap: 2rem;
+      margin-top: 1rem;
+
+      & .link {
+        display: none;
+        visibility: hidden;
+      }
+    }
+  }
+
+  & > .content > .column {
+    display: flex;
+    justify-content: stretch;
+    flex-direction: column;
+    width: max(300px, 33.3333333%);
+
+    &:not(&:first-of-type) {
+      //@extend .govuk-\!-margin-top-2;
+      align-self: flex-end;
+    }
+
+    @media only screen and (max-width: 520px) {
+      &.link {
+        display: none;
+      }
+    }
+
+  }
 }

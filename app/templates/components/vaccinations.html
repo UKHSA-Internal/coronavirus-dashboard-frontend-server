@@ -14,9 +14,9 @@
 	<meta itemprop="category" content="https://www.wikidata.org/wiki/Q81068910" />
 	<meta itemprop="datePosted" content="{{ despatch }}"/>
 	<meta itemprop="expires" content="{{ despatch | add_days(1) }}"/>
-	<meta itemprop="mainEntityOfPage" content="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"/>
-	<meta itemprop="thumbnailUrl" content="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"/>
-	<meta itemprop="image" content="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"/>
+	<meta itemprop="mainEntityOfPage" content="{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"/>
+	<meta itemprop="thumbnailUrl" content="{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"/>
+	<meta itemprop="image" content="{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"/>
 	<meta itemprop="description"
 	      content="Latest data on vaccinations for {{ firstDoseDaily.areaName }} {% if is_postcode -%}at {{ firstDoseDaily.areaType | to_full_area_type | lower }} level{%- endif %}provided on {{ firstDoseDaily.date }}"/>
 	<meta itemprop="text"
@@ -41,7 +41,7 @@
        rel="next"
 		   style="text-decoration: none; justify-self: start"
 		   href="{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}">
-			<b>All vaccination data</b>
+			<b>All vaccination data{% if firstDoseDaily.areaType != "overview" %} in {{ firstDoseDaily.areaName }}{% endif %}</b>
 		</a>
 	</div>
 
@@ -226,12 +226,12 @@
 			</div>
 		</figcaption>
 		<div class="graph">
-			<a href="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"
-				   class="govuk-link govuk-link--no-visited-state bottom-aligned"
+			<a href="{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"
+				   class="govuk-link govuk-link--no-visited-state bottom-aligned" tabindex="0"
 				   style="text-decoration: none"
 				   rel="next">
-				<img src="https://{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"
-				     alt="Chart displaying the percentage of adult population vaccinated in {{ firstDoseDaily.areaName }}"/>
+				<img src="{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"
+				     alt="Chart displaying the percentage of adult population vaccinated in {{ firstDoseDaily.areaName }}" aria-hidden="true" loading="lazy"/>
 			</a>
 		</div>
 
@@ -240,11 +240,11 @@
 	<div class="mob-link additional-info">
 		<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>
 		<p class="bottom-aligned govuk-!-margin-top-2 govuk-!-font-size-16 govuk-!-margin-bottom-0">
-			<meta itemprop="url" content="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"/>
+			<meta itemprop="url" content="{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}"/>
 			<a class="govuk-link govuk-link--no-visited-state"
 			   style="text-decoration: none"
-			   href="https://{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}">
-				<b>All vaccination data</b>
+			   href="{{ base }}{{ urlPath }}{% if firstDoseDaily.areaType != "overview" %}?areaType={{ firstDoseDaily.areaType }}&areaName={{ firstDoseDaily.areaName }}{% endif %}">
+				<b>All vaccination data{% if firstDoseDaily.areaType != "overview" %} in {{ firstDoseDaily.areaName }}{% endif %}</b>
 			</a>
 		</p>
 	</div>
