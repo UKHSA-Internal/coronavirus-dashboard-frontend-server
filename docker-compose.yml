@@ -5,6 +5,7 @@ services:
     build: .
     restart: always
     volumes:
+      - ./app:/opt/app
       - ./app/assets/css:/opt/assets
     ports:
       - 5100:5100
