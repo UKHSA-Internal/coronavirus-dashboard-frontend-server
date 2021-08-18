@@ -1,5 +1,5 @@
-{% set R_growth_min = "transmissionRateGrowthRateMin" | get_data(data) %}
-{% set R_growth_max = "transmissionRateGrowthRateMax" | get_data(data) %}
+{#{% set R_growth_min = "transmissionRateGrowthRateMin" | get_data(data) %}#}
+{#{% set R_growth_max = "transmissionRateGrowthRateMax" | get_data(data) %}#}
 {% set transmissionRateMin = "transmissionRateMin" | get_data(data) %}
 {% set transmissionRateMax = "transmissionRateMax" | get_data(data) %}
 
@@ -10,12 +10,12 @@
 		<div>
 			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">Transmission</span>
 		</div>
-		{% if R_growth_max.areaName[0] == "U" -%}
+		{% if transmissionRateMin.areaName[0] == "U" -%}
 			<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">R value</h3>
 		{% else %}
 			<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
-				R value in {{ R_growth_max.areaName }}
-				{% if R_growth_max.areaType != "nation" -%}
+				R value in {{ transmissionRateMin.areaName }}
+				{% if transmissionRateMin.areaType != "nation" -%}
 					healthcare region
 				{%- endif %}
 			</h4>
