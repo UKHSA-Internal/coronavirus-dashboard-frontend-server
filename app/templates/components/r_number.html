@@ -9,15 +9,19 @@
 			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">Transmission</span>
 		</div>
 		{% if R_growth_max.areaName[0] == "U" -%}
-			<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">R value and growth rate</h3>
+			<h3 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">R value</h3>
 		{% else %}
 			<h4 class="govuk-heading-m title-mobile govuk-!-margin-bottom-0">
-				R value and growth rate in {{ R_growth_max.areaName }}
-				{% if R_growth_max.areaType[0] != "nation" -%}
+				R value in {{ R_growth_max.areaName }}
+				{% if R_growth_max.areaType != "nation" -%}
 					healthcare region
 				{%- endif %}
 			</h4>
 		{% endif %}
+		<p class="grey govuk-!-font-size-14 govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+			Latest data {% if is_postcode -%}at <strong>{{ transmissionRateMin.areaType | to_full_area_type | lower }}</strong> level{%- endif %}
+			provided on&nbsp;<span style="white-space: nowrap">{{ transmissionRateMin.date }}</span>
+		</p>
 	</div>
 	<div class="content">
 {# To be enabled when transmission card is introduced. #}
@@ -68,57 +72,56 @@
 				</details>
 			</div>
 		</div>
-		<div class="column">
-			<div>
-				<div class="number-group">
-					<div class="number-container">
-						<div class="govuk-!-margin-bottom-1">Growth rate, estimated range</div>
-						<div class="float tooltip">
-							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
-									<span class="govuk-link--no-visited-state number-link number">
-										{%- if R_growth_max is undefined %}
-											N/A
-										{%- elif R_growth_min.raw > 0 -%}
-											+{{ R_growth_min.raw | format_number }}%
-										{%- elif R_growth_min.raw < 0 -%}
-											{{ R_growth_min.raw | format_number }}%
-										{%- else -%}
-											0%
-										{%- endif -%}
-										&nbsp;to&nbsp;
-										{%- if R_growth_max is undefined -%}
-											N/A
-										{%- elif R_growth_max.raw > 0 -%}
-											+{{ R_growth_max.raw | format_number }}%
-										{%- elif R_growth_max.raw < 0 -%}
-											{{ R_growth_max.raw | format_number }}%
-										{%- else -%}
-											0%
-										{%- endif -%}
-										<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
-											Reported on {{ R_growth_max.date }}
-										</span>
-									</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div style="padding-bottom: 0 !important;" class="govuk-!-margin-top-2">
-				<details class="govuk-details govuk-!-margin-bottom-0" data-module="govuk-details">
-					<summary class="govuk-details__summary  govuk-!-margin-bottom-0">
-    <span class="govuk-details__summary-text govuk-!-font-size-16">
-      About growth rate
-    </span>
-					</summary>
-					<div class="govuk-details__text govuk-body-s">
-						An approximation of the percentage charge in the number of infections each day.
-					</div>
-				</details>
-			</div>
-
-		</div>
+{#		<div class="column">#}
+{#			<div>#}
+{#				<div class="number-group">#}
+{#					<div class="number-container">#}
+{#						<div class="govuk-!-margin-bottom-1">Growth rate, estimated range</div>#}
+{#						<div class="float tooltip">#}
+{#							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">#}
+{#									<span class="govuk-link--no-visited-state number-link number">#}
+{#										{%- if R_growth_max is undefined %}#}
+{#											N/A#}
+{#										{%- elif R_growth_min.raw > 0 -%}#}
+{#											+{{ R_growth_min.raw | format_number }}%#}
+{#										{%- elif R_growth_min.raw < 0 -%}#}
+{#											{{ R_growth_min.raw | format_number }}%#}
+{#										{%- else -%}#}
+{#											0%#}
+{#										{%- endif -%}#}
+{#										&nbsp;to&nbsp;#}
+{#										{%- if R_growth_max is undefined -%}#}
+{#											N/A#}
+{#										{%- elif R_growth_max.raw > 0 -%}#}
+{#											+{{ R_growth_max.raw | format_number }}%#}
+{#										{%- elif R_growth_max.raw < 0 -%}#}
+{#											{{ R_growth_max.raw | format_number }}%#}
+{#										{%- else -%}#}
+{#											0%#}
+{#										{%- endif -%}#}
+{#										<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">#}
+{#											Reported on {{ R_growth_max.date }}#}
+{#										</span>#}
+{#									</span>#}
+{#							</div>#}
+{#						</div>#}
+{#					</div>#}
+{#				</div>#}
+{#			</div>#}
+{##}
+{#			<div style="padding-bottom: 0 !important;" class="govuk-!-margin-top-2">#}
+{#				<details class="govuk-details govuk-!-margin-bottom-0" data-module="govuk-details">#}
+{#					<summary class="govuk-details__summary  govuk-!-margin-bottom-0">#}
+{#    <span class="govuk-details__summary-text govuk-!-font-size-16" style="margin-top: -30px">#}
+{#      About growth rate#}
+{#    </span>#}
+{#					</summary>#}
+{#					<div class="govuk-details__text govuk-body-s">#}
+{#						An approximation of the percentage charge in the number of infections each day.#}
+{#					</div>#}
+{#				</details>#}
+{#			</div>#}
+{#		</div>#}
 {# To be enabled when transmission card is introduced. #}
 {#		<div class="mob-link additional-info">#}
 {#			<hr class="govuk-section-break govuk-section-break--visible bottom-aligned" style="margin: 0 -20px;"/>#}
