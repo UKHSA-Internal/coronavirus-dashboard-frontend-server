@@ -4,7 +4,9 @@
 {% set transmissionRateMax = "transmissionRateMax" | get_data(data) %}
 
 <div class="card-wide govuk-!-margin-top-3">
-	<div class="topic govuk-!-margin-bottom-3">
+	<div class="content">
+
+	<div class="topic column">
 		<div>
 			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">Transmission</span>
 		</div>
@@ -23,7 +25,6 @@
 			provided on&nbsp;<span style="white-space: nowrap">{{ transmissionRateMin.date }}</span>
 		</p>
 	</div>
-	<div class="content">
 {# To be enabled when transmission card is introduced. #}
 {#		<div class="column bottom-aligned link">#}
 {#			<div>#}
