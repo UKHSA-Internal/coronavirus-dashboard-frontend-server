@@ -83,8 +83,6 @@ class Connection:
         self._connection = connect(
             self.conn_str,
             statement_cache_size=0,
-            max_cached_statement_lifetime=0,
-            max_cacheable_statement_size=0,
             timeout=20,
             loop=loop or get_event_loop()
         )
