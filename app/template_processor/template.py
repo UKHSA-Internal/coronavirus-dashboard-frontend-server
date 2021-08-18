@@ -89,7 +89,11 @@ async def render_template(request, template_name: str, context: Optional[Dict[st
         context["despatch"] = await get_website_timestamp(request)
 
     context["date"] = context["despatch"].split("T")[0]
-    context["base"] = request.url.hostname
+
+    context["base"] = f"{request.url.scheme}://{request.url.hostname}"
+
+    if request.url.port and request.url.port not in [80, 443]:
+        context["base"] += f":{request.url.port}"
 
     kw_jobs = {
         "banners": get_banners(request, context["timestamp"]),
