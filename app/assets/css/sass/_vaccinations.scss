@@ -8,7 +8,11 @@
   grid-template-columns: 1fr;
   grid-template-rows: repeat(4, auto);
   grid-auto-flow: row;
-  grid-row-gap: 1rem;
+  grid-gap: 1rem;
+
+  h3, h4 {
+    width: auto;
+  }
 
   @include govuk-media-query($from: 520px) {
     grid-template-columns: repeat(2, 1fr);
@@ -18,7 +22,7 @@
   @include govuk-media-query($from: 1100px) {
     grid-row-gap: .5rem;
     grid-template-rows: auto repeat(2, 1fr);
-    grid-template-columns: minmax(215px, 1fr) repeat(2, 1fr) auto;
+    grid-template-columns: minmax(450px, 1fr) repeat(2, 1fr) auto;
     grid-auto-flow: column;
   }
 }
