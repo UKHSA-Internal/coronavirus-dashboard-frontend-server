@@ -5,7 +5,13 @@
 {% set secondDoseDaily = "newPeopleVaccinatedSecondDoseByPublishDate" | get_data(data) %}
 {% set firstDosePer = "cumVaccinationFirstDoseUptakeByPublishDatePercentage" | get_data(data) %}
 {% set secondDosePer = "cumVaccinationSecondDoseUptakeByPublishDatePercentage" | get_data(data) %}
-
+{% if firstDoseDaily.areaType in ["overview", "nation"] %}
+	{% set percentageHeading = "Percentage of population aged 16+" %}
+	{% set percentageHeadingInline = "population aged 16+" %}
+{% else %}
+	{% set percentageHeading = "Percentage of population aged 18+" %}
+	{% set percentageHeadingInline = "population aged 18+" %}
+{% endif %}
 <div class="vaccinations"  itemscope itemprop="SpecialAnnouncement" itemtype="https://schema.org/SpecialAnnouncement">
 	<span style="grid-column: -1; display: none" itemprop="spatialCoverage" itemtype="http://schema.org/{% if firstDoseDaily.areaName != 'United Kingdom' %}AdministrativeArea{% else %}Country{% endif %}" itemscope>
 		<meta itemprop="name" content="{{ firstDoseDaily.areaName }}"/>
@@ -20,7 +26,7 @@
 	<meta itemprop="description"
 	      content="Latest data on vaccinations for {{ firstDoseDaily.areaName }} {% if is_postcode -%}at {{ firstDoseDaily.areaType | to_full_area_type | lower }} level{%- endif %}provided on {{ firstDoseDaily.date }}"/>
 	<meta itemprop="text"
-	      content="Vaccines are currently given in 2 doses, at least 21 days apart. By the end of {{ firstDoseDaily.date }}, {{ firstDoseDaily.value }} people had been given a first dose and {{ secondDoseDaily.value }} a second dose. In total, {{ firstDoseCum.value }} people ({{ firstDosePer.raw }}% of the adult population) have received a first dose and {{ secondDoseCum.value }} people ({{ secondDosePer.raw }}% of the adult population) a second dose of a vaccine."/>
+	      content="Vaccines are currently given in 2 doses, at least 21 days apart. By the end of {{ firstDoseDaily.date }}, {{ firstDoseDaily.value }} {{ people }} had been given a first dose and {{ secondDoseDaily.value }} a second dose. In total, {{ firstDoseCum.value }} people ({{ firstDosePer.raw }}% of {{ percentageHeadingInline }}) have received a first dose and {{ secondDoseCum.value }} people ({{ secondDosePer.raw }}% of {{ percentageHeadingInline }}) a second dose of a vaccine."/>
 	<div class="topic">
 		<div>
 			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">Vaccinations</span>
@@ -164,15 +170,15 @@
 
 	<figure class="visaulisation">
 		<div class="bottom-aligned main-caption narrow govuk-!-font-size-16">
-			Percentage of adult population
+			{{ percentageHeading }}
 		</div>
 		<figcaption>
 			<div class="bottom-aligned main-caption govuk-!-font-size-16">
-				Percentage of adult population
+				{{ percentageHeading }}
 			</div>
 
 			<div class="item" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
-				<meta itemprop="name" content="Percentage of adults vaccinated - first dose"/>
+				<meta itemprop="name" content="Percentage of {{ percentageHeadingInline }} vaccinated - first dose"/>
 				<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ firstDosePer.rawDate }}"/>
 				<span itemprop="measuredValue">
 					<span itemtype="https://schema.org/Number" itemprop="Number">
@@ -186,7 +192,7 @@
 								<span href="#" class="govuk-link--no-visited-state number-link">
 									{{ firstDosePer.value }}%
 									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
-										Percentage of adults vaccinated (first dose) reported on {{ firstDosePer.date }}
+										Percentage of {{ percentageHeadingInline }} vaccinated (first dose) reported on {{ firstDosePer.date }}
 									</span>
 								</span>
 							</div>
@@ -199,7 +205,7 @@
 			</div>
 
 			<div class="item" itemprop="Observation" itemtype="https://schema.org/Observation" itemscope>
-				<meta itemprop="name" content="Percentage of adults vaccinated - second dose"/>
+				<meta itemprop="name" content="Percentage of {{ percentageHeadingInline }} vaccinated - second dose"/>
 				<meta itemprop="observationDate" itemtype="https://schema.org/DateTime" content="{{ secondDosePer.rawDate }}"/>
 				<span itemprop="measuredValue">
 					<span itemtype="https://schema.org/Number" itemprop="Number">
@@ -213,7 +219,7 @@
 								<span href="#" class="govuk-link--no-visited-state number-link">
 									{{ secondDosePer.value }}%
 									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
-										Percentage of adults vaccinated (second dose) reported on {{ secondDosePer.date }}
+										Percentage of {{ percentageHeadingInline }} vaccinated (second dose) reported on {{ secondDosePer.date }}
 									</span>
 								</span>
 							</div>
@@ -231,7 +237,7 @@
 				   style="text-decoration: none"
 				   rel="next">
 				<img src="{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"
-				     alt="Chart displaying the percentage of adult population vaccinated in {{ firstDoseDaily.areaName }}" aria-hidden="true" loading="lazy"/>
+				     alt="Chart displaying the percentage of {{ percentageHeadingInline }} vaccinated in {{ firstDoseDaily.areaName }}" aria-hidden="true" loading="lazy"/>
 			</a>
 		</div>
 
