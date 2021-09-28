@@ -137,7 +137,6 @@ def from_cache_or_db(prefix):
                 redis_result = await redis.get(cache_key)
 
                 if redis_result is not None:
-                    # result = loads(redis_result)
                     result = (
                         read_json(redis_result, orient="records")
                         .rename(columns={
@@ -158,7 +157,7 @@ def from_cache_or_db(prefix):
                             "areaName": "area_name",
                             "areaCode": "area_code"
                         })
-                        .to_json(orient="records", index=False)
+                        .to_json(orient="records")
                     ),
                     expire=36 * 60 * 60  # 36 hours in seconds
                 )
