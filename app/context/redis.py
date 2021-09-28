@@ -38,6 +38,7 @@ async def instantiate_redis_pool():
     conn = await create_redis_pool(
         **Settings.redis,
         minsize=10,
+        db=2,
         loop=get_event_loop(),
         ssl=ssl_context if Settings.DEBUG else None,  # Prod goes via VNet
     )
