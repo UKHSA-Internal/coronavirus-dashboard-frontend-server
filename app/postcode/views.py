@@ -133,9 +133,14 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
     data = await gather(*tasks, loop=loop)
 
     result = concat(data).reset_index(drop=True)
-    result["rank"] = result.groupby("metric")[["priority", "date"]].rank(ascending=True)
+    result["rank"] = (
+         result
+         .groupby("metric")[["priority", "date"]]
+         .rank(ascending=True)
+         .mean(axis=1)
+    )
     filters = (
-            (result["rank"] == 1) |
+            (result["rank"] < 2) |
             (result["metric"].str.startswith(msoa_metric))
     )
     result = result.loc[filters, :]
