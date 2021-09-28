@@ -5,12 +5,12 @@
 # Python:
 from inspect import signature
 from hashlib import blake2b
-from random import randint
 from functools import wraps
 from pickle import loads, dumps
+from datetime import datetime
 
 # 3rd party:
-from pandas import DataFrame
+from pandas import DataFrame, read_json
 
 # Internal: 
 from app.middleware.tracers.utils import trace_async_method_operation
@@ -122,24 +122,45 @@ def from_cache_or_db(prefix):
         async def inner(*args, **kwargs):
             bound_inputs = sig.bind(*args, **kwargs)
             request = bound_inputs.arguments.pop("request")
-            key = [*bound_inputs.args, *bound_inputs.kwargs.values()]
-            raw_key = str.join("|", map(str, key))
-
-            cache_key = prefix + blake2b(raw_key.encode(), digest_size=6).hexdigest()
+            try:
+                area_id = bound_inputs.arguments["area_id"]
+                if bound_inputs.arguments["area_type"] == "overview":
+                    area_id = "UK"
+                timestamp = datetime.strptime(bound_inputs.arguments["timestamp"], "%Y_%m_%d")
+                raw_key = cache_key = f"area-{timestamp:%Y-%m-%d}-{area_id}"
+            except KeyError:
+                key = [*bound_inputs.args, *bound_inputs.kwargs.values()]
+                raw_key = str.join("|", map(str, key))
+                cache_key = prefix + blake2b(raw_key.encode(), digest_size=6).hexdigest()
 
             async with Redis(request, raw_key) as redis:
                 redis_result = await redis.get(cache_key)
 
                 if redis_result is not None:
-                    result = loads(redis_result)
+                    # result = loads(redis_result)
+                    result = (
+                        read_json(redis_result, orient="records")
+                        .rename(columns={
+                            "area_type": "areaType",
+                            "area_name": "areaName",
+                            "area_code": "areaCode"
+                        })
+                    )
                     return result
 
                 result: DataFrame = await func(request, *bound_inputs.args, **bound_inputs.kwargs)
-
                 await redis.set(
                     key=cache_key,
-                    value=dumps(result),
-                    expire=randint(5 * 60, 8 * 60) * 60  # Between 5 and 8 hours
+                    value=(
+                        result
+                        .rename(columns={
+                            "areaType": "area_type",
+                            "areaName": "area_name",
+                            "areaCode": "area_code"
+                        })
+                        .to_json(orient="records", index=False)
+                    ),
+                    expire=36 * 60 * 60  # 36 hours in seconds
                 )
 
             return result
