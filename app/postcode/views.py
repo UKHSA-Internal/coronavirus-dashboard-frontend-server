@@ -140,8 +140,8 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
          .mean(axis=1)
     )
     filters = (
-            (result["rank"] < 2) |
-            (result["metric"].str.startswith(msoa_metric))
+        (result["rank"] < 2) |
+        (result["metric"].str.startswith(msoa_metric))
     )
     result = result.loc[filters, :]
 
