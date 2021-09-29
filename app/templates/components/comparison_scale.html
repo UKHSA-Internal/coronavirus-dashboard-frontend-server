@@ -18,7 +18,7 @@
 		<figcaption class="govuk-caption-m govuk-!-font-weight-regular govuk-!-margin-bottom-2">
 			How does this compare to {% if area_data.areaType == 'msoa' %}England{% else %}UK{% endif %} average?
 		</figcaption>
-		<img src="{{ base }}/public/assets/frontpage/scales/{{ area_data.areaType }}/{{ area_data.areaCode }}.jpg"
+		<img src="{{ base }}/public/assets/frontpage/scales/{{ date }}/{{ area_data.areaType }}/{{ area_data.areaCode }}.jpg"
 	     style="max-width: min(400px, 100%); height: auto;"
 	     loading="lazy"
 	     alt="Scale showing the comparison of {{ postcode }} relative to national median."/>
