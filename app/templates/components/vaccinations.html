@@ -20,8 +20,13 @@
 	<meta itemprop="image" content="{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"/>
 	<meta itemprop="description"
 	      content="Latest data on vaccinations for {{ firstDoseDaily.areaName }} {% if is_postcode -%}at {{ firstDoseDaily.areaType | to_full_area_type | lower }} level{%- endif %}provided on {{ firstDoseDaily.date }}"/>
-	<meta itemprop="text"
-	      content="Vaccines are currently given in 2 doses, at least 21 days apart. By the end of {{ firstDoseDaily.date }}, {{ firstDoseDaily.value }} {{ people }} had been given a first dose and {{ secondDoseDaily.value }} a second dose. In total, {{ firstDoseCum.value }} people ({{ firstDosePer.raw }}% of {{ percentageHeadingInline }}) have received a first dose and {{ secondDoseCum.value }} people ({{ secondDosePer.raw }}% of {{ percentageHeadingInline }}) a second dose of a vaccine."/>
+	{% if firstDoseDaily.areaName != 'United Kingdom' %}
+		<meta itemprop="text"
+	        content="Vaccines are currently given in 2 doses, at least 21 days apart. By the end of {{ firstDoseDaily.date }}, {{ firstDoseDaily.value }} {{ people }} had been given a first dose and {{ secondDoseDaily.value }} a second dose. In total, {{ firstDoseCum.value }} people ({{ firstDosePer.raw }}% of {{ percentageHeadingInline }}) have received a first dose and {{ secondDoseCum.value }} people ({{ secondDosePer.raw }}% of {{ percentageHeadingInline }}) a second dose of a vaccine."/>
+	{% else %}
+		<meta itemprop="text"
+	        content="Vaccines are currently given in 2 doses, at least 21 days apart. By the end of {{ firstDoseDaily.date }}, {{ firstDoseDaily.value }} {{ people }} had been given a first dose and {{ secondDoseDaily.value }} a second dose. In total, {{ firstDoseCum.value }} people have received a first dose and {{ secondDoseCum.value }} people a second dose of a vaccine."/>
+	{% endif %}
 	<div class="topic">
 		<div>
 			<span class="govuk-caption-m govuk-!-font-weight-regular" itemprop="name">Vaccinations</span>
@@ -245,8 +250,13 @@
 				   class="govuk-link govuk-link--no-visited-state bottom-aligned" tabindex="0"
 				   style="text-decoration: none"
 				   rel="next">
+			{% if firstDoseDaily.areaName != 'United Kingdom' %}
 				<img src="{{ base }}/downloads/homepage/{{ date }}/vaccinations/{{ firstDoseDaily.areaType }}/{{ firstDoseDaily.areaCode }}_thumbnail.svg"
 				     alt="Chart displaying the percentage of {{ percentageHeadingInline }} vaccinated in {{ firstDoseDaily.areaName }}" aria-hidden="true" loading="lazy"/>
+			{% else %}
+				<img src="{{ base }}/downloads/supplements/blurred_vax_thumbnail.svg"
+				     alt="Chart displaying the percentage of {{ percentageHeadingInline }} vaccinated in {{ firstDoseDaily.areaName }}" aria-hidden="true" loading="lazy"/>
+			{% endif %}
 			</a>
 		</div>
 
