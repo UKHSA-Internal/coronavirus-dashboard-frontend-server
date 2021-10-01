@@ -185,10 +185,17 @@
 						<div class="float tooltip">
 							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 								<span href="#" class="govuk-link--no-visited-state number-link">
+								{% if firstDoseDaily.areaName != 'United Kingdom' %}
 									{{ firstDosePer.value }}%
 									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
 										Percentage of {{ percentageHeadingInline }} vaccinated (first dose) reported on {{ firstDosePer.date }}
 									</span>
+								{% else %}
+										N/A
+										<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+											No data available.
+										</span>
+								{% endif %}
 								</span>
 							</div>
 						</div>
@@ -212,10 +219,17 @@
 						<div class="float tooltip">
 							<div class="float govuk-heading-m govuk-!-margin-bottom-0 govuk-!-padding-top-0 total-figure2">
 								<span href="#" class="govuk-link--no-visited-state number-link">
+								{% if firstDoseDaily.areaName != 'United Kingdom' %}
 									{{ secondDosePer.value }}%
 									<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
 										Percentage of {{ percentageHeadingInline }} vaccinated (second dose) reported on {{ secondDosePer.date }}
 									</span>
+								{% else %}
+										N/A
+										<span class="tooltiptext govuk-!-font-size-16" itemprop="disambiguatingDescription">
+											No data available.
+										</span>
+								{% endif %}
 								</span>
 							</div>
 						</div>
