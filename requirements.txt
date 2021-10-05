@@ -1,7 +1,7 @@
 azure-storage-blob
 azure-cosmos==4.2.0
 PyYAML
-jinja2~=2.11.3
+jinja2~=3.0.2
 flask==1.1.2
 plotly~=4.14.3
 kaleido==0.0.3.post1
