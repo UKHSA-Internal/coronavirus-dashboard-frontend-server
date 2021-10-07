@@ -5,13 +5,8 @@
 {% set secondDoseDaily = "newPeopleVaccinatedSecondDoseByPublishDate" | get_data(data) %}
 {% set firstDosePer = "cumVaccinationFirstDoseUptakeByPublishDatePercentage" | get_data(data) %}
 {% set secondDosePer = "cumVaccinationSecondDoseUptakeByPublishDatePercentage" | get_data(data) %}
-{% if firstDoseDaily.areaType not in ['overview', 'nation'] %}
-{% set percentageHeading = "Percentage of population aged 16+" %}
-{% set percentageHeadingInline = "population aged 16+" %}
-{% else %}
-	{% set percentageHeading = "Percentage of population aged 12+" %}
-	{% set percentageHeadingInline = "population aged 12+" %}
-{% endif %}
+{% set percentageHeading = "Percentage of population aged 12+" %}
+{% set percentageHeadingInline = "population aged 12+" %}
 <div class="vaccinations"  itemscope itemprop="SpecialAnnouncement" itemtype="https://schema.org/SpecialAnnouncement">
 	<span style="grid-column: -1; display: none" itemprop="spatialCoverage" itemtype="http://schema.org/{% if firstDoseDaily.areaName != 'United Kingdom' %}AdministrativeArea{% else %}Country{% endif %}" itemscope>
 		<meta itemprop="name" content="{{ firstDoseDaily.areaName }}"/>
