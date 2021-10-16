@@ -94,7 +94,7 @@ async def get_data(request, partition_name, area_type, area_id, timestamp, loop=
     return df
 
 
-@FromCacheOrDB("POSTCODE::")
+@FromCacheOrDB("area-postcode")
 async def get_postcode_areas(request, postcode: str):
     loop = get_running_loop()
 
