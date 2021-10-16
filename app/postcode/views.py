@@ -61,7 +61,7 @@ with open(join_path(queries_dir, "locations.sql")) as fp:
     locations_query = fp.read()
 
 
-@FromCacheOrDBMainData("area-")
+@FromCacheOrDBMainData("area")
 async def get_data(request, partition_name, area_type, area_id, timestamp, loop=None):
     numeric_metrics = ["%Percentage%", "%Rate%"]
     local_metrics = query_data["local_data"]["metrics"]
