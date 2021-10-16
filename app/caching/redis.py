@@ -78,10 +78,28 @@ class Redis:
         "url", "_key",
         name="account_name",
         dep_type="_name",
+        action="HGET"
+    )
+    async def hget(self, key, field):
+        return await self._conn.hget(key, field)
+
+    @trace_async_method_operation(
+        "url", "_key",
+        name="account_name",
+        dep_type="_name",
         action="SET"
     )
     async def set(self, key, value, expire=None):
         return await self._conn.set(key, value, expire=expire)
+
+    @trace_async_method_operation(
+        "url", "_key",
+        name="account_name",
+        dep_type="_name",
+        action="HSET"
+    )
+    async def hset(self, key, field, value):
+        return await self._conn.hset(key, field, value)
 
     @trace_async_method_operation(
         "url",
@@ -197,7 +215,7 @@ class FromCacheOrDBBase:
         cache_key = self.cache_key(bound_inputs)
 
         async with Redis(request, cache_key) as redis:
-            results = await redis.get(cache_key)
+            results = await self._from_cache(redis, cache_key)
 
             if results is not None:
                 return self.process_cache_results(results)
@@ -211,8 +229,11 @@ class FromCacheOrDBBase:
     def process_db_results(self, results: DataFrame) -> bytes:
         raise NotImplementedError()
 
-    def process_cache_results(self, results: str) -> DataFrame:
+    def process_cache_results(self, results: bytes) -> DataFrame:
         raise NotImplementedError()
+
+    async def _from_cache(self, redis, cache_key: str) -> bytes:
+        return await redis.get(cache_key)
 
     async def _cache_results(self, redis, cache_key: str, results: bytes) -> NoReturn:
         await redis.set(
@@ -228,14 +249,24 @@ class FromCacheOrDB(FromCacheOrDBBase):
 
     def cache_key(self, bound_inputs) -> str:
         key = [*bound_inputs.args, *bound_inputs.kwargs.values()]
-        raw_key = f'{self.prefix}::{str.join("|", map(str, key))}'
+        raw_key = str.join("|", map(str, key))
         return raw_key
 
     def process_db_results(self, results) -> bytes:
         return json_dumps(list(map(dict, results)))
 
-    def process_cache_results(self, results: str) -> DataFrame:
+    def process_cache_results(self, results: bytes) -> DataFrame:
         return json_loads(results)
+
+    async def _from_cache(self, redis, cache_key: str) -> bytes:
+        return await redis.hget(key=self.prefix, field=cache_key)
+
+    async def _cache_results(self, redis, cache_key: str, results: bytes) -> NoReturn:
+        await redis.hset(
+            key=self.prefix,
+            field=cache_key,
+            value=results
+        )
 
 
 class FromCacheOrDBMainData(FromCacheOrDBBase):
@@ -266,7 +297,7 @@ class FromCacheOrDBMainData(FromCacheOrDBBase):
 
         return res
 
-    def process_cache_results(self, results: str) -> DataFrame:
+    def process_cache_results(self, results: bytes) -> DataFrame:
         res = (
             read_json(results, orient="records")
             .rename(columns={
