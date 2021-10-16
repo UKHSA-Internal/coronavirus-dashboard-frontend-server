@@ -22,7 +22,7 @@ from app.common.utils import get_release_timestamp
 from app.common.data.variables import DestinationMetrics, IsImproving
 from app.database.postgres import Connection
 from app.template_processor import render_template
-from app.caching import from_cache_or_db
+from app.caching import FromCacheOrDB, FromCacheOrDBMainData
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -61,7 +61,7 @@ with open(join_path(queries_dir, "locations.sql")) as fp:
     locations_query = fp.read()
 
 
-@from_cache_or_db("FRONTEND::PC::")
+@FromCacheOrDBMainData("area-")
 async def get_data(request, partition_name, area_type, area_id, timestamp, loop=None):
     numeric_metrics = ["%Percentage%", "%Rate%"]
     local_metrics = query_data["local_data"]["metrics"]
@@ -94,6 +94,16 @@ async def get_data(request, partition_name, area_type, area_id, timestamp, loop=
     return df
 
 
+@FromCacheOrDB("POSTCODE::")
+async def get_postcode_areas(request, postcode: str):
+    loop = get_running_loop()
+
+    async with Connection(loop=loop) as conn:
+        area_codes = await conn.fetch(locations_query, postcode)
+
+    return area_codes
+
+
 async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame:
     msoa_metric = query_data["local_data"]["msoa_metric"]
     ts = datetime.fromisoformat(timestamp.replace("5Z", ""))
@@ -111,8 +121,7 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
 
     loop = get_running_loop()
 
-    async with Connection(loop=loop) as conn:
-        area_codes = await conn.fetch(locations_query, postcode)
+    area_codes = await get_postcode_areas(request, postcode)
 
     if not len(area_codes):
         return DataFrame()
