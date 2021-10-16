@@ -3,14 +3,17 @@
 # Imports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Python:
+from typing import NoReturn
 from inspect import signature
 from hashlib import blake2b
 from functools import wraps
 from pickle import loads, dumps
 from datetime import datetime
+import logging
 
 # 3rd party:
 from pandas import DataFrame, read_json
+from orjson import dumps as json_dumps, loads as json_loads
 
 # Internal: 
 from app.middleware.tracers.utils import trace_async_method_operation
@@ -21,8 +24,14 @@ from app.config import Settings
 __all__ = [
     'Redis',
     'from_cache_or_func',
-    'from_cache_or_db'
+    'from_cache_or_db',
+    'FromCacheOrDBMainData',
+    'FromCacheOrDB'
 ]
+
+
+DEFAULT_CACHE_TTL = 36 * 60 * 60  # 36 hours in seconds
+LONG_TERM_CACHE_TTL = 36 * 60 * 60 * 24 * 180  # 180 days
 
 
 class Redis:
@@ -114,7 +123,7 @@ async def from_cache_or_func(request, func, prefix, expire, with_request=False, 
     return result
 
 
-def from_cache_or_db(prefix):
+def from_cache_or_db(prefix, ttl=DEFAULT_CACHE_TTL):
     def outer(func):
         sig = signature(func)
 
@@ -159,10 +168,114 @@ def from_cache_or_db(prefix):
                         })
                         .to_json(orient="records")
                     ),
-                    expire=36 * 60 * 60  # 36 hours in seconds
+                    expire=ttl
                 )
 
             return result
 
         return inner
     return outer
+
+
+class FromCacheOrDBBase:
+    def __init__(self, prefix, ttl=DEFAULT_CACHE_TTL):
+        self.prefix = prefix
+        self.ttl = ttl
+
+    def __call__(self, func):
+        self.func = func
+        self.sig = signature(func)
+
+        return self._execute
+
+    def cache_key(self, bound_inputs) -> str:
+        raise NotImplementedError()
+
+    async def _execute(self, *args, **kwargs):
+        bound_inputs = self.sig.bind(*args, **kwargs)
+        request = bound_inputs.arguments.pop("request")
+        cache_key = self.cache_key(bound_inputs)
+
+        async with Redis(request, cache_key) as redis:
+            results = await redis.get(cache_key)
+
+            if results is not None:
+                return self.process_cache_results(results)
+
+            results = await self.func(request, *bound_inputs.args, **bound_inputs.kwargs)
+            db_results = self.process_db_results(results)
+            await self._cache_results(redis, cache_key, db_results)
+
+        return results
+
+    def process_db_results(self, results: DataFrame) -> bytes:
+        raise NotImplementedError()
+
+    def process_cache_results(self, results: str) -> DataFrame:
+        raise NotImplementedError()
+
+    async def _cache_results(self, redis, cache_key: str, results: bytes) -> NoReturn:
+        await redis.set(
+            key=cache_key,
+            value=results,
+            expire=self.ttl
+        )
+
+
+class FromCacheOrDB(FromCacheOrDBBase):
+    def __init__(self, prefix, ttl=None):
+        super().__init__(prefix, ttl=ttl or LONG_TERM_CACHE_TTL)
+
+    def cache_key(self, bound_inputs) -> str:
+        key = [*bound_inputs.args, *bound_inputs.kwargs.values()]
+        raw_key = f'{self.prefix}::{str.join("|", map(str, key))}'
+        return raw_key
+
+    def process_db_results(self, results) -> bytes:
+        return json_dumps(list(map(dict, results)))
+
+    def process_cache_results(self, results: str) -> DataFrame:
+        return json_loads(results)
+
+
+class FromCacheOrDBMainData(FromCacheOrDBBase):
+    def cache_key(self, bound_inputs) -> str:
+        try:
+            area_id = bound_inputs.arguments["area_id"]
+            if bound_inputs.arguments["area_type"] == "overview":
+                area_id = "UK"
+            timestamp = datetime.strptime(bound_inputs.arguments["timestamp"], "%Y_%m_%d")
+            raw_key = f"{self.prefix}-{timestamp:%Y-%m-%d}-{area_id}"
+        except KeyError:
+            key = [*bound_inputs.args, *bound_inputs.kwargs.values()]
+            raw_key = f'SUMMARY::{str.join("|", map(str, key))}'
+
+        return raw_key
+
+    def process_db_results(self, results: DataFrame) -> bytes:
+        res = (
+            results
+            .rename(columns={
+                "areaType": "area_type",
+                "areaName": "area_name",
+                "areaCode": "area_code"
+            })
+            .to_json(orient="records")
+            .encode()
+        )
+
+        return res
+
+    def process_cache_results(self, results: str) -> DataFrame:
+        res = (
+            read_json(results, orient="records")
+            .rename(columns={
+                "area_type": "areaType",
+                "area_name": "areaName",
+                "area_code": "areaCode"
+            })
+        )
+
+        return res
+
+
