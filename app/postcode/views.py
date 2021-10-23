@@ -8,6 +8,7 @@ from os.path import abspath, split as split_path, join as join_path
 from operator import itemgetter
 from json import load
 from typing import Union
+from collections import defaultdict
 from asyncio import gather, get_running_loop, Lock
 import ssl
 
@@ -62,7 +63,19 @@ with open(join_path(queries_dir, "locations.sql")) as fp:
 
 
 @FromCacheOrDBMainData("area")
-async def get_data(request, partition_name, area_type, area_id, timestamp, loop=None):
+async def get_data(request, area_type, area_id, timestamp, loop=None):
+    partition_names = {
+        "overview": "other",
+        "nation": "other",
+        "region": "other",
+        "nhsRegion": "other",
+        "utla": "utla",
+        "ltla": "ltla",
+        "nhsTrust": "nhstrust",
+        "msoa": "msoa",
+    }
+
+    partition_name = partition_names[area_type]
     numeric_metrics = ["%Percentage%", "%Rate%"]
     local_metrics = query_data["local_data"]["metrics"]
     msoa_metric = [f'{query_data["local_data"]["msoa_metric"]}%']
@@ -95,7 +108,7 @@ async def get_data(request, partition_name, area_type, area_id, timestamp, loop=
 
 
 @FromCacheOrDB("area-postcode")
-async def get_postcode_areas(request, postcode: str):
+async def get_postcode_areas(request, postcode: str, **kwargs):
     loop = get_running_loop()
 
     async with Connection(loop=loop) as conn:
@@ -108,16 +121,6 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
     msoa_metric = query_data["local_data"]["msoa_metric"]
     ts = datetime.fromisoformat(timestamp.replace("5Z", ""))
     partition_ts = f"{ts:%Y_%-m_%-d}"
-    partition_names = {
-        "overview": "other",
-        "nation": "other",
-        "region": "other",
-        "nhsRegion": "other",
-        "utla": "utla",
-        "ltla": "ltla",
-        "nhsTrust": "nhstrust",
-        "msoa": "msoa",
-    }
 
     loop = get_running_loop()
 
@@ -126,20 +129,16 @@ async def get_postcode_data(timestamp: str, postcode: str, request) -> DataFrame
     if not len(area_codes):
         return DataFrame()
 
-    tasks = list()
+    kws = defaultdict(list)
     for area_data in area_codes:
-        area_type = area_data["area_type"]
-        task = get_data(
-            request,
-            partition_names[area_type],
-            area_type,
-            area_data["id"],
-            partition_ts
-        )
+        kws["area_type"].append(area_data["area_type"])
+        kws["area_id"].append(area_data["id"])
 
-        tasks.append(task)
-
-    data = await gather(*tasks, loop=loop)
+    data = await get_data(
+        request,
+        **kws,
+        timestamp=partition_ts
+    )
 
     result = concat(data).reset_index(drop=True)
     result["rank"] = (
