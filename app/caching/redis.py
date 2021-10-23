@@ -252,6 +252,16 @@ class FromCacheOrDBBase:
 
             if isinstance(cache_key, (str, bytes)) and results is not None:
                 return self.process_cache_results(results)
+            elif isinstance(cache_key, (str, bytes)):
+                results = await self.func(
+                    request,
+                    *bound_inputs.args,
+                    area_id=area_id,
+                    area_type=area_type,
+                    **bound_inputs.kwargs
+                )
+                db_results = self.process_db_results(results)
+                await self._cache_results(redis, cache_key, db_results)
             elif hasattr(cache_key, "__iter__"):
                 for index, (key, res) in enumerate(zip(cache_key, results)):
                     if res is not None:
@@ -269,16 +279,6 @@ class FromCacheOrDBBase:
                     results[index] = self.process_db_results(db_res)
 
                     await self._cache_results(redis, key, results[index])
-            elif isinstance(cache_key, str):
-                results = await self.func(
-                    request,
-                    *bound_inputs.args,
-                    area_id=area_id,
-                    area_type=area_type,
-                    **bound_inputs.kwargs
-                )
-                db_results = self.process_db_results(results)
-                await self._cache_results(redis, cache_key, db_results)
             elif area_id is None:
                 results = await self.func(
                     request,
