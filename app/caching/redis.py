@@ -261,8 +261,8 @@ class FromCacheOrDBBase:
                     db_res = await self.func(
                         request,
                         *bound_inputs.args,
-                        area_id=area_id,
-                        area_type=area_type,
+                        area_id=area_id[index],
+                        area_type=area_type[index],
                         **bound_inputs.kwargs
                     )
 
