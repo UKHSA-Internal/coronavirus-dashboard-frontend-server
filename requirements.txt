@@ -11,7 +11,7 @@ redis==3.5.3
 pytz==2021.1
 flask-caching==1.9.0
 flask_cors==3.0.10
-opencensus-ext-azure==1.0.5
+opencensus-ext-azure==1.1.8
 opencensus-ext-logging==0.1.0
 opencensus-ext-requests
 Markdown~=3.3.4
