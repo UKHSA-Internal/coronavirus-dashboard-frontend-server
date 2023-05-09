@@ -7,7 +7,7 @@ plotly~=4.14.3
 kaleido==0.0.3.post1
 pandas~=1.2.4
 werkzeug==1.0.1
-redis==3.5.3
+redis==4.5.5
 pytz==2021.1
 flask-caching==1.9.0
 flask_cors==3.0.10
