@@ -1,5 +1,5 @@
 azure-storage-blob
-azure-cosmos==4.2.0
+azure-cosmos==4.4.0
 PyYAML
 jinja2~=2.11.3
 flask==1.1.2
